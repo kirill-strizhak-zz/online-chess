@@ -1,5 +1,7 @@
 package ks3.oc;
 
+import ks3.oc.swing.SwingMainWindow;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -12,10 +14,10 @@ public class ChatPanel extends JPanel implements Protocol {
 	private JTextArea chat;
 	private JTextField txt;
 	private Sender sender;
-	private MainFrame owner;
+	private SwingMainWindow owner;
 	private SimpleDateFormat time;
 	
-	public ChatPanel(Sender send, MainFrame own) {
+	public ChatPanel(Sender send, SwingMainWindow own) {
 		super(true);
 		sender = send;
 		owner = own;

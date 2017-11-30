@@ -17,7 +17,7 @@ public class Board extends JPanel implements Protocol, Runnable {
     public int hlPos = 0;
     public Image board;
     public Image figureSet[][] = new Image[4][6]; // black; black selected; white; white selected
-    private MainFrame owner;
+    private MainWindow owner;
     public int dragX,  dragY,  x,  y;
     private Figure drawOnTop = null;
     private Thread trtr;
@@ -28,7 +28,7 @@ public class Board extends JPanel implements Protocol, Runnable {
     public int bDis,  fDis;
     public boolean isLoading = false;
 
-    public Board(MainFrame own, Sender send, ChatPanel ch) {
+    public Board(MainWindow own, Sender send, ChatPanel ch) {
         super();
         owner = own;
         sender = send;
@@ -39,7 +39,6 @@ public class Board extends JPanel implements Protocol, Runnable {
         bDis = 1;
         fDis = 0;
         loadImg(bDis, fDis);
-        testIni();
         initFigures();
         addMouseListener(new MouseAdapter() {
 
@@ -51,7 +50,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                 else if (x < 0) x = 0;
                 if (y > 7) y = 7;
                 else if (y < 0) y = 0;
-                if ((fig[x][y].color == owner.myColor) && (owner.myTurn)) {
+                if ((fig[x][y].color == owner.getMyColor()) && (owner.isMyTurn())) {
                     dragX = x;
                     dragY = y;
                     check.move(fig[x][y], x, y);
@@ -154,7 +153,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                     }
                 }
             }
-            if ((owner.myTurn) && (hlight[0][0] != -1)) {
+            if ((owner.isMyTurn()) && (hlight[0][0] != -1)) {
                 g.setColor(myRed);
                 g.drawRect(hlight[0][0] - 1, hlight[0][1] - 1, 61, 61);
                 g.drawRect(hlight[0][0], hlight[0][1], 59, 59);
@@ -177,13 +176,13 @@ public class Board extends JPanel implements Protocol, Runnable {
 
     public void initFigures() {
         int i, j, k, l, m, n;
-        while (owner.myColor == -1) {
+        while (owner.getMyColor() == -1) {
             try {
                 trtr.sleep(100);
             } catch (Exception e) {
             }
         }
-        if (owner.myColor == BLACK) {
+        if (owner.getMyColor() == BLACK) {
             k = 7;
             l = 0;
             m = 6;
@@ -216,7 +215,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                     fig[i][k].type = BISHOP;
                     break;
                 case 3:
-                    if (owner.myColor == BLACK) {
+                    if (owner.getMyColor() == BLACK) {
                         fig[i][k].type = KING;
                         king[0][0] = i;
                         king[0][1] = k;
@@ -225,7 +224,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                     }
                     break;
                 case 4:
-                    if (owner.myColor == BLACK) {
+                    if (owner.getMyColor() == BLACK) {
                         fig[i][k].type = QUEEN;
                     } else {
                         fig[i][k].type = KING;
@@ -261,7 +260,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                     fig[i][l].type = BISHOP;
                     break;
                 case 3:
-                    if (owner.myColor == BLACK) {
+                    if (owner.getMyColor() == BLACK) {
                         fig[i][l].type = KING;
                         king[1][0] = i;
                         king[1][1] = l;
@@ -270,7 +269,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                     }
                     break;
                 case 4:
-                    if (owner.myColor == BLACK) {
+                    if (owner.getMyColor() == BLACK) {
                         fig[i][l].type = QUEEN;
                     } else {
                         fig[i][l].type = KING;
@@ -307,10 +306,6 @@ public class Board extends JPanel implements Protocol, Runnable {
         }
     }
 
-    public void testIni() {
-        /*debugging tool*/
-    }
-
     public void makeMove(int currX, int currY, int newX, int newY) {
         fig[newX][newY].oX = newX * 60;
         fig[newX][newY].oY = newY * 60;
@@ -321,13 +316,13 @@ public class Board extends JPanel implements Protocol, Runnable {
         fig[currX][currY].firstStep = false;
         fig[currX][currY].color = NULL;
         fig[currX][currY].type = NULL;
-        owner.myTurn = true;
-        int z = owner.myColor / 2;
-        isCheck = !check.free2go(king[z][0], king[z][1], owner.oppColor);
+        owner.setMyTurn(true);
+        int z = owner.getMyColor() / 2;
+        isCheck = !check.free2go(king[z][0], king[z][1], owner.getOppColor());
         if (!isLoading) {
             Figure[][] mf = fig;
             if (check.mate(king[z][0], king[z][1], fig)) {
-                owner.myTurn = false;
+                owner.setMyTurn(false);
                 try {
                     while (!sender.isFree()) {
                         owner.say("B: waiting to send coordinates");
@@ -355,9 +350,9 @@ public class Board extends JPanel implements Protocol, Runnable {
     }
 
     public void makeMove(int newX, int newY) {
-        owner.myTurn = false;
+        owner.setMyTurn(false);
         try {
-            int z = owner.myColor / 2;
+            int z = owner.getMyColor() / 2;
             int invertedX, invertedY, newInvertedX, newInvertedY;
             invertedX = Math.abs(7 - dragX);
             invertedY = Math.abs(7 - dragY);
@@ -373,11 +368,11 @@ public class Board extends JPanel implements Protocol, Runnable {
             sender.send(newInvertedX);
             sender.send(newInvertedY);
             sender.free();
-            isCheck = !check.free2go(king[z][0], king[z][1], owner.oppColor);
+            isCheck = !check.free2go(king[z][0], king[z][1], owner.getOppColor());
             if (!isLoading) {
                 Figure[][] mf = fig;
                 if (check.mate(king[z][0], king[z][1], mf)) {
-                    owner.myTurn = false;
+                    owner.setMyTurn(false);
                     while (!sender.isFree()) {
                         owner.say("B: waiting to send coordinates");
                         try {
@@ -403,7 +398,7 @@ public class Board extends JPanel implements Protocol, Runnable {
     }
 
     public void globalSetFigure(int x, int y, int color, int type, boolean isEmpty, boolean firstStep) {
-        owner.myTurn = false;
+        owner.setMyTurn(false);
         localSetFigure(x, y, color, type, isEmpty, firstStep);
         int iIsEmpty, iFirstStep;
         if (isEmpty) {
@@ -467,7 +462,7 @@ public class Board extends JPanel implements Protocol, Runnable {
     }
 
     public void shortXchng() {
-        owner.myTurn = false;
+        owner.setMyTurn(false);
         while (!sender.isFree()) {
             owner.say("B: waiting to send coordinates");
             try {
@@ -475,16 +470,16 @@ public class Board extends JPanel implements Protocol, Runnable {
             } catch (Exception e) {
             }
         }
-        if (owner.myColor == WHITE) {
+        if (owner.getMyColor() == WHITE) {
             globalSetFigure(7, 7, NULL, NULL, true, false);
             globalSetFigure(4, 7, NULL, NULL, true, false);
-            globalSetFigure(5, 7, owner.myColor, ROOK, false, false);
-            globalSetFigure(6, 7, owner.myColor, KING, false, false);
+            globalSetFigure(5, 7, owner.getMyColor(), ROOK, false, false);
+            globalSetFigure(6, 7, owner.getMyColor(), KING, false, false);
         } else {
             globalSetFigure(0, 7, NULL, NULL, true, false);
             globalSetFigure(3, 7, NULL, NULL, true, false);
-            globalSetFigure(2, 7, owner.myColor, ROOK, false, false);
-            globalSetFigure(1, 7, owner.myColor, KING, false, false);
+            globalSetFigure(2, 7, owner.getMyColor(), ROOK, false, false);
+            globalSetFigure(1, 7, owner.getMyColor(), KING, false, false);
         }
         giveTurn();
         sender.free();
@@ -492,7 +487,7 @@ public class Board extends JPanel implements Protocol, Runnable {
     }
 
     public void longXchng() {
-        owner.myTurn = false;
+        owner.setMyTurn(false);
         while (!sender.isFree()) {
             owner.say("B: waiting to send coordinates");
             try {
@@ -500,16 +495,16 @@ public class Board extends JPanel implements Protocol, Runnable {
             } catch (Exception e) {
             }
         }
-        if (owner.myColor == WHITE) {
+        if (owner.getMyColor() == WHITE) {
             globalSetFigure(0, 7, NULL, NULL, true, false);
             globalSetFigure(4, 7, NULL, NULL, true, false);
-            globalSetFigure(3, 7, owner.myColor, ROOK, false, false);
-            globalSetFigure(2, 7, owner.myColor, KING, false, false);
+            globalSetFigure(3, 7, owner.getMyColor(), ROOK, false, false);
+            globalSetFigure(2, 7, owner.getMyColor(), KING, false, false);
         } else {
             globalSetFigure(7, 7, NULL, NULL, true, false);
             globalSetFigure(3, 7, NULL, NULL, true, false);
-            globalSetFigure(4, 7, owner.myColor, ROOK, false, false);
-            globalSetFigure(5, 7, owner.myColor, KING, false, false);
+            globalSetFigure(4, 7, owner.getMyColor(), ROOK, false, false);
+            globalSetFigure(5, 7, owner.getMyColor(), KING, false, false);
         }
         giveTurn();
         sender.free();

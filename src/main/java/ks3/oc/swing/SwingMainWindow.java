@@ -1,4 +1,13 @@
-package ks3.oc;
+package ks3.oc.swing;
+
+import ks3.oc.Board;
+import ks3.oc.ChatPanel;
+import ks3.oc.Check;
+import ks3.oc.Logger;
+import ks3.oc.MainWindow;
+import ks3.oc.Messenjah;
+import ks3.oc.Protocol;
+import ks3.oc.Sender;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,28 +24,28 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
-public class MainFrame extends JFrame implements Protocol, Runnable {
+public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainWindow {
     
     private static final String ERR_BASE = "oc.MainFrame::";
     
     private Logger log;
-    private MainFrame self = null;
+    private SwingMainWindow self = null;
     public String opponentName;
     public String myName;
     private ChatPanel chatPanel = null;
     private Board board = null;
     private Sender sender = null;
     private int type;
-    public int oppColor;
-    public int myColor = -1;
-    public boolean myTurn = false;
+    private int oppColor;
+    private int myColor = -1;
+    private boolean myTurn = false;
     private Thread trtr;
     private Messenjah aboutWND;
     private Check check = null;
     private JMenuItem shortXchng,  longXchng;
     public boolean debug = true;
 
-    public MainFrame(Logger log, int t, int c, String addr, int port, String name) {
+    public SwingMainWindow(Logger log, int t, int c, String addr, int port, String name) {
         super("Online Chess");
         self = this;
         this.log = log;
@@ -61,11 +70,11 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
             }
         }
         if (type == SERVER) {
-            myColor = c;
-            if (myColor == BLACK) {
-                oppColor = WHITE;
+            setMyColor(c);
+            if (getMyColor() == BLACK) {
+                setOppColor(WHITE);
             } else {
-                oppColor = BLACK;
+                setOppColor(BLACK);
             }
             try {
                 while (!sender.isFree()) {
@@ -73,8 +82,8 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
                     trtr.sleep(1000);
                 }
                 sender.send(COLOR);
-                if (myColor == WHITE) {
-                    myTurn = true;
+                if (getMyColor() == WHITE) {
+                    setMyTurn(true);
                     sender.send(BLACK);
                 } else {
                     sender.send(WHITE);
@@ -85,7 +94,7 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
             }
         }
 
-        while (myColor == -1) {
+        while (getMyColor() == -1) {
             log.log(ERR_BASE + "(): waiting for color");
             try {
                 trtr.sleep(1000);
@@ -249,11 +258,11 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
     }
 
     public void reset() {
-        myTurn = false;
+        setMyTurn(false);
         board.initFigures();
         board.hlight[0][0] = -1;
-        if (myColor == WHITE) {
-            myTurn = true;
+        if (getMyColor() == WHITE) {
+            setMyTurn(true);
         }
         board.repaint();
         chatPanel.addChatLine("* Server starts new game", "sys_&^_tem");
@@ -263,6 +272,7 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
         chatPanel.addChatLine("* " + opponentName + " quits", "sys_&^_tem");
     }
 
+    @Override
     public ChatPanel getChat() {
         return chatPanel;
     }
@@ -273,9 +283,9 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
 
     private void save() {
         int i, j;
-        boolean t = myTurn;
+        boolean t = isMyTurn();
         String cat = "";
-        myTurn = false;
+        setMyTurn(false);
         board.reaveTurn();
         try {
             PrintWriter pw = new PrintWriter(new FileOutputStream("save.txt"));
@@ -291,8 +301,8 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
         } catch (IOException e) {
             log.log(ERR_BASE + "save(): exception while saving: " + e.getMessage());
         }
-        myTurn = t;
-        if (!myTurn) {
+        setMyTurn(t);
+        if (!isMyTurn()) {
             board.giveTurn();
         }
     }
@@ -301,7 +311,7 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
         int i, j, type, color, oX, oY;
         boolean firstStep, empty;
         String str;
-        myTurn = false;
+        setMyTurn(false);
         board.reaveTurn();
         //Figure f = new Figure();
         StringTokenizer breaker;
@@ -328,7 +338,7 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
 
             str = br.readLine();
             breaker = new StringTokenizer(str, ":");
-            myTurn = Boolean.parseBoolean(breaker.nextToken());
+            setMyTurn(Boolean.parseBoolean(breaker.nextToken()));
             board.hlight[0][0] = Integer.parseInt(breaker.nextToken());
             board.hlight[0][1] = Integer.parseInt(breaker.nextToken());
             board.hlight[1][0] = Integer.parseInt(breaker.nextToken());
@@ -338,14 +348,43 @@ public class MainFrame extends JFrame implements Protocol, Runnable {
         } catch (Exception e) {
             log.log(ERR_BASE + "load(): exception while loading");
         }
-        if (!myTurn) {
+        if (!isMyTurn()) {
             board.giveTurn();
         }
         board.repaint();
         board.isLoading = false;
     }
     
+    @Override
     public void say(String s) {
         log.log(s);
+    }
+
+    @Override
+    public int getOppColor() {
+        return oppColor;
+    }
+
+    public void setOppColor(int oppColor) {
+        this.oppColor = oppColor;
+    }
+
+    @Override
+    public int getMyColor() {
+        return myColor;
+    }
+
+    public void setMyColor(int myColor) {
+        this.myColor = myColor;
+    }
+
+    @Override
+    public boolean isMyTurn() {
+        return myTurn;
+    }
+
+    @Override
+    public void setMyTurn(boolean myTurn) {
+        this.myTurn = myTurn;
     }
 }

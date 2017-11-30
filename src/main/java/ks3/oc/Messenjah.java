@@ -1,5 +1,7 @@
 package ks3.oc;
 
+import ks3.oc.swing.SwingMainWindow;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,7 +18,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
     
     private Logger log;
     private Messenjah self;
-    private MainFrame owner;
+    private SwingMainWindow owner;
     private Board board;
     private Starter starter;
     private Sender sender;
@@ -285,7 +287,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
     }
     
     // new game
-    public Messenjah(Logger log, Sender send, MainFrame own) {
+    public Messenjah(Logger log, Sender send, SwingMainWindow own) {
         super("Start new game?");
         self = this;
         this.log = log;

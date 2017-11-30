@@ -1,5 +1,7 @@
 package ks3.oc;
 
+import ks3.oc.swing.SwingMainWindow;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -8,13 +10,13 @@ public class Receiver implements Runnable, Protocol {
     private Logger log = null;
     private boolean active = true;
     private BufferedReader br;
-    private MainFrame owner;
+    private SwingMainWindow owner;
     private Sender sender;
     private ChatPanel chat = null;
     private Board board = null;
     private Thread trtr;
 
-    public Receiver(MainFrame own, Logger log, BufferedReader b, Sender send) {
+    public Receiver(SwingMainWindow own, Logger log, BufferedReader b, Sender send) {
         this.log = log;
         br = b;
         owner = own;
@@ -72,14 +74,14 @@ public class Receiver implements Runnable, Protocol {
                         sender.suicide("Receiver: client disconnected");
                         break;
                     case COLOR:
-                        owner.myColor = br.read();
-                        if (owner.myColor == BLACK) {
-                            owner.oppColor = WHITE;
+                        owner.setMyColor(br.read());
+                        if (owner.getMyColor() == BLACK) {
+                            owner.setOppColor(WHITE);
                         } else {
-                            owner.oppColor = BLACK;
+                            owner.setOppColor(BLACK);
                         }
-                        if (owner.myColor == WHITE) {
-                            owner.myTurn = true;
+                        if (owner.getMyColor() == WHITE) {
+                            owner.setMyTurn(true);
                         }
                         break;
                     case OFFER_RESET:
@@ -128,13 +130,13 @@ public class Receiver implements Runnable, Protocol {
                         board.localSetFigure(x, y, color, type, isEmpty, firstStep);
                         break;
                     case GIVE_TURN:
-                        owner.myTurn = true;
+                        owner.setMyTurn(true);
                         break;
                     case REAVE_TURN:
-                        owner.myTurn = false;
+                        owner.setMyTurn(false);
                         break;
                     case MATE:
-                        owner.myTurn = false;
+                        owner.setMyTurn(false);
                         while (chat == null) {
                             try {
                                 trtr.sleep(100);

@@ -1,5 +1,7 @@
 package ks3.oc;
 
+import ks3.oc.swing.SwingMainWindow;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,12 +20,12 @@ public class Sender implements Protocol {
 	private ServerSocket serv = null;
 	private Socket sock;
 	private PrintWriter pw;
-	private MainFrame owner;
+	private SwingMainWindow owner;
 	private Receiver receiver = null;
 	private Thread rec = null;
 	private boolean free = true;
 	
-	public Sender(MainFrame own, Logger log, int t, String host, int port) {
+	public Sender(SwingMainWindow own, Logger log, int t, String host, int port) {
                 this.log = log;
 		owner = own;
 		type = t;
@@ -83,7 +85,7 @@ public class Sender implements Protocol {
 		pw.flush();
 	}
 	
-	protected void suicide(String s) {
+	public void suicide(String s) {
 		try { owner.say("Sender: suicidal tendency caused by: "+s);
 		sock.close();
 		owner.connectionKilled();

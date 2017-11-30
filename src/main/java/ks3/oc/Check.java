@@ -6,10 +6,10 @@ public class Check implements Protocol {
     private int arrPos = 0;
     public boolean calculating = false;
     private Board board;
-    private MainFrame owner;
+    private MainWindow owner;
     private int[] attacker = new int[2];
 
-    public Check(Board brd, MainFrame own) {
+    public Check(Board brd, MainWindow own) {
         board = brd;
         owner = own;
         allowed[0][0] = -1;
@@ -70,7 +70,7 @@ public class Check implements Protocol {
     private void rook(int x, int y) {
         int i;
         for (i = x; i >= 0; i--) {
-            if (board.fig[i][y].color != owner.myColor) {
+            if (board.fig[i][y].color != owner.getMyColor()) {
                 add(i, y);
             }
             if ((board.fig[i][y].color != NULL) && (i != x)) {
@@ -78,7 +78,7 @@ public class Check implements Protocol {
             }
         }
         for (i = y; i >= 0; i--) {
-            if (board.fig[x][i].color != owner.myColor) {
+            if (board.fig[x][i].color != owner.getMyColor()) {
                 add(x, i);
             }
             if ((board.fig[x][i].color != NULL) && (i != y)) {
@@ -86,7 +86,7 @@ public class Check implements Protocol {
             }
         }
         for (i = x; i <= 7; i++) {
-            if (board.fig[i][y].color != owner.myColor) {
+            if (board.fig[i][y].color != owner.getMyColor()) {
                 add(i, y);
             }
             if ((board.fig[i][y].color != NULL) && (i != x)) {
@@ -94,7 +94,7 @@ public class Check implements Protocol {
             }
         }
         for (i = y; i <= 7; i++) {
-            if (board.fig[x][i].color != owner.myColor) {
+            if (board.fig[x][i].color != owner.getMyColor()) {
                 add(x, i);
             }
             if ((board.fig[x][i].color != NULL) && (i != y)) {
@@ -134,7 +134,7 @@ public class Check implements Protocol {
         int i, j;
         j = y;
         for (i = x; i >= 0; i--) {
-            if (board.fig[i][j].color != owner.myColor) {
+            if (board.fig[i][j].color != owner.getMyColor()) {
                 add(i, j);
             }
             if ((board.fig[i][j].color != NULL) && ((i != x) || (j != y))) {
@@ -147,7 +147,7 @@ public class Check implements Protocol {
         }
         j = y;
         for (i = x; i >= 0; i--) {
-            if (board.fig[i][j].color != owner.myColor) {
+            if (board.fig[i][j].color != owner.getMyColor()) {
                 add(i, j);
             }
             if ((board.fig[i][j].color != NULL) && ((i != x) || (j != y))) {
@@ -160,7 +160,7 @@ public class Check implements Protocol {
         }
         j = y;
         for (i = x; i <= 7; i++) {
-            if (board.fig[i][j].color != owner.myColor) {
+            if (board.fig[i][j].color != owner.getMyColor()) {
                 add(i, j);
             }
             if ((board.fig[i][j].color != NULL) && ((i != x) || (j != y))) {
@@ -173,7 +173,7 @@ public class Check implements Protocol {
         }
         j = y;
         for (i = x; i <= 7; i++) {
-            if (board.fig[i][j].color != owner.myColor) {
+            if (board.fig[i][j].color != owner.getMyColor()) {
                 add(i, j);
             }
             if ((board.fig[i][j].color != NULL) && ((i != x) || (j != y))) {
@@ -192,28 +192,28 @@ public class Check implements Protocol {
     }
 
     private void king(int x, int y) {
-        if (((x - 1) >= 0) && ((y - 1) >= 0) && (board.fig[x - 1][y - 1].color != owner.myColor) && (free2go(x - 1, y - 1, owner.oppColor))) {
+        if (((x - 1) >= 0) && ((y - 1) >= 0) && (board.fig[x - 1][y - 1].color != owner.getMyColor()) && (free2go(x - 1, y - 1, owner.getOppColor()))) {
             add(x - 1, y - 1);
         }
-        if (((x + 1) <= 7) && ((y - 1) >= 0) && (board.fig[x + 1][y - 1].color != owner.myColor) && (free2go(x + 1, y - 1, owner.oppColor))) {
+        if (((x + 1) <= 7) && ((y - 1) >= 0) && (board.fig[x + 1][y - 1].color != owner.getMyColor()) && (free2go(x + 1, y - 1, owner.getOppColor()))) {
             add(x + 1, y - 1);
         }
-        if (((x - 1) >= 0) && ((y + 1) <= 7) && (board.fig[x - 1][y + 1].color != owner.myColor) && (free2go(x - 1, y + 1, owner.oppColor))) {
+        if (((x - 1) >= 0) && ((y + 1) <= 7) && (board.fig[x - 1][y + 1].color != owner.getMyColor()) && (free2go(x - 1, y + 1, owner.getOppColor()))) {
             add(x - 1, y + 1);
         }
-        if (((x + 1) <= 7) && ((y + 1) <= 7) && (board.fig[x + 1][y + 1].color != owner.myColor) && (free2go(x + 1, y + 1, owner.oppColor))) {
+        if (((x + 1) <= 7) && ((y + 1) <= 7) && (board.fig[x + 1][y + 1].color != owner.getMyColor()) && (free2go(x + 1, y + 1, owner.getOppColor()))) {
             add(x + 1, y + 1);
         }
-        if (((y - 1) >= 0) && (board.fig[x][y - 1].color != owner.myColor) && (free2go(x, y - 1, owner.oppColor))) {
+        if (((y - 1) >= 0) && (board.fig[x][y - 1].color != owner.getMyColor()) && (free2go(x, y - 1, owner.getOppColor()))) {
             add(x, y - 1);
         }
-        if (((y + 1) <= 7) && (board.fig[x][y + 1].color != owner.myColor) && (free2go(x, y + 1, owner.oppColor))) {
+        if (((y + 1) <= 7) && (board.fig[x][y + 1].color != owner.getMyColor()) && (free2go(x, y + 1, owner.getOppColor()))) {
             add(x, y + 1);
         }
-        if (((x + 1) <= 7) && (board.fig[x + 1][y].color != owner.myColor) && (free2go(x + 1, y, owner.oppColor))) {
+        if (((x + 1) <= 7) && (board.fig[x + 1][y].color != owner.getMyColor()) && (free2go(x + 1, y, owner.getOppColor()))) {
             add(x + 1, y);
         }
-        if (((x - 1) >= 0) && (board.fig[x - 1][y].color != owner.myColor) && (free2go(x - 1, y, owner.oppColor))) {
+        if (((x - 1) >= 0) && (board.fig[x - 1][y].color != owner.getMyColor()) && (free2go(x - 1, y, owner.getOppColor()))) {
             add(x - 1, y);
         }
     }
@@ -439,7 +439,7 @@ public class Check implements Protocol {
     }
 
     public void drop(int a, int b) {
-        int col = owner.myColor / 2;
+        int col = owner.getMyColor() / 2;
         boolean flag = false;
         Figure f1 = new Figure();
         Figure f2 = new Figure();
@@ -449,7 +449,7 @@ public class Check implements Protocol {
                     board.fig[board.x][board.y].empty = true;
                     board.fig[board.x][board.y].type = NULL;
                     board.fig[board.x][board.y].color = NULL;
-                    Messenjah m = new Messenjah(board, owner.myColor, a, b);
+                    Messenjah m = new Messenjah(board, owner.getMyColor(), a, b);
                 } else {
                     copy(f1, board.fig[a][b]);
                     copy(f2, board.fig[board.x][board.y]);
@@ -470,7 +470,7 @@ public class Check implements Protocol {
                         board.king[col][1] = b;
                     }
                 }
-                if (!free2go(board.king[col][0], board.king[col][1], owner.oppColor)) {
+                if (!free2go(board.king[col][0], board.king[col][1], owner.getOppColor())) {
                     if (flag) {
                         board.king[col][0] = board.bckKing[0];
                         board.king[col][1] = board.bckKing[1];
@@ -494,14 +494,14 @@ public class Check implements Protocol {
     }
 
     public boolean shortXchng() {
-        if (owner.myColor == WHITE) {
-            if ((board.fig[5][7].empty) && (board.fig[6][7].empty) && (board.fig[7][7].firstStep) && (board.fig[4][7].firstStep) && (!board.isCheck) && (owner.myTurn)) {
+        if (owner.getMyColor() == WHITE) {
+            if ((board.fig[5][7].empty) && (board.fig[6][7].empty) && (board.fig[7][7].firstStep) && (board.fig[4][7].firstStep) && (!board.isCheck) && (owner.isMyTurn())) {
                 return true;
             } else {
                 return false;
             }
         } else {
-            if ((board.fig[1][7].empty) && (board.fig[2][7].empty) && (board.fig[0][7].firstStep) && (board.fig[3][7].firstStep) && (!board.isCheck) && (owner.myTurn)) {
+            if ((board.fig[1][7].empty) && (board.fig[2][7].empty) && (board.fig[0][7].firstStep) && (board.fig[3][7].firstStep) && (!board.isCheck) && (owner.isMyTurn())) {
                 return true;
             } else {
                 return false;
@@ -510,14 +510,14 @@ public class Check implements Protocol {
     }
 
     public boolean longXchng() {
-        if (owner.myColor == WHITE) {
-            if ((board.fig[1][7].empty) && (board.fig[2][7].empty) && (board.fig[3][7].empty) && (board.fig[0][7].firstStep) && (board.fig[4][7].firstStep) && (!board.isCheck) && (owner.myTurn)) {
+        if (owner.getMyColor() == WHITE) {
+            if ((board.fig[1][7].empty) && (board.fig[2][7].empty) && (board.fig[3][7].empty) && (board.fig[0][7].firstStep) && (board.fig[4][7].firstStep) && (!board.isCheck) && (owner.isMyTurn())) {
                 return true;
             } else {
                 return false;
             }
         } else {
-            if ((board.fig[4][7].empty) && (board.fig[5][7].empty) && (board.fig[6][7].empty) && (board.fig[7][7].firstStep) && (board.fig[3][7].firstStep) && (!board.isCheck) && (owner.myTurn)) {
+            if ((board.fig[4][7].empty) && (board.fig[5][7].empty) && (board.fig[6][7].empty) && (board.fig[7][7].firstStep) && (board.fig[3][7].firstStep) && (!board.isCheck) && (owner.isMyTurn())) {
                 return true;
             } else {
                 return false;
@@ -529,7 +529,7 @@ public class Check implements Protocol {
         if (board.isCheck) {
             move(fig[i][j], i, j);
             if (allowed[0][0] == -1) {
-                if (free2go(attacker[0], attacker[1], owner.myColor)) {
+                if (free2go(attacker[0], attacker[1], owner.getMyColor())) {
                     return !canCover(i, j, fig);
                 }
             } else {
@@ -540,14 +540,14 @@ public class Check implements Protocol {
                     }
                     fig[i][j].color = NULL;
                     bck = fig[allowed[k][0]][allowed[k][1]].color;
-                    fig[allowed[k][0]][allowed[k][1]].color = owner.myColor;
-                    if (free2go(allowed[k][0], allowed[k][1], owner.oppColor)) {
+                    fig[allowed[k][0]][allowed[k][1]].color = owner.getMyColor();
+                    if (free2go(allowed[k][0], allowed[k][1], owner.getOppColor())) {
                         fig[allowed[k][0]][allowed[k][1]].color = bck;
-                        fig[i][j].color = owner.myColor;
+                        fig[i][j].color = owner.getMyColor();
                         break;
                     }
                     fig[allowed[k][0]][allowed[k][1]].color = bck;
-                    fig[i][j].color = owner.myColor;
+                    fig[i][j].color = owner.getMyColor();
                 }
             }
         }
@@ -558,20 +558,20 @@ public class Check implements Protocol {
         int k, l, bck;
         for (k = 0; k <= 7; k++) {
             for (l = 0; l <= 7; l++) {
-                if ((fig[k][l].color == owner.myColor) && (fig[k][l].type != KING)) {
+                if ((fig[k][l].color == owner.getMyColor()) && (fig[k][l].type != KING)) {
                     move(fig[k][l], k, l);
                     int m = 0;
                     while (allowed[m][0] != -1) {
                         fig[k][l].color = NULL;
                         bck = fig[allowed[m][0]][allowed[m][1]].color;
-                        fig[allowed[m][0]][allowed[m][1]].color = owner.myColor;
-                        if (free2go(i, j, owner.oppColor)) {
+                        fig[allowed[m][0]][allowed[m][1]].color = owner.getMyColor();
+                        if (free2go(i, j, owner.getOppColor())) {
                             fig[allowed[m][0]][allowed[m][1]].color = bck;
-                            fig[k][l].color = owner.myColor;
+                            fig[k][l].color = owner.getMyColor();
                             return true;
                         }
                         fig[allowed[m][0]][allowed[m][1]].color = bck;
-                        fig[k][l].color = owner.myColor;
+                        fig[k][l].color = owner.getMyColor();
                         ++m;
                     }
                 }
