@@ -1,6 +1,6 @@
 package ks3.oc.swing;
 
-import ks3.oc.Board;
+import ks3.oc.board.Board;
 import ks3.oc.ChatPanel;
 import ks3.oc.Check;
 import ks3.oc.Logger;

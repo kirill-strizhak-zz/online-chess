@@ -1,5 +1,7 @@
 package ks3.oc;
 
+import ks3.oc.board.Board;
+
 public class Check implements Protocol {
 
     private int[][] allowed = new int[100][2];

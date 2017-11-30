@@ -1,4 +1,11 @@
-package ks3.oc;
+package ks3.oc.board;
+
+import ks3.oc.ChatPanel;
+import ks3.oc.Check;
+import ks3.oc.Figure;
+import ks3.oc.MainWindow;
+import ks3.oc.Protocol;
+import ks3.oc.Sender;
 
 import javax.swing.*;
 import java.awt.*;
@@ -175,135 +182,68 @@ public class Board extends JPanel implements Protocol, Runnable {
     }
 
     public void initFigures() {
-        int i, j, k, l, m, n;
         while (owner.getMyColor() == -1) {
             try {
-                trtr.sleep(100);
-            } catch (Exception e) {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
             }
         }
+
+        BoardSetup setup;
         if (owner.getMyColor() == BLACK) {
-            k = 7;
-            l = 0;
-            m = 6;
-            n = 1;
+            setup = BoardSetup.PLAYING_BLACK;
         } else {
-            k = 0;
-            l = 7;
-            m = 1;
-            n = 6;
+            setup = BoardSetup.PLAYING_WHITE;
         }
-        for (i = 0; i <= 7; i++) {
-            for (j = 0; j <= 7; j++) {
-                fig[i][j] = new Figure();
+
+        initMiddleRows();
+        initPawnRow(setup.blackPawnRow, BLACK);
+        initPawnRow(setup.whitePawnRow, WHITE);
+        initFigureRow(setup.blackFigureRow, setup.queenCol, setup.kingCol, BLACK);
+        initFigureRow(setup.whiteFigureRow, setup.queenCol, setup.kingCol, WHITE);
+        initKingCoordinates(setup.kingCol, setup.blackFigureRow, setup.whiteFigureRow);
+    }
+
+    private void initMiddleRows() {
+        for (int row = 2; row < 6; row++) {
+            for (int col = 0; col < 8; col++) {
+                fig[col][row] = new Figure();
             }
         }
-        for (i = 0; i <= 7; i++) {
-            fig[i][k] = new Figure();
-            fig[i][k].empty = false;
-            fig[i][k].color = BLACK;
-            fig[i][k].oX = i * 60;
-            fig[i][k].oY = k * 60;
-            switch (i) {
-                case 0:
-                    fig[i][k].type = ROOK;
-                    break;
-                case 1:
-                    fig[i][k].type = KNIGHT;
-                    break;
-                case 2:
-                    fig[i][k].type = BISHOP;
-                    break;
-                case 3:
-                    if (owner.getMyColor() == BLACK) {
-                        fig[i][k].type = KING;
-                        king[0][0] = i;
-                        king[0][1] = k;
-                    } else {
-                        fig[i][k].type = QUEEN;
-                    }
-                    break;
-                case 4:
-                    if (owner.getMyColor() == BLACK) {
-                        fig[i][k].type = QUEEN;
-                    } else {
-                        fig[i][k].type = KING;
-                        king[0][0] = i;
-                        king[0][1] = k;
-                    }
-                    break;
-                case 5:
-                    fig[i][k].type = BISHOP;
-                    break;
-                case 6:
-                    fig[i][k].type = KNIGHT;
-                    break;
-                case 7:
-                    fig[i][k].type = ROOK;
-                    break;
-            }
+    }
+
+    private void initPawnRow(int row, int color) {
+        for (int col = 0; col <= 7; col++) {
+            fig[col][row] = createFigure(PAWN, color, col, row);
         }
-        for (i = 0; i <= 7; i++) {
-            fig[i][l] = new Figure();
-            fig[i][l].empty = false;
-            fig[i][l].color = WHITE;
-            fig[i][l].oX = i * 60;
-            fig[i][l].oY = l * 60;
-            switch (i) {
-                case 0:
-                    fig[i][l].type = ROOK;
-                    break;
-                case 1:
-                    fig[i][l].type = KNIGHT;
-                    break;
-                case 2:
-                    fig[i][l].type = BISHOP;
-                    break;
-                case 3:
-                    if (owner.getMyColor() == BLACK) {
-                        fig[i][l].type = KING;
-                        king[1][0] = i;
-                        king[1][1] = l;
-                    } else {
-                        fig[i][l].type = QUEEN;
-                    }
-                    break;
-                case 4:
-                    if (owner.getMyColor() == BLACK) {
-                        fig[i][l].type = QUEEN;
-                    } else {
-                        fig[i][l].type = KING;
-                        king[1][0] = i;
-                        king[1][1] = l;
-                    }
-                    break;
-                case 5:
-                    fig[i][l].type = BISHOP;
-                    break;
-                case 6:
-                    fig[i][l].type = KNIGHT;
-                    break;
-                case 7:
-                    fig[i][l].type = ROOK;
-                    break;
-            }
-        }
-        for (i = 0; i <= 7; i++) {
-            fig[i][m] = new Figure();
-            fig[i][m].empty = false;
-            fig[i][m].type = PAWN;
-            fig[i][m].color = BLACK;
-            fig[i][m].oX = i * 60;
-            fig[i][m].oY = m * 60;
-        }
-        for (i = 0; i <= 7; i++) {
-            fig[i][n] = new Figure();
-            fig[i][n].empty = false;
-            fig[i][n].type = PAWN;
-            fig[i][n].color = WHITE;
-            fig[i][n].oX = i * 60;
-            fig[i][n].oY = n * 60;
-        }
+    }
+
+    private void initFigureRow(int row, int queenCol, int kingCol, int color) {
+        fig[0][row] = createFigure(ROOK, color, 0, row);
+        fig[7][row] = createFigure(ROOK, color, 7, row);
+        fig[1][row] = createFigure(KNIGHT, color, 1, row);
+        fig[6][row] = createFigure(KNIGHT, color, 6, row);
+        fig[2][row] = createFigure(BISHOP, color, 2, row);
+        fig[5][row] = createFigure(BISHOP, color, 5, row);
+        fig[queenCol][row] = createFigure(QUEEN, color, queenCol, row);
+        fig[kingCol][row] = createFigure(KING, color, kingCol, row);
+    }
+
+    private void initKingCoordinates(int kingCol, int blackFigureRow, int whiteFigureRow) {
+        king[0][0] = kingCol;
+        king[1][0] = kingCol;
+        king[0][1] = blackFigureRow;
+        king[1][1] = whiteFigureRow;
+    }
+
+    private Figure createFigure(int type, int color, int col, int row) {
+        Figure figure = new Figure();
+        figure.empty = false;
+        figure.type = type;
+        figure.color = color;
+        figure.oX = col * 60;
+        figure.oY = row * 60;
+        return figure;
     }
 
     public void makeMove(int currX, int currY, int newX, int newY) {

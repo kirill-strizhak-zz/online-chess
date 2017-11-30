@@ -1,15 +1,15 @@
-package ks3.oc;
+package ks3.oc.board;
 
-import org.junit.Assert;
+import ks3.oc.Figure;
+import ks3.oc.MainWindow;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class BoardInitialisationTest {
 
@@ -33,26 +33,25 @@ public class BoardInitialisationTest {
     public void testInitFigures_IfWhite() {
         when(mainWindow.getMyColor()).thenReturn(Board.WHITE);
         Board board = new Board(mainWindow, null, null);
-        testMiddleIsEmpty(board.fig);
-        testPawnMatch(board.fig, blackFigureSet[Board.PAWN], 1);
-        testPawnMatch(board.fig, whiteFigureSet[Board.PAWN], 6);
-        testFigureMatch(board.fig, blackFigureSet, 0, 3, 4);
-        testFigureMatch(board.fig, whiteFigureSet, 7, 3, 4);
-        testFigureCoordinates(board.fig, 0, 2);
-        testFigureCoordinates(board.fig, 6, 8);
+        testInitFigures(board, BoardSetup.PLAYING_WHITE);
     }
 
     @Test
     public void testInitFigures_IfBlack() {
         when(mainWindow.getMyColor()).thenReturn(Board.BLACK);
         Board board = new Board(mainWindow, null, null);
+        testInitFigures(board, BoardSetup.PLAYING_BLACK);
+    }
+
+    private void testInitFigures(Board board, BoardSetup setup) {
         testMiddleIsEmpty(board.fig);
-        testPawnMatch(board.fig, whiteFigureSet[Board.PAWN], 1);
-        testPawnMatch(board.fig, blackFigureSet[Board.PAWN], 6);
-        testFigureMatch(board.fig, whiteFigureSet, 0, 4, 3);
-        testFigureMatch(board.fig, blackFigureSet, 7, 4, 3);
+        testPawnMatch(board.fig, blackFigureSet[Board.PAWN], setup.blackPawnRow);
+        testPawnMatch(board.fig, whiteFigureSet[Board.PAWN], setup.whitePawnRow);
+        testFigureMatch(board.fig, blackFigureSet, setup.blackFigureRow, setup.queenCol, setup.kingCol);
+        testFigureMatch(board.fig, whiteFigureSet, setup.whiteFigureRow, setup.queenCol, setup.kingCol);
         testFigureCoordinates(board.fig, 0, 2);
         testFigureCoordinates(board.fig, 6, 8);
+        testKing(board.king, setup.whiteFigureRow, setup.blackFigureRow, setup.kingCol);
     }
 
     private void testMiddleIsEmpty(Figure[][] figures) {
@@ -86,10 +85,18 @@ public class BoardInitialisationTest {
     private void testFigureCoordinates(Figure[][] figures, int fromRow, int toRow) {
         for (int row = fromRow; row < toRow; row++) {
             for (int col = 0; col < 8; col++) {
-                Assert.assertEquals(col * 60, figures[col][row].oX);
-                Assert.assertEquals(row * 60, figures[col][row].oY);
+                assertEquals("X coordinate should be correct", col * 60, figures[col][row].oX);
+                assertEquals("Y coordinate should be correct", row * 60, figures[col][row].oY);
             }
         }
+    }
+
+    private void testKing(int[][] kings, int whiteRow, int blackRow, int kingCol) {
+        String colMsg = "King coordinate should be in correct column";
+        assertEquals(colMsg, kingCol, kings[0][0]);
+        assertEquals(colMsg, kingCol, kings[1][0]);
+        assertEquals("Black king coordinate should be in correct row", blackRow, kings[0][1]);
+        assertEquals("White king coordinate should be in correct row", whiteRow, kings[1][1]);
     }
 
     private boolean figuresAreEqual(Figure f1, Figure f2) {
