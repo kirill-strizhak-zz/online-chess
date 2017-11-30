@@ -18,14 +18,14 @@ public class Board extends JPanel implements Protocol, Runnable {
     public Image board;
     public Image figureSet[][] = new Image[4][6]; // black; black selected; white; white selected
     private MainWindow owner;
-    public int dragX,  dragY,  x,  y;
+    public int dragX, dragY, x, y;
     private Figure drawOnTop = null;
     private Thread trtr;
     private Sender sender;
     private ChatPanel chat;
     private Check check;
     private Color myRed = new Color(220, 0, 0);
-    public int bDis,  fDis;
+    public int bDis, fDis;
     public boolean isLoading = false;
 
     public Board(MainWindow own, Sender send, ChatPanel ch) {
