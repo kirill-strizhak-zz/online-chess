@@ -1,0 +1,131 @@
+package ks3.oc.logic;
+
+import ks3.oc.Protocol;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class LogicRookMoveTest extends LogicMoveTester {
+
+    private List<String> toLeft = Arrays.asList("0:2", "1:2");
+    private List<String> toRight = Arrays.asList("3:2", "4:2", "5:2", "6:2", "7:2");
+    private List<String> upwards = Arrays.asList("2:0", "2:1");
+    private List<String> downwards = Arrays.asList("2:3", "2:4", "2:5", "2:6", "2:7");
+
+    @Before
+    public void setUp() {
+        commonSetUp();
+    }
+
+    // ~ ~ + ~ ~
+    // ~ ~ + ~ ~
+    // + + o + +
+    // ~ ~ + ~ ~
+    // ~ ~ + ~ ~
+    @Test
+    public void testAllowedMoves_WhenAllClear() {
+        Set<String> expected = new HashSet<>(14);
+        expected.addAll(toLeft);
+        expected.addAll(toRight);
+        expected.addAll(upwards);
+        expected.addAll(downwards);
+        validate(expected);
+    }
+
+    // ~ ~ ~ ~ ~
+    // ~ ~ ! ~ ~
+    // ~ ! o ! ~
+    // ~ ~ ! ~ ~
+    // ~ ~ ~ ~ ~
+    @Test
+    public void testAllowedMoves_WhenAllNearFriendly() {
+        initFriendly(2, 1);
+        initFriendly(1, 2);
+        initFriendly(3, 2);
+        initFriendly(2, 3);
+
+        Set<String> expected = new HashSet<>(0);
+        validate(expected);
+    }
+
+    // ~ ~ ! ~ ~
+    // ~ ~ + ~ ~
+    // ! + o + !
+    // ~ ~ + ~ ~
+    // ~ ~ ! ~ ~
+    @Test
+    public void testAllowedMoves_WhenAllFarFriendly() {
+        initFriendly(2, 0);
+        initFriendly(0, 2);
+        initFriendly(4, 2);
+        initFriendly(2, 4);
+
+        Set<String> expected = new HashSet<>(4);
+        expected.add("2:1");
+        expected.add("1:2");
+        expected.add("3:2");
+        expected.add("2:3");
+        validate(expected);
+    }
+
+    // ~ ~ ~ ~ ~
+    // ~ ~ x ~ ~
+    // ~ x o x ~
+    // ~ ~ x ~ ~
+    // ~ ~ ~ ~ ~
+    @Test
+    public void testAllowedMoves_WhenAllNearEnemy() {
+        initEnemy(2, 1);
+        initEnemy(1, 2);
+        initEnemy(3, 2);
+        initEnemy(2, 3);
+
+        Set<String> expected = new HashSet<>(4);
+        expected.add("2:1");
+        expected.add("1:2");
+        expected.add("3:2");
+        expected.add("2:3");
+        validate(expected);
+    }
+
+    // ~ ~ x ~ ~
+    // ~ ~ + ~ ~
+    // x + o + x
+    // ~ ~ + ~ ~
+    // ~ ~ x ~ ~
+    @Test
+    public void testAllowedMoves_WhenAllFarEnemy() {
+        initEnemy(2, 0);
+        initEnemy(0, 2);
+        initEnemy(4, 2);
+        initEnemy(2, 4);
+
+        Set<String> expected = new HashSet<>(8);
+        expected.addAll(toLeft);
+        expected.addAll(upwards);
+        expected.add("3:2");
+        expected.add("4:2");
+        expected.add("2:3");
+        expected.add("2:4");
+        validate(expected);
+    }
+
+    @Override
+    protected int col() {
+        return 2;
+    }
+
+    @Override
+    protected int row() {
+        return 2;
+    }
+
+    @Override
+    protected int type() {
+        return Protocol.ROOK;
+    }
+}

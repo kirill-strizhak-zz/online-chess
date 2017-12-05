@@ -14,21 +14,19 @@ public class LogicPawnMoveTest extends LogicMoveTester {
         commonSetUp();
     }
 
-    // ~ x ~
-    // ~ x ~
+    // ~ + ~
+    // ~ + ~
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenAllClearAndFirstMove() {
         Set<String> expected = new HashSet<>(2);
         expected.add("1:0");
         expected.add("1:1");
-
-        logic.calculateAllowedMoves(fig[1][2], 1, 2);
         validate(expected);
     }
 
-    // x ~ ~
-    // x ~ ~
+    // + ~ ~
+    // + ~ ~
     // o ~ ~
     @Test
     public void testAllowedMoves_LeftmostPawn() {
@@ -37,13 +35,11 @@ public class LogicPawnMoveTest extends LogicMoveTester {
         Set<String> expected = new HashSet<>(2);
         expected.add("0:0");
         expected.add("0:1");
-
-        logic.calculateAllowedMoves(fig[0][2], 0, 2);
-        validate(expected);
+        validate(0, 2, expected);
     }
 
-    // ~ ~ x
-    // ~ ~ x
+    // ~ ~ +
+    // ~ ~ +
     // ~ ~ o
     @Test
     public void testAllowedMoves_RightmostPawn() {
@@ -52,13 +48,11 @@ public class LogicPawnMoveTest extends LogicMoveTester {
         Set<String> expected = new HashSet<>(2);
         expected.add("7:0");
         expected.add("7:1");
-
-        logic.calculateAllowedMoves(fig[7][2], 7, 2);
-        validate(expected);
+        validate(7, 2, expected);
     }
 
     // ~ ~ ~
-    // ~ x ~
+    // ~ + ~
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenAllClearAndNotFirstMove() {
@@ -66,22 +60,18 @@ public class LogicPawnMoveTest extends LogicMoveTester {
 
         Set<String> expected = new HashSet<>(1);
         expected.add("1:1");
-
-        logic.calculateAllowedMoves(fig[1][2], 1, 2);
         validate(expected);
     }
 
     // ~ ! ~
-    // ~ x ~
+    // ~ + ~
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenFarBlocked() {
-        fig[1][0].empty = false;
+        initEnemy(1, 0);
 
         Set<String> expected = new HashSet<>(1);
         expected.add("1:1");
-
-        logic.calculateAllowedMoves(fig[1][2], 1, 2);
         validate(expected);
     }
 
@@ -90,11 +80,9 @@ public class LogicPawnMoveTest extends LogicMoveTester {
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenNearBlocked() {
-        fig[1][1].empty = false;
+        initEnemy(1, 1);
 
         Set<String> expected = new HashSet<>(0);
-
-        logic.calculateAllowedMoves(fig[1][2], 1, 2);
         validate(expected);
     }
 
@@ -103,14 +91,11 @@ public class LogicPawnMoveTest extends LogicMoveTester {
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenNearBlocked_LeftEnemy() {
-        fig[1][1].empty = false;
-        fig[0][1].empty = false;
-        fig[0][1].color = Protocol.BLACK;
+        initEnemy(1, 1);
+        initEnemy(0, 1);
 
         Set<String> expected = new HashSet<>(1);
         expected.add("0:1");
-
-        logic.calculateAllowedMoves(fig[1][2], 1, 2);
         validate(expected);
     }
 
@@ -119,76 +104,66 @@ public class LogicPawnMoveTest extends LogicMoveTester {
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenNearBlocked_RightEnemy() {
-        fig[1][1].empty = false;
-        fig[2][1].empty = false;
-        fig[2][1].color = Protocol.BLACK;
+        initEnemy(1, 1);
+        initEnemy(2, 1);
 
         Set<String> expected = new HashSet<>(1);
         expected.add("2:1");
-
-        logic.calculateAllowedMoves(fig[1][2], 1, 2);
         validate(expected);
     }
 
     // ~ ~ ~
-    // o ! ~
+    // ! ! ~
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenNearBlocked_LeftFriendly() {
-        fig[1][1].empty = false;
-        fig[0][1].empty = false;
-        fig[0][1].color = Protocol.WHITE;
+        initEnemy(1, 1);
+        initFriendly(0, 1);
 
         Set<String> expected = new HashSet<>(0);
-
-        logic.calculateAllowedMoves(fig[1][2], 1, 2);
         validate(expected);
     }
 
     // ~ ~ ~
-    // ~ ! o
+    // ~ ! !
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenNearBlocked_RightFriendly() {
-        fig[1][1].empty = false;
-        fig[0][1].empty = false;
-        fig[0][1].color = Protocol.WHITE;
+        initEnemy(1, 1);
+        initFriendly(2, 1);
 
         Set<String> expected = new HashSet<>(0);
-
-        logic.calculateAllowedMoves(fig[1][2], 1, 2);
         validate(expected);
     }
 
-    // ~ x ~
-    // x x x
+    // ~ + ~
+    // x + x
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenFree_TwoEnemies() {
-        fig[0][1].empty = false;
-        fig[0][1].color = Protocol.BLACK;
-        fig[2][1].empty = false;
-        fig[2][1].color = Protocol.BLACK;
+        initEnemy(0, 1);
+        initEnemy(2, 1);
 
         Set<String> expected = new HashSet<>(4);
         expected.add("1:0");
         expected.add("0:1");
         expected.add("1:1");
         expected.add("2:1");
-
-        logic.calculateAllowedMoves(fig[1][2], 1, 2);
         validate(expected);
     }
 
     @Override
-    protected void initFigure() {
-        initFigure(1, 2);
+    protected int col() {
+        return 1;
     }
 
-    private void initFigure(int col, int row) {
-        fig[col][row].empty = false;
-        fig[col][row].firstStep = true;
-        fig[col][row].type = Protocol.PAWN;
-        fig[col][row].color = Protocol.WHITE;
+    @Override
+    protected int row() {
+        return 2;
+    }
+
+    @Override
+    protected int type() {
+        return Protocol.PAWN;
     }
 }

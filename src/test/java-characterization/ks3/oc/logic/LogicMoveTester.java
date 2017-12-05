@@ -36,7 +36,7 @@ public abstract class LogicMoveTester {
 
     public void commonSetUp() {
         MockitoAnnotations.initMocks(this);
-        initFigure();
+        initFigure(col(), row());
         when(board.figureAt(anyInt(), anyInt())).thenAnswer((in) -> {
             int col = (Integer) in.getArguments()[0];
             int row = (Integer) in.getArguments()[1];
@@ -46,9 +46,32 @@ public abstract class LogicMoveTester {
         logic = new Logic(board, mainWindow);
     }
 
-    protected abstract void initFigure();
+    protected void initFigure(int col, int row) {
+        fig[col][row].empty = false;
+        fig[col][row].firstStep = true;
+        fig[col][row].type = type();
+        fig[col][row].color = Protocol.WHITE;
+    }
+
+    protected void initEnemy(int col, int row) {
+        initSimple(col, row, Protocol.BLACK);
+    }
+
+    protected void initFriendly(int col, int row) {
+        initSimple(col, row, Protocol.WHITE);
+    }
+
+    private void initSimple(int col, int row, int color) {
+        fig[col][row].empty = false;
+        fig[col][row].color = color;
+    }
 
     protected void validate(Set<String> expected) {
+        validate(col(), row(), expected);
+    }
+
+    protected void validate(int col, int row, Set<String> expected) {
+        logic.calculateAllowedMoves(fig[col][row], col, row);
         Set<String> result = convertResult();
         assertTrue("Result does not contain all expected values: " + result, result.containsAll(expected));
         assertTrue("Result has unexpected values: " + result, expected.containsAll(result));
@@ -61,5 +84,11 @@ public abstract class LogicMoveTester {
         }
         return result;
     }
+
+    protected abstract int col();
+
+    protected abstract int row();
+
+    protected abstract int type();
 
 }
