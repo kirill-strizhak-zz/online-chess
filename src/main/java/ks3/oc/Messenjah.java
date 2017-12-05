@@ -1,6 +1,7 @@
 package ks3.oc;
 
 import ks3.oc.board.Board;
+import ks3.oc.board.BoardState;
 import ks3.oc.swing.SwingMainWindow;
 
 import javax.swing.*;
@@ -20,18 +21,15 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
     private Logger log;
     private Messenjah self;
     private SwingMainWindow owner;
-    private Board board;
+    private BoardState board;
     private Starter starter;
     private Sender sender;
     private int color,  x,  y,  oldSel;
     private int sel = 0;
     private int mode;
     private JTextField addr,  port,  name;
-    private JButton start;
-    private CheckboxGroup cbTypeGroup,  cbColorGroup;
     private Checkbox cbServer,  cbClient,  cbWhite,  cbBlack;
     private String save = "localhost";
-    private Thread trtr;
     private JComboBox boardCB,  figureCB;
     
     // About window
@@ -52,12 +50,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         JButton b = new JButton("OK");
         b.setSize(80, 30);
         getContentPane().add("South", b);
-        b.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                setVisible(false);
-            }
-        });
+        b.addActionListener(event -> setVisible(false));
         setVisible(true);
     }
     
@@ -66,7 +59,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         super("Start game");
         setSize(this.getInsets().left + this.getInsets().right + 200,
                 this.getInsets().top + this.getInsets().bottom + 230);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setIgnoreRepaint(false);
         getContentPane().setLayout(new BorderLayout(10, 10));
         setBackground(Color.black);
@@ -104,8 +97,8 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         cbCPanel.setLayout(new BorderLayout());
         JLabel t = new JLabel("You are:");
         JLabel c = new JLabel("Your color:");
-        cbTypeGroup = new CheckboxGroup();
-        cbColorGroup = new CheckboxGroup();
+        CheckboxGroup cbTypeGroup = new CheckboxGroup();
+        CheckboxGroup cbColorGroup = new CheckboxGroup();
         cbServer = new Checkbox("Server", cbTypeGroup, false);
         cbServer.setState(true);
         cbClient = new Checkbox("Client", cbTypeGroup, false);
@@ -151,18 +144,16 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
             }
         });
 
-        start = new JButton("Start");
-        start.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if ((!addr.getText().equals("")) && (!port.getText().equals("")) && (!name.getText().equals(""))) {
-                    setVisible(false);
-                    int type, color;
-                    if (cbServer.getState()) type = 0;
-                    else type = 1;
-                    if (cbWhite.getState()) color = 2;
-                    else color = 0;
-                    starter.begin(type, color, addr.getText(), Integer.parseInt(port.getText()), name.getText());
-                }
+        JButton start = new JButton("Start");
+        start.addActionListener(event -> {
+            if ((!addr.getText().equals("")) && (!port.getText().equals("")) && (!name.getText().equals(""))) {
+                setVisible(false);
+                int type, color1;
+                if (cbServer.getState()) type = 0;
+                else type = 1;
+                if (cbWhite.getState()) color1 = 2;
+                else color1 = 0;
+                starter.begin(type, color1, addr.getText(), Integer.parseInt(port.getText()), name.getText());
             }
         });
         getContentPane().add("South", start);
@@ -170,7 +161,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
     }
     
     // Figure chooser
-    public Messenjah(Board brd, int c, int x0, int y0) {
+    public Messenjah(BoardState brd, int c, int x0, int y0) {
         super("Choose a figure to set");
         setSize(248, 87);
         setResizable(false);
@@ -200,7 +191,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
                         break;
                 }
                 board.globalSetFigure(x, y, color, type, false, false);
-                board.hlPos = 1;
+                board.setHlPos(1);
                 board.giveTurn();
                 setVisible(false);
                 dispose();
@@ -240,10 +231,10 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         for (i = 0; i <= 1; i++) {
             figureIcons[i] = new ImageIcon("img/f" + i + ".gif");
         }
-        boardCB = new JComboBox(boardIcons);
-        figureCB = new JComboBox(figureIcons);
-        boardCB.setSelectedIndex(board.bDis);
-        figureCB.setSelectedIndex(board.fDis / 4);
+        boardCB = new JComboBox<>(boardIcons);
+        figureCB = new JComboBox<>(figureIcons);
+        boardCB.setSelectedIndex(board.getBoardId());
+        figureCB.setSelectedIndex(board.getFigureId() / 4);
         JPanel brdPanel = new JPanel();
         JPanel figPanel = new JPanel();
         JPanel buttPanel = new JPanel();
@@ -265,24 +256,11 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         getContentPane().add(brdPanel);
         getContentPane().add(figPanel);
         getContentPane().add(buttPanel);
-        ok.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (board.bDis != boardCB.getSelectedIndex()) {
-                    board.bDis = boardCB.getSelectedIndex();
-                }
-                if (board.fDis != figureCB.getSelectedIndex()) {
-                    board.fDis = figureCB.getSelectedIndex() * 4;
-                }
-                board.loadImg(board.bDis, board.fDis);
-                board.repaint();
-                dispose();
-            }
+        ok.addActionListener(event -> {
+            board.reloadImages(boardCB.getSelectedIndex(), figureCB.getSelectedIndex() * 4);
+            dispose();
         });
-        cancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
+        cancel.addActionListener(event -> dispose());
         pack();
         setVisible(true);
     }
@@ -298,7 +276,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         sender = send;
         owner = own;
         mode = 0;
-        trtr = new Thread(this);
+        Thread trtr = new Thread(this);
         trtr.start();
         setLayout(new GridLayout(2, 1));
         JPanel top = new JPanel();
@@ -313,7 +291,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
                 try {
                     while (!sender.isFree()) {
                         owner.say("M: waiting to send acc_reset");
-                        trtr.sleep(100);
+                        Thread.sleep(100);
                     }
                     sender.send(ACCEPT_RESET);
                     sender.free();
@@ -329,7 +307,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
                 try {
                     while (!sender.isFree()) {
                         owner.say("M: waiting to send dec_reset");
-                        trtr.sleep(100);
+                        Thread.sleep(100);
                     }
                     sender.send(DECLINE_RESET);
                     sender.free();
@@ -353,10 +331,6 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
     public void run() {
     }
 
-    public void update() {
-        repaint();
-    }
-
     @Override
     public void paint(Graphics g) {
         switch (mode) {
@@ -369,10 +343,10 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
                 g.drawRect(64, 23, 59, 59);
                 g.drawRect(124, 23, 59, 59);
                 g.drawRect(184, 23, 59, 59);
-                g.drawImage(board.figureSet[color][ROOK], 4, 23, this);
-                g.drawImage(board.figureSet[color][KNIGHT], 64, 23, this);
-                g.drawImage(board.figureSet[color][BISHOP], 124, 23, this);
-                g.drawImage(board.figureSet[color][QUEEN], 184, 23, this);
+                g.drawImage(board.getFigureImage(color, ROOK), 4, 23, this);
+                g.drawImage(board.getFigureImage(color, KNIGHT), 64, 23, this);
+                g.drawImage(board.getFigureImage(color, BISHOP), 124, 23, this);
+                g.drawImage(board.getFigureImage(color, QUEEN), 184, 23, this);
                 g.setColor(Color.black);
                 g.drawRect(sel * 60 + 4, 23, 59, 59);
                 break;

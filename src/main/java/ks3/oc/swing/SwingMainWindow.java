@@ -1,13 +1,14 @@
 package ks3.oc.swing;
 
-import ks3.oc.board.Board;
 import ks3.oc.ChatPanel;
-import ks3.oc.Logic;
+import ks3.oc.Figure;
 import ks3.oc.Logger;
 import ks3.oc.MainWindow;
 import ks3.oc.Messenjah;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
+import ks3.oc.board.Board;
+import ks3.oc.logic.Logic;
 
 import javax.swing.*;
 import java.awt.*;
@@ -141,8 +142,8 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
                     }
                     logic = board.getLogic();
                 }
-                shortXchng.setEnabled(logic.kingSideCastling());
-                longXchng.setEnabled(logic.queenSideCastling());
+                shortXchng.setEnabled(logic.kingSideCastlingAllowed());
+                longXchng.setEnabled(logic.queenSideCastlingAllowed());
             }
         });
         shortXchng.addActionListener(new ActionListener() {
@@ -288,10 +289,12 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
         setMyTurn(false);
         board.reaveTurn();
         try {
+            Figure fig;
             PrintWriter pw = new PrintWriter(new FileOutputStream("save.txt"));
             for (i = 0; i <= 7; i++) {
                 for (j = 0; j <= 7; j++) {
-                    cat = board.fig[i][j].empty + ":" + board.fig[i][j].firstStep + ":" + board.fig[i][j].type + ":" + board.fig[i][j].color + ":" + board.fig[i][j].oX + ":" + board.fig[i][j].oY;
+                    fig = board.figureAt(i, j);
+                    cat = fig.empty + ":" + fig.firstStep + ":" + fig.type + ":" + fig.color + ":" + fig.oX + ":" + fig.oY;
                     pw.println(cat);
                 }
             }

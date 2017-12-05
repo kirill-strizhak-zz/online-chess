@@ -1,7 +1,7 @@
 package ks3.oc.board;
 
 import ks3.oc.ChatPanel;
-import ks3.oc.Logic;
+import ks3.oc.logic.Logic;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
@@ -13,11 +13,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
-public class Board extends JPanel implements Protocol, Runnable {
+public class Board extends JPanel implements Protocol, Runnable, BoardState {
 
     private boolean isDragging = false;
-    public boolean isCheck = false;
-    public Figure[][] fig = new Figure[8][8]; // figures on board
+    private boolean check = false;
+    private Figure[][] fig = new Figure[8][8]; // figures on board
     public int[][] king = new int[2][2]; // i = (0 - black; 1 - white;)
     public int[] bckKing = new int[2];
     public int[][] hlight = new int[2][2];
@@ -27,12 +27,11 @@ public class Board extends JPanel implements Protocol, Runnable {
     private MainWindow owner;
     public int dragX, dragY, x, y;
     private Figure drawOnTop = null;
-    private Thread trtr;
     private Sender sender;
     private ChatPanel chat;
     private Logic logic;
     private Color myRed = new Color(220, 0, 0);
-    public int bDis, fDis;
+    public int boardId, figureId;
     public boolean isLoading = false;
 
     public Board(MainWindow own, Sender send, ChatPanel ch) {
@@ -43,9 +42,9 @@ public class Board extends JPanel implements Protocol, Runnable {
         logic = new Logic(this, owner);
         hlight[0][0] = -1;
         this.setSize(480, 480);
-        bDis = 1;
-        fDis = 0;
-        loadImg(bDis, fDis);
+        boardId = 1;
+        figureId = 0;
+        loadImg();
         initFigures();
         addMouseListener(new MouseAdapter() {
 
@@ -82,7 +81,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                     } else {
                         while (logic.calculating) {
                             try {
-                                trtr.sleep(10);
+                                Thread.sleep(10);
                             } catch (Exception ex) {
                             }
                         }
@@ -117,14 +116,13 @@ public class Board extends JPanel implements Protocol, Runnable {
                 }
             }
         });
-        trtr = new Thread(this);
-        trtr.start();
+        new Thread(this).start();
         owner.say("B: ini completed");
     }
 
-    public void loadImg(int bd, int d) {
+    public void loadImg() {
         MediaTracker mt = new MediaTracker(this);
-        board = getToolkit().getImage(getClass().getResource("/img/" + bd + ".jpg"));
+        board = getToolkit().getImage(getClass().getResource("/img/" + boardId + ".jpg"));
         mt.addImage(board, 0);
         try {
             mt.waitForAll();
@@ -133,7 +131,7 @@ public class Board extends JPanel implements Protocol, Runnable {
         int i, j;
         for (i = 0; i <= 3; i++) {
             for (j = 0; j <= 5; j++) {
-                figureSet[i][j] = getToolkit().getImage(getClass().getResource("/img/" + (i + d) + j + ".gif"));
+                figureSet[i][j] = getToolkit().getImage(getClass().getResource("/img/" + (i + figureId) + j + ".gif"));
                 mt.addImage(figureSet[i][j], 0);
                 try {
                     mt.waitForAll();
@@ -258,15 +256,14 @@ public class Board extends JPanel implements Protocol, Runnable {
         fig[currX][currY].type = NULL;
         owner.setMyTurn(true);
         int z = owner.getMyColor() / 2;
-        isCheck = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
+        check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
         if (!isLoading) {
-            Figure[][] mf = fig;
             if (logic.mate(king[z][0], king[z][1], fig)) {
                 owner.setMyTurn(false);
                 try {
                     while (!sender.isFree()) {
                         owner.say("B: waiting to send coordinates");
-                        trtr.sleep(1000);
+                        Thread.sleep(1000);
                     }
                     sender.send(MATE);
                     sender.free();
@@ -274,7 +271,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                 }
                 while (chat == null) {
                     try {
-                        trtr.sleep(1000);
+                        Thread.sleep(1000);
                     } catch (Exception e) {
                     }
                     chat = owner.getChat();
@@ -289,6 +286,7 @@ public class Board extends JPanel implements Protocol, Runnable {
         repaint();
     }
 
+    @Override
     public void makeMove(int newX, int newY) {
         owner.setMyTurn(false);
         try {
@@ -300,7 +298,7 @@ public class Board extends JPanel implements Protocol, Runnable {
             newInvertedY = Math.abs(7 - newY);
             while (!sender.isFree()) {
                 owner.say("B: waiting to send coordinates");
-                trtr.sleep(1000);
+                Thread.sleep(1000);
             }
             sender.send(COORDINATES);
             sender.send(invertedX);
@@ -308,7 +306,7 @@ public class Board extends JPanel implements Protocol, Runnable {
             sender.send(newInvertedX);
             sender.send(newInvertedY);
             sender.free();
-            isCheck = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
+            check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
             if (!isLoading) {
                 Figure[][] mf = fig;
                 if (logic.mate(king[z][0], king[z][1], mf)) {
@@ -316,7 +314,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                     while (!sender.isFree()) {
                         owner.say("B: waiting to send coordinates");
                         try {
-                            trtr.sleep(1000);
+                            Thread.sleep(1000);
                         } catch (Exception e) {
                         }
                     }
@@ -324,7 +322,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                     sender.free();
                     while (chat == null) {
                         try {
-                            trtr.sleep(1000);
+                            Thread.sleep(1000);
                         } catch (Exception e) {
                         }
                         chat = owner.getChat();
@@ -337,6 +335,7 @@ public class Board extends JPanel implements Protocol, Runnable {
         repaint();
     }
 
+    @Override
     public void globalSetFigure(int x, int y, int color, int type, boolean isEmpty, boolean firstStep) {
         owner.setMyTurn(false);
         localSetFigure(x, y, color, type, isEmpty, firstStep);
@@ -383,6 +382,7 @@ public class Board extends JPanel implements Protocol, Runnable {
         repaint();
     }
 
+    @Override
     public void giveTurn() {
         try {
             sender.send(GIVE_TURN);
@@ -406,7 +406,7 @@ public class Board extends JPanel implements Protocol, Runnable {
         while (!sender.isFree()) {
             owner.say("B: waiting to send coordinates");
             try {
-                trtr.sleep(1000);
+                Thread.sleep(1000);
             } catch (Exception e) {
             }
         }
@@ -431,7 +431,7 @@ public class Board extends JPanel implements Protocol, Runnable {
         while (!sender.isFree()) {
             owner.say("B: waiting to send coordinates");
             try {
-                trtr.sleep(1000);
+                Thread.sleep(1000);
             } catch (Exception e) {
             }
         }
@@ -456,7 +456,7 @@ public class Board extends JPanel implements Protocol, Runnable {
         while (!sender.isFree()) {
             owner.say("B: waiting to send CLEAR");
             try {
-                trtr.sleep(1000);
+                Thread.sleep(1000);
             } catch (Exception e) {
             }
         }
@@ -478,5 +478,92 @@ public class Board extends JPanel implements Protocol, Runnable {
                 fig[i][j].oY = -1;
             }
         }
+    }
+
+    protected Figure[][] figures() {
+        return fig;
+    }
+
+    @Override
+    public boolean isCheck() {
+        return check;
+    }
+
+    @Override
+    public void setCheck(boolean check) {
+        this.check = check;
+    }
+
+    @Override
+    public Figure figureAt(int col, int row) {
+        return fig[col][row];
+    }
+
+    @Override
+    public Figure draggedFigure() {
+        return fig[x][y];
+    }
+
+    @Override
+    public void updateDraggedPosition() {
+        fig[x][y].oX = dragX * 60;
+        fig[x][y].oY = dragY * 60;
+    }
+
+    @Override
+    public boolean isFigureDroppedAtNewPosition(int col, int row) {
+        return x != col || y != row;
+    }
+
+    @Override
+    public void moveKing(int color, int col, int row) {
+        bckKing[0] = king[color][0];
+        bckKing[1] = king[color][1];
+        king[color][0] = col;
+        king[color][1] = row;
+    }
+
+    @Override
+    public void restoreKing(int color) {
+        king[color][0] = bckKing[0];
+        king[color][1] = bckKing[1];
+    }
+
+    @Override
+    public int getKingCol(int color) {
+        return king[color][0];
+    }
+
+    @Override
+    public int getKingRow(int color) {
+        return king[color][1];
+    }
+
+    @Override
+    public void reloadImages(int boardId, int figureId) {
+        this.boardId = boardId;
+        this.figureId = figureId;
+        loadImg();
+        repaint();
+    }
+
+    @Override
+    public int getBoardId() {
+        return boardId;
+    }
+
+    @Override
+    public int getFigureId() {
+        return figureId;
+    }
+
+    @Override
+    public void setHlPos(int hlPos) {
+        this.hlPos = hlPos;
+    }
+
+    @Override
+    public Image getFigureImage(int color, int type) {
+        return figureSet[color][type];
     }
 }

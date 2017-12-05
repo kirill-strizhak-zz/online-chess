@@ -44,13 +44,13 @@ public class BoardInitialisationTest {
     }
 
     private void testInitFigures(Board board, BoardSetup setup) {
-        testMiddleIsEmpty(board.fig);
-        testPawnMatch(board.fig, blackFigureSet[Board.PAWN], setup.blackPawnRow);
-        testPawnMatch(board.fig, whiteFigureSet[Board.PAWN], setup.whitePawnRow);
-        testFigureMatch(board.fig, blackFigureSet, setup.blackFigureRow, setup.queenCol, setup.kingCol);
-        testFigureMatch(board.fig, whiteFigureSet, setup.whiteFigureRow, setup.queenCol, setup.kingCol);
-        testFigureCoordinates(board.fig, 0, 2);
-        testFigureCoordinates(board.fig, 6, 8);
+        testMiddleIsEmpty(board.figures());
+        testPawnMatch(board.figures(), blackFigureSet[Board.PAWN], setup.blackPawnRow);
+        testPawnMatch(board.figures(), whiteFigureSet[Board.PAWN], setup.whitePawnRow);
+        testFigureMatch(board.figures(), blackFigureSet, setup.blackFigureRow, setup.queenCol, setup.kingCol);
+        testFigureMatch(board.figures(), whiteFigureSet, setup.whiteFigureRow, setup.queenCol, setup.kingCol);
+        testFigureCoordinates(board.figures(), 0, 2);
+        testFigureCoordinates(board.figures(), 6, 8);
         testKing(board.king, setup.whiteFigureRow, setup.blackFigureRow, setup.kingCol);
     }
 
