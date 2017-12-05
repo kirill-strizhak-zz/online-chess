@@ -114,6 +114,36 @@ public class LogicRookMoveTest extends LogicMoveTester {
         validate(expected);
     }
 
+    // o + + + +
+    // + ~ ~ ~ ~
+    // + ~ ~ ~ ~
+    // + ~ ~ ~ ~
+    // + ~ ~ ~ ~
+    @Test
+    public void testAllowedMoves_WhenInTopLeft() {
+        initFigure(0, 0);
+
+        Set<String> expected = new HashSet<>(14);
+        expected.addAll(Arrays.asList("0:1", "0:2", "0:3", "0:4", "0:5", "0:6", "0:7"));
+        expected.addAll(Arrays.asList("1:0", "2:0", "3:0", "4:0", "5:0", "6:0", "7:0"));
+        validate(0, 0, expected);
+    }
+
+    // ~ ~ ~ ~ +
+    // ~ ~ ~ ~ +
+    // ~ ~ ~ ~ +
+    // ~ ~ ~ ~ +
+    // + + + + o
+    @Test
+    public void testAllowedMoves_WhenInBottomRight() {
+        initFigure(7, 7);
+
+        Set<String> expected = new HashSet<>(14);
+        expected.addAll(Arrays.asList("7:0", "7:1", "7:2", "7:3", "7:4", "7:5", "7:6"));
+        expected.addAll(Arrays.asList("0:7", "1:7", "2:7", "3:7", "4:7", "5:7", "6:7"));
+        validate(7, 7, expected);
+    }
+
     @Override
     protected int col() {
         return 2;
