@@ -2,7 +2,7 @@ package ks3.oc.swing;
 
 import ks3.oc.board.Board;
 import ks3.oc.ChatPanel;
-import ks3.oc.Check;
+import ks3.oc.Logic;
 import ks3.oc.Logger;
 import ks3.oc.MainWindow;
 import ks3.oc.Messenjah;
@@ -41,7 +41,7 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
     private boolean myTurn = false;
     private Thread trtr;
     private Messenjah aboutWND;
-    private Check check = null;
+    private Logic logic = null;
     private JMenuItem shortXchng,  longXchng;
     public boolean debug = true;
 
@@ -133,16 +133,16 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
         game.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                while (check == null) {
+                while (logic == null) {
                     try {
                         trtr.sleep(1000);
                     } catch (Exception ex) {
                         self.log.log(ERR_BASE + "gamePressed(): " + ex.getMessage());
                     }
-                    check = board.getCheck();
+                    logic = board.getLogic();
                 }
-                shortXchng.setEnabled(check.shortXchng());
-                longXchng.setEnabled(check.longXchng());
+                shortXchng.setEnabled(logic.kingSideCastling());
+                longXchng.setEnabled(logic.queenSideCastling());
             }
         });
         shortXchng.addActionListener(new ActionListener() {

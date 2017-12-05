@@ -1,6 +1,6 @@
 package ks3.oc.board;
 
-public class BoardSetup {
+class BoardSetup {
 
     int blackFigureRow;
     int whiteFigureRow;

@@ -1,7 +1,7 @@
 package ks3.oc.board;
 
 import ks3.oc.ChatPanel;
-import ks3.oc.Check;
+import ks3.oc.Logic;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
@@ -30,7 +30,7 @@ public class Board extends JPanel implements Protocol, Runnable {
     private Thread trtr;
     private Sender sender;
     private ChatPanel chat;
-    private Check check;
+    private Logic logic;
     private Color myRed = new Color(220, 0, 0);
     public int bDis, fDis;
     public boolean isLoading = false;
@@ -40,7 +40,7 @@ public class Board extends JPanel implements Protocol, Runnable {
         owner = own;
         sender = send;
         chat = ch;
-        check = new Check(this, owner);
+        logic = new Logic(this, owner);
         hlight[0][0] = -1;
         this.setSize(480, 480);
         bDis = 1;
@@ -60,7 +60,7 @@ public class Board extends JPanel implements Protocol, Runnable {
                 if ((fig[x][y].color == owner.getMyColor()) && (owner.isMyTurn())) {
                     dragX = x;
                     dragY = y;
-                    check.move(fig[x][y], x, y);
+                    logic.calculateAllowedMoves(fig[x][y], x, y);
                     drawOnTop = fig[x][y];
                     isDragging = true;
                 }
@@ -80,13 +80,13 @@ public class Board extends JPanel implements Protocol, Runnable {
                         fig[x][y].oX = dragX * 60;
                         fig[x][y].oY = dragY * 60;
                     } else {
-                        while (check.calculating) {
+                        while (logic.calculating) {
                             try {
                                 trtr.sleep(10);
                             } catch (Exception ex) {
                             }
                         }
-                        check.drop(a, b);
+                        logic.drop(a, b);
                     }
                 }
                 repaint();
@@ -258,10 +258,10 @@ public class Board extends JPanel implements Protocol, Runnable {
         fig[currX][currY].type = NULL;
         owner.setMyTurn(true);
         int z = owner.getMyColor() / 2;
-        isCheck = !check.free2go(king[z][0], king[z][1], owner.getOppColor());
+        isCheck = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
         if (!isLoading) {
             Figure[][] mf = fig;
-            if (check.mate(king[z][0], king[z][1], fig)) {
+            if (logic.mate(king[z][0], king[z][1], fig)) {
                 owner.setMyTurn(false);
                 try {
                     while (!sender.isFree()) {
@@ -308,10 +308,10 @@ public class Board extends JPanel implements Protocol, Runnable {
             sender.send(newInvertedX);
             sender.send(newInvertedY);
             sender.free();
-            isCheck = !check.free2go(king[z][0], king[z][1], owner.getOppColor());
+            isCheck = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
             if (!isLoading) {
                 Figure[][] mf = fig;
-                if (check.mate(king[z][0], king[z][1], mf)) {
+                if (logic.mate(king[z][0], king[z][1], mf)) {
                     owner.setMyTurn(false);
                     while (!sender.isFree()) {
                         owner.say("B: waiting to send coordinates");
@@ -397,8 +397,8 @@ public class Board extends JPanel implements Protocol, Runnable {
         }
     }
 
-    public Check getCheck() {
-        return check;
+    public Logic getLogic() {
+        return logic;
     }
 
     public void shortXchng() {
