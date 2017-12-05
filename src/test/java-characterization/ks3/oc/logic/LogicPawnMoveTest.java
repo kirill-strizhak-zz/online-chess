@@ -1,47 +1,17 @@
 package ks3.oc.logic;
 
-import ks3.oc.Figure;
-import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
-import ks3.oc.board.BoardState;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.when;
-
-public class LogicPawnMoveTest {
-
-    @Mock
-    private BoardState board;
-    @Mock
-    private MainWindow mainWindow;
-
-    private Logic logic;
-
-    private Figure[][] fig = {
-            { new Figure(), new Figure(), new Figure() },
-            { new Figure(), new Figure(), new Figure() },
-            { new Figure(), new Figure(), new Figure() }
-    };
+public class LogicPawnMoveTest extends LogicMoveTester {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        initPawn();
-        when(board.figureAt(anyInt(), anyInt())).thenAnswer((in) -> {
-            int col = (Integer) in.getArguments()[0];
-            int row = (Integer) in.getArguments()[1];
-            return fig[col][row];
-        });
-        when(mainWindow.getMyColor()).thenReturn(Protocol.WHITE);
-        logic = new Logic(board, mainWindow);
+        commonSetUp();
     }
 
     // ~ x ~
@@ -54,6 +24,36 @@ public class LogicPawnMoveTest {
         expected.add("1:1");
 
         logic.calculateAllowedMoves(fig[1][2], 1, 2);
+        validate(expected);
+    }
+
+    // x ~ ~
+    // x ~ ~
+    // o ~ ~
+    @Test
+    public void testAllowedMoves_LeftmostPawn() {
+        initFigure(0, 2);
+
+        Set<String> expected = new HashSet<>(2);
+        expected.add("0:0");
+        expected.add("0:1");
+
+        logic.calculateAllowedMoves(fig[0][2], 0, 2);
+        validate(expected);
+    }
+
+    // ~ ~ x
+    // ~ ~ x
+    // ~ ~ o
+    @Test
+    public void testAllowedMoves_RightmostPawn() {
+        initFigure(7, 2);
+
+        Set<String> expected = new HashSet<>(2);
+        expected.add("7:0");
+        expected.add("7:1");
+
+        logic.calculateAllowedMoves(fig[7][2], 7, 2);
         validate(expected);
     }
 
@@ -131,7 +131,7 @@ public class LogicPawnMoveTest {
     }
 
     // ~ ~ ~
-    // x ! ~
+    // o ! ~
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenNearBlocked_LeftFriendly() {
@@ -145,24 +145,50 @@ public class LogicPawnMoveTest {
         validate(expected);
     }
 
-    private void initPawn() {
-        fig[1][2].empty = false;
-        fig[1][2].firstStep = true;
-        fig[1][2].type = Protocol.PAWN;
-        fig[1][2].color = Protocol.WHITE;
+    // ~ ~ ~
+    // ~ ! o
+    // ~ o ~
+    @Test
+    public void testAllowedMoves_WhenNearBlocked_RightFriendly() {
+        fig[1][1].empty = false;
+        fig[0][1].empty = false;
+        fig[0][1].color = Protocol.WHITE;
+
+        Set<String> expected = new HashSet<>(0);
+
+        logic.calculateAllowedMoves(fig[1][2], 1, 2);
+        validate(expected);
     }
 
-    private Set<String> convertResult() {
-        Set<String> result = new HashSet<>();
-        for (int i = 0; logic.getAllowed()[i][0] != -1; i++) {
-            result.add(logic.getAllowed()[i][0] + ":" + logic.getAllowed()[i][1]);
-        }
-        return result;
+    // ~ x ~
+    // x x x
+    // ~ o ~
+    @Test
+    public void testAllowedMoves_WhenFree_TwoEnemies() {
+        fig[0][1].empty = false;
+        fig[0][1].color = Protocol.BLACK;
+        fig[2][1].empty = false;
+        fig[2][1].color = Protocol.BLACK;
+
+        Set<String> expected = new HashSet<>(4);
+        expected.add("1:0");
+        expected.add("0:1");
+        expected.add("1:1");
+        expected.add("2:1");
+
+        logic.calculateAllowedMoves(fig[1][2], 1, 2);
+        validate(expected);
     }
 
-    private void validate(Set<String> expected) {
-        Set<String> result = convertResult();
-        assertTrue("Result does not contain all expected values: " + result, result.containsAll(expected));
-        assertTrue("Result has unexpected values: " + result, expected.containsAll(result));
+    @Override
+    protected void initFigure() {
+        initFigure(1, 2);
+    }
+
+    private void initFigure(int col, int row) {
+        fig[col][row].empty = false;
+        fig[col][row].firstStep = true;
+        fig[col][row].type = Protocol.PAWN;
+        fig[col][row].color = Protocol.WHITE;
     }
 }
