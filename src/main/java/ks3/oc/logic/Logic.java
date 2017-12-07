@@ -95,54 +95,10 @@ public class Logic implements Protocol {
     }
 
     private void allowedMovesOfRook(int col, int row) {
-        checkRookMovesToTheLeft(col, row);
-        checkRookMovesUpwards(col, row);
-        checkRookMovesToTheRight(col, row);
-        checkRookMovesDownwards(col, row);
-    }
-
-    private void checkRookMovesToTheLeft(int col, int row) {
-        for (int colLeft = col - 1; colLeft >= 0; colLeft--) {
-            if (isNotFriendly(colLeft, row)) {
-                addAllowedMove(colLeft, row);
-            }
-            if (!isEmpty(colLeft, row)) {
-                break;
-            }
-        }
-    }
-
-    private void checkRookMovesUpwards(int col, int row) {
-        for (int rowUp = row - 1; rowUp >= 0; rowUp--) {
-            if (isNotFriendly(col, rowUp)) {
-                addAllowedMove(col, rowUp);
-            }
-            if (!isEmpty(col, rowUp)) {
-                break;
-            }
-        }
-    }
-
-    private void checkRookMovesToTheRight(int col, int row) {
-        for (int colRight = col + 1; colRight <= 7; colRight++) {
-            if (isNotFriendly(colRight, row)) {
-                addAllowedMove(colRight, row);
-            }
-            if (!isEmpty(colRight, row)) {
-                break;
-            }
-        }
-    }
-
-    private void checkRookMovesDownwards(int col, int row) {
-        for (int rowDown = row + 1; rowDown <= 7; rowDown++) {
-            if (isNotFriendly(col, rowDown)) {
-                addAllowedMove(col, rowDown);
-            }
-            if (!isEmpty(col, rowDown)) {
-                break;
-            }
-        }
+        checkAllowedMovesInDirection(col, row, -1, 0, BoundaryValidators.LEFT);
+        checkAllowedMovesInDirection(col, row, 0, -1, BoundaryValidators.TOP);
+        checkAllowedMovesInDirection(col, row, 1, 0, BoundaryValidators.RIGHT);
+        checkAllowedMovesInDirection(col, row, 0, 1, BoundaryValidators.BOTTOM);
     }
 
     private void allowedMovesOfKnight(int col, int row) {
@@ -173,13 +129,13 @@ public class Logic implements Protocol {
     }
 
     private void allowedMovesOfBishop(int col, int row) {
-        checkDiagonalMovesByDirection(col, row, -1, -1, BoundaryValidators.TOP_LEFT);
-        checkDiagonalMovesByDirection(col, row, -1, 1, BoundaryValidators.BOTTOM_LEFT);
-        checkDiagonalMovesByDirection(col, row, 1, 1, BoundaryValidators.BOTTOM_RIGHT);
-        checkDiagonalMovesByDirection(col, row, 1, -1, BoundaryValidators.TOP_RIGHT);
+        checkAllowedMovesInDirection(col, row, -1, -1, BoundaryValidators.TOP_LEFT);
+        checkAllowedMovesInDirection(col, row, -1, 1, BoundaryValidators.BOTTOM_LEFT);
+        checkAllowedMovesInDirection(col, row, 1, 1, BoundaryValidators.BOTTOM_RIGHT);
+        checkAllowedMovesInDirection(col, row, 1, -1, BoundaryValidators.TOP_RIGHT);
     }
 
-    private void checkDiagonalMovesByDirection(int col, int row, int colMod, int rowMod, BoundaryValidator boundaryValidator) {
+    private void checkAllowedMovesInDirection(int col, int row, int colMod, int rowMod, BoundaryValidator boundaryValidator) {
         for (col += colMod, row += rowMod; boundaryValidator.test(col, row); col += colMod, row += rowMod) {
             if (isNotFriendly(col, row)) {
                 addAllowedMove(col, row);
