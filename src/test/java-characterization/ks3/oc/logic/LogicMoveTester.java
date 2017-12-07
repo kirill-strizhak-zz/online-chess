@@ -69,7 +69,7 @@ public abstract class LogicMoveTester {
     }
 
     protected void clearFigure(int col, int row) {
-        fig[col][row].empty = false;
+        fig[col][row].empty = true;
         fig[col][row].color = Protocol.NULL;
     }
 

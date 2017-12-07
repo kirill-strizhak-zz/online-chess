@@ -172,73 +172,19 @@ public class Logic implements Protocol {
         }
     }
 
-    private boolean topLeftBound(int col, int row) {
-        return col >= 0 && row >= 0;
-    }
-
-    private boolean bottomLeftBound(int col, int row) {
-        return col >= 0 && row <= 7;
-    }
-
-    private boolean topRightBound(int col, int row) {
-        return col <= 7 && row >= 0;
-    }
-
-    private boolean bottomRightBound(int col, int row) {
-        return col <= 7 && row <= 7;
-    }
-
     private void allowedMovesOfBishop(int col, int row) {
-        int i, j;
-        j = row;
-        for (i = col; i >= 0; i--) {
-            if (board.figureAt(i, j).color != owner.getMyColor()) {
-                addAllowedMove(i, j);
+        checkDiagonalMovesByDirection(col, row, -1, -1, BoundaryValidators.TOP_LEFT);
+        checkDiagonalMovesByDirection(col, row, -1, 1, BoundaryValidators.BOTTOM_LEFT);
+        checkDiagonalMovesByDirection(col, row, 1, 1, BoundaryValidators.BOTTOM_RIGHT);
+        checkDiagonalMovesByDirection(col, row, 1, -1, BoundaryValidators.TOP_RIGHT);
+    }
+
+    private void checkDiagonalMovesByDirection(int col, int row, int colMod, int rowMod, BoundaryValidator boundaryValidator) {
+        for (col += colMod, row += rowMod; boundaryValidator.test(col, row); col += colMod, row += rowMod) {
+            if (isNotFriendly(col, row)) {
+                addAllowedMove(col, row);
             }
-            if ((board.figureAt(i, j).color != NULL) && ((i != col) || (j != row))) {
-                break;
-            }
-            j--;
-            if (j < 0) {
-                break;
-            }
-        }
-        j = row;
-        for (i = col; i >= 0; i--) {
-            if (board.figureAt(i, j).color != owner.getMyColor()) {
-                addAllowedMove(i, j);
-            }
-            if ((board.figureAt(i, j).color != NULL) && ((i != col) || (j != row))) {
-                break;
-            }
-            j++;
-            if (j > 7) {
-                break;
-            }
-        }
-        j = row;
-        for (i = col; i <= 7; i++) {
-            if (board.figureAt(i, j).color != owner.getMyColor()) {
-                addAllowedMove(i, j);
-            }
-            if ((board.figureAt(i, j).color != NULL) && ((i != col) || (j != row))) {
-                break;
-            }
-            j++;
-            if (j > 7) {
-                break;
-            }
-        }
-        j = row;
-        for (i = col; i <= 7; i++) {
-            if (board.figureAt(i, j).color != owner.getMyColor()) {
-                addAllowedMove(i, j);
-            }
-            if ((board.figureAt(i, j).color != NULL) && ((i != col) || (j != row))) {
-                break;
-            }
-            j--;
-            if (j < 0) {
+            if (!isEmpty(col, row)) {
                 break;
             }
         }
@@ -634,5 +580,21 @@ public class Logic implements Protocol {
 
     private boolean isNotFriendly(int col, int row) {
         return board.figureAt(col, row).color != owner.getMyColor();
+    }
+
+    private boolean topLeftBound(int col, int row) {
+        return col >= 0 && row >= 0;
+    }
+
+    private boolean bottomLeftBound(int col, int row) {
+        return col >= 0 && row <= 7;
+    }
+
+    private boolean topRightBound(int col, int row) {
+        return col <= 7 && row >= 0;
+    }
+
+    private boolean bottomRightBound(int col, int row) {
+        return col <= 7 && row <= 7;
     }
 }
