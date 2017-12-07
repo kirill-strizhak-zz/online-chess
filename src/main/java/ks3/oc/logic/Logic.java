@@ -95,55 +95,34 @@ public class Logic implements Protocol {
     }
 
     private void allowedMovesOfRook(int col, int row) {
-        checkAllowedMovesInDirection(col, row, -1, 0, BoundaryValidators.LEFT);
-        checkAllowedMovesInDirection(col, row, 0, -1, BoundaryValidators.TOP);
-        checkAllowedMovesInDirection(col, row, 1, 0, BoundaryValidators.RIGHT);
-        checkAllowedMovesInDirection(col, row, 0, 1, BoundaryValidators.BOTTOM);
+        checkAndAddAllowedMovesInDirection(col, row, -1, 0, BoundaryValidators.LEFT);
+        checkAndAddAllowedMovesInDirection(col, row, 0, -1, BoundaryValidators.TOP);
+        checkAndAddAllowedMovesInDirection(col, row, 1, 0, BoundaryValidators.RIGHT);
+        checkAndAddAllowedMovesInDirection(col, row, 0, 1, BoundaryValidators.BOTTOM);
     }
 
     private void allowedMovesOfKnight(int col, int row) {
-        if (topLeftBound(col - 1, row - 2) && isNotFriendly(col - 1, row - 2)) {
-            addAllowedMove(col - 1, row - 2);
-        }
-        if (topRightBound(col + 1, row - 2) && isNotFriendly(col + 1, row - 2)) {
-            addAllowedMove(col + 1, row - 2);
-        }
-        if (topRightBound(col + 2, row - 1) && isNotFriendly(col + 2, row - 1)) {
-            addAllowedMove(col + 2, row - 1);
-        }
-        if (bottomRightBound(col + 2, row + 1) && isNotFriendly(col + 2, row + 1)) {
-            addAllowedMove(col + 2, row + 1);
-        }
-        if (bottomRightBound(col + 1, row + 2) && isNotFriendly(col + 1, row + 2)) {
-            addAllowedMove(col + 1, row + 2);
-        }
-        if (bottomLeftBound(col - 1, row + 2) && isNotFriendly(col - 1, row + 2)) {
-            addAllowedMove(col - 1, row + 2);
-        }
-        if (bottomLeftBound(col - 2, row + 1) && isNotFriendly(col - 2, row + 1)) {
-            addAllowedMove(col - 2, row + 1);
-        }
-        if (topLeftBound(col - 2, row - 1) && isNotFriendly(col - 2, row - 1)) {
-            addAllowedMove(col - 2, row - 1);
+        checkAndAddAllowedKnightMove(col - 1, row - 2, BoundaryValidators.TOP_LEFT);
+        checkAndAddAllowedKnightMove(col - 2, row - 1, BoundaryValidators.TOP_LEFT);
+        checkAndAddAllowedKnightMove(col + 1, row - 2, BoundaryValidators.TOP_RIGHT);
+        checkAndAddAllowedKnightMove(col + 2, row - 1, BoundaryValidators.TOP_RIGHT);
+        checkAndAddAllowedKnightMove(col + 2, row + 1, BoundaryValidators.BOTTOM_RIGHT);
+        checkAndAddAllowedKnightMove(col + 1, row + 2, BoundaryValidators.BOTTOM_RIGHT);
+        checkAndAddAllowedKnightMove(col - 1, row + 2, BoundaryValidators.BOTTOM_LEFT);
+        checkAndAddAllowedKnightMove(col - 2, row + 1, BoundaryValidators.BOTTOM_LEFT);
+    }
+
+    private void checkAndAddAllowedKnightMove(int col, int row, BoundaryValidator boundaryValidator) {
+        if (boundaryValidator.test(col, row) && isNotFriendly(col, row)) {
+            addAllowedMove(col, row);
         }
     }
 
     private void allowedMovesOfBishop(int col, int row) {
-        checkAllowedMovesInDirection(col, row, -1, -1, BoundaryValidators.TOP_LEFT);
-        checkAllowedMovesInDirection(col, row, -1, 1, BoundaryValidators.BOTTOM_LEFT);
-        checkAllowedMovesInDirection(col, row, 1, 1, BoundaryValidators.BOTTOM_RIGHT);
-        checkAllowedMovesInDirection(col, row, 1, -1, BoundaryValidators.TOP_RIGHT);
-    }
-
-    private void checkAllowedMovesInDirection(int col, int row, int colMod, int rowMod, BoundaryValidator boundaryValidator) {
-        for (col += colMod, row += rowMod; boundaryValidator.test(col, row); col += colMod, row += rowMod) {
-            if (isNotFriendly(col, row)) {
-                addAllowedMove(col, row);
-            }
-            if (!isEmpty(col, row)) {
-                break;
-            }
-        }
+        checkAndAddAllowedMovesInDirection(col, row, -1, -1, BoundaryValidators.TOP_LEFT);
+        checkAndAddAllowedMovesInDirection(col, row, -1, 1, BoundaryValidators.BOTTOM_LEFT);
+        checkAndAddAllowedMovesInDirection(col, row, 1, 1, BoundaryValidators.BOTTOM_RIGHT);
+        checkAndAddAllowedMovesInDirection(col, row, 1, -1, BoundaryValidators.TOP_RIGHT);
     }
 
     private void allowedMovesOfQueen(int col, int row) {
@@ -538,19 +517,14 @@ public class Logic implements Protocol {
         return board.figureAt(col, row).color != owner.getMyColor();
     }
 
-    private boolean topLeftBound(int col, int row) {
-        return col >= 0 && row >= 0;
-    }
-
-    private boolean bottomLeftBound(int col, int row) {
-        return col >= 0 && row <= 7;
-    }
-
-    private boolean topRightBound(int col, int row) {
-        return col <= 7 && row >= 0;
-    }
-
-    private boolean bottomRightBound(int col, int row) {
-        return col <= 7 && row <= 7;
+    private void checkAndAddAllowedMovesInDirection(int col, int row, int colMod, int rowMod, BoundaryValidator boundaryValidator) {
+        for (col += colMod, row += rowMod; boundaryValidator.test(col, row); col += colMod, row += rowMod) {
+            if (isNotFriendly(col, row)) {
+                addAllowedMove(col, row);
+            }
+            if (!isEmpty(col, row)) {
+                break;
+            }
+        }
     }
 }
