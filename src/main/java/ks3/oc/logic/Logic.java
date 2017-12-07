@@ -116,28 +116,28 @@ public class Logic implements Protocol {
     }
 
     private void allowedMovesOfKnight(int col, int row) {
-        if (((col - 1) >= 0) && ((row - 2) >= 0)) {
+        if (topLeftBound(col - 1, row - 2) && isNotFriendly(col - 1, row - 2)) {
             addAllowedMove(col - 1, row - 2);
         }
-        if (((col + 1) <= 7) && ((row - 2) >= 0)) {
+        if (topRightBound(col + 1, row - 2) && isNotFriendly(col + 1, row - 2)) {
             addAllowedMove(col + 1, row - 2);
         }
-        if (((col + 2) <= 7) && ((row - 1) >= 0)) {
+        if (topRightBound(col + 2, row - 1) && isNotFriendly(col + 2, row - 1)) {
             addAllowedMove(col + 2, row - 1);
         }
-        if (((col + 2) <= 7) && ((row + 1) <= 7)) {
+        if (bottomRightBound(col + 2, row + 1) && isNotFriendly(col + 2, row + 1)) {
             addAllowedMove(col + 2, row + 1);
         }
-        if (((col + 1) <= 7) && ((row + 2) <= 7)) {
+        if (bottomRightBound(col + 1, row + 2) && isNotFriendly(col + 1, row + 2)) {
             addAllowedMove(col + 1, row + 2);
         }
-        if (((col - 1) >= 0) && ((row + 2) <= 7)) {
+        if (bottomLeftBound(col - 1, row + 2) && isNotFriendly(col - 1, row + 2)) {
             addAllowedMove(col - 1, row + 2);
         }
-        if (((col - 2) >= 0) && ((row + 1) <= 7)) {
+        if (bottomLeftBound(col - 2, row + 1) && isNotFriendly(col - 2, row + 1)) {
             addAllowedMove(col - 2, row + 1);
         }
-        if (((col - 2) >= 0) && ((row - 1) >= 0)) {
+        if (topLeftBound(col - 2, row - 1) && isNotFriendly(col - 2, row - 1)) {
             addAllowedMove(col - 2, row - 1);
         }
     }
@@ -580,5 +580,25 @@ public class Logic implements Protocol {
 
     protected int[][] getAllowed() {
         return allowed;
+    }
+
+    private boolean isNotFriendly(int col, int row) {
+        return board.figureAt(col, row).color != owner.getMyColor();
+    }
+
+    private boolean topLeftBound(int col, int row) {
+        return col >= 0 && row >= 0;
+    }
+
+    private boolean bottomLeftBound(int col, int row) {
+        return col >= 0 && row <= 7;
+    }
+
+    private boolean topRightBound(int col, int row) {
+        return col <= 7 && row >= 0;
+    }
+
+    private boolean bottomRightBound(int col, int row) {
+        return col <= 7 && row <= 7;
     }
 }

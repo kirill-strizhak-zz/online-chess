@@ -10,8 +10,8 @@ import java.util.Set;
 
 public class LogicPawnMoveTest extends LogicMoveTester {
 
-    // ~ + ~
-    // ~ + ~
+    // ~ # ~
+    // ~ # ~
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenAllClearAndFirstMove() {
@@ -21,8 +21,8 @@ public class LogicPawnMoveTest extends LogicMoveTester {
         validate(expected);
     }
 
-    // + ~ ~
-    // + ~ ~
+    // # ~ ~
+    // # ~ ~
     // o ~ ~
     @Test
     public void testAllowedMoves_LeftmostPawn() {
@@ -33,8 +33,8 @@ public class LogicPawnMoveTest extends LogicMoveTester {
         validate(0, 2, expected);
     }
 
-    // ~ ~ +
-    // ~ ~ +
+    // ~ ~ #
+    // ~ ~ #
     // ~ ~ o
     @Test
     public void testAllowedMoves_RightmostPawn() {
@@ -46,7 +46,7 @@ public class LogicPawnMoveTest extends LogicMoveTester {
     }
 
     // ~ ~ ~
-    // ~ + ~
+    // ~ # ~
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenAllClearAndNotFirstMove() {
@@ -57,7 +57,7 @@ public class LogicPawnMoveTest extends LogicMoveTester {
     }
 
     // ~ ! ~
-    // ~ + ~
+    // ~ # ~
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenFarBlocked() {
@@ -120,8 +120,8 @@ public class LogicPawnMoveTest extends LogicMoveTester {
         validate(Collections.emptySet());
     }
 
-    // ~ + ~
-    // x + x
+    // ~ # ~
+    // x # x
     // ~ o ~
     @Test
     public void testAllowedMoves_WhenFree_TwoEnemies() {
