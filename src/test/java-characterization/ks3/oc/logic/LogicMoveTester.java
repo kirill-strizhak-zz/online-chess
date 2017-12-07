@@ -4,6 +4,7 @@ import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.BoardState;
+import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -34,7 +35,8 @@ public abstract class LogicMoveTester {
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() }
     };
 
-    public void commonSetUp() {
+    @Before
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         initFigure(col(), row());
         when(board.figureAt(anyInt(), anyInt())).thenAnswer((in) -> {
