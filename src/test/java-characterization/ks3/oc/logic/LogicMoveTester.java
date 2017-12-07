@@ -68,6 +68,11 @@ public abstract class LogicMoveTester {
         fig[col][row].color = color;
     }
 
+    protected void clearFigure(int col, int row) {
+        fig[col][row].empty = false;
+        fig[col][row].color = Protocol.NULL;
+    }
+
     protected void validate(Set<String> expected) {
         validate(col(), row(), expected);
     }

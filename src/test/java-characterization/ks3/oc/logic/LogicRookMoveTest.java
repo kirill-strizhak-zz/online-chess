@@ -82,10 +82,8 @@ public class LogicRookMoveTest extends LogicMoveTester {
         initEnemy(4, 2);
         initEnemy(2, 4);
         Set<String> expected = new HashSet<>(8);
-        expected.addAll(Arrays.asList(
-                "0:2", "1:2", "3:2", "4:2",
-                "2:0", "2:1", "2:3", "2:4"
-        ));
+        expected.addAll(IMMEDIATE_SURROUNDINGS);
+        expected.addAll(Arrays.asList("0:2", "4:2", "2:0", "2:4"));
         validate(expected);
     }
 
@@ -119,6 +117,25 @@ public class LogicRookMoveTest extends LogicMoveTester {
                 "0:7", "1:7", "2:7", "3:7", "4:7", "5:7", "6:7"
         ));
         validate(7, 7, expected);
+    }
+
+    // !
+    // # ~ ~ ~ ~
+    // # ~ ~ ~ ~
+    // # ~ ~ ~ ~
+    // # ~ ~ ~ ~
+    // o # # # # x
+    @Test
+    public void testAllowedMoves_WhenFurthestEnemyOrFriendly() {
+        initFigure(0, 7);
+        initFriendly(0, 0);
+        initEnemy(7, 7);
+        Set<String> expected = new HashSet<>(13);
+        expected.addAll(Arrays.asList(
+                "0:1", "0:2", "0:3", "0:4", "0:5", "0:6",
+                "1:7", "2:7", "3:7", "4:7", "5:7", "6:7", "7:7"
+        ));
+        validate(0, 7, expected);
     }
 
     @Override
