@@ -45,6 +45,7 @@ public abstract class LogicMoveTester {
             return fig[col][row];
         });
         when(mainWindow.getMyColor()).thenReturn(Protocol.WHITE);
+        when(mainWindow.getOppColor()).thenReturn(Protocol.BLACK);
         logic = new Logic(board, mainWindow);
     }
 
@@ -56,20 +57,26 @@ public abstract class LogicMoveTester {
     }
 
     protected void initEnemy(int col, int row) {
-        initSimple(col, row, Protocol.BLACK);
+        initSimple(col, row, Protocol.BLACK, type());
+    }
+
+    protected void initEnemy(int col, int row, int type) {
+        initSimple(col, row, Protocol.BLACK, type);
     }
 
     protected void initFriendly(int col, int row) {
-        initSimple(col, row, Protocol.WHITE);
+        initSimple(col, row, Protocol.WHITE, type());
     }
 
-    private void initSimple(int col, int row, int color) {
+    private void initSimple(int col, int row, int color, int type) {
         fig[col][row].empty = false;
+        fig[col][row].type = type;
         fig[col][row].color = color;
     }
 
     protected void clearFigure(int col, int row) {
         fig[col][row].empty = true;
+        fig[col][row].type = Protocol.NULL;
         fig[col][row].color = Protocol.NULL;
     }
 
