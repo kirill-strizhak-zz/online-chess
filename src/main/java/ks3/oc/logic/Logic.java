@@ -80,36 +80,35 @@ public class Logic implements Protocol {
     }
 
     private void allowedMovesOfRook(int col, int row) {
-        int i;
-        for (i = col; i >= 0; i--) {
-            if (board.figureAt(i, row).color != owner.getMyColor()) {
-                addAllowedMove(i, row);
+        for (int colLeft = col - 1; colLeft >= 0; colLeft--) {
+            if (isNotFriendly(colLeft, row)) {
+                addAllowedMove(colLeft, row);
             }
-            if ((board.figureAt(i, row).color != NULL) && (i != col)) {
+            if (isNotEmpty(colLeft, row)) {
                 break;
             }
         }
-        for (i = row; i >= 0; i--) {
-            if (board.figureAt(col, i).color != owner.getMyColor()) {
-                addAllowedMove(col, i);
+        for (int rowUp = row - 1; rowUp >= 0; rowUp--) {
+            if (isNotFriendly(col, rowUp)) {
+                addAllowedMove(col, rowUp);
             }
-            if ((board.figureAt(col, i).color != NULL) && (i != row)) {
+            if (isNotEmpty(col, rowUp)) {
                 break;
             }
         }
-        for (i = col; i <= 7; i++) {
-            if (board.figureAt(i, row).color != owner.getMyColor()) {
-                addAllowedMove(i, row);
+        for (int colRight = col + 1; colRight <= 7; colRight++) {
+            if (isNotFriendly(colRight, row)) {
+                addAllowedMove(colRight, row);
             }
-            if ((board.figureAt(i, row).color != NULL) && (i != col)) {
+            if (isNotEmpty(colRight, row)) {
                 break;
             }
         }
-        for (i = row; i <= 7; i++) {
-            if (board.figureAt(col, i).color != owner.getMyColor()) {
-                addAllowedMove(col, i);
+        for (int rowDown = row + 1; rowDown <= 7; rowDown++) {
+            if (isNotFriendly(col, rowDown)) {
+                addAllowedMove(col, rowDown);
             }
-            if ((board.figureAt(col, i).color != NULL) && (i != row)) {
+            if (isNotEmpty(col, rowDown)) {
                 break;
             }
         }
@@ -580,6 +579,10 @@ public class Logic implements Protocol {
 
     protected int[][] getAllowed() {
         return allowed;
+    }
+
+    private boolean isNotEmpty(int col, int row) {
+        return !board.figureAt(col, row).empty;
     }
 
     private boolean isNotFriendly(int col, int row) {
