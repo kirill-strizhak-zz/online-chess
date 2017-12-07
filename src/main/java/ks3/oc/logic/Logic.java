@@ -59,56 +59,87 @@ public class Logic implements Protocol {
     }
 
     private void allowedMovesOfPawn(Figure figure, int col, int row) {
-        if (figure.firstStep
-                && board.figureAt(col, row - 2).empty
-                && board.figureAt(col, row - 1).empty) {
+        boolean simpleMoveAdded = checkPawnFirstStepRule(figure, col, row);
+        if (!simpleMoveAdded) {
+            checkPawnStepRule(col, row);
+        }
+        checkPawnCanAttackLeft(col, row);
+        checkPawnCanAttackRight(col, row);
+    }
+
+    private boolean checkPawnFirstStepRule(Figure figure, int col, int row) {
+        boolean conditionMet = figure.firstStep && isEmpty(col, row - 1) && isEmpty(col, row - 2);
+        if (conditionMet) {
+            addAllowedMove(col, row - 1);
             addAllowedMove(col, row - 2);
         }
-        if (col != 0
-                && !board.figureAt(col - 1, row - 1).empty
-                && board.figureAt(col - 1, row - 1).color != owner.getMyColor()) {
-            addAllowedMove(col - 1, row - 1);
-        }
-        if (col != 7
-                && !board.figureAt(col + 1, row - 1).empty
-                && board.figureAt(col + 1, row - 1).color != owner.getMyColor()) {
-            addAllowedMove(col + 1, row - 1);
-        }
-        if ((row != 0) && (board.figureAt(col, row - 1).empty)) {
+        return conditionMet;
+    }
+
+    private void checkPawnStepRule(int col, int row) {
+        if (row != 0 && isEmpty(col, row - 1)) {
             addAllowedMove(col, row - 1);
         }
     }
 
+    private void checkPawnCanAttackLeft(int col, int row) {
+        if (col != 0 && !isEmpty(col - 1, row - 1) && isNotFriendly(col - 1, row - 1)) {
+            addAllowedMove(col - 1, row - 1);
+        }
+    }
+
+    private void checkPawnCanAttackRight(int col, int row) {
+        if (col != 7 && !isEmpty(col + 1, row - 1) && isNotFriendly(col + 1, row - 1)) {
+            addAllowedMove(col + 1, row - 1);
+        }
+    }
+
     private void allowedMovesOfRook(int col, int row) {
+        checkRookMovesToTheLeft(col, row);
+        checkRookMovesUpwards(col, row);
+        checkRookMovesToTheRight(col, row);
+        checkRookMovesDownwards(col, row);
+    }
+
+    private void checkRookMovesToTheLeft(int col, int row) {
         for (int colLeft = col - 1; colLeft >= 0; colLeft--) {
             if (isNotFriendly(colLeft, row)) {
                 addAllowedMove(colLeft, row);
             }
-            if (isNotEmpty(colLeft, row)) {
+            if (!isEmpty(colLeft, row)) {
                 break;
             }
         }
+    }
+
+    private void checkRookMovesUpwards(int col, int row) {
         for (int rowUp = row - 1; rowUp >= 0; rowUp--) {
             if (isNotFriendly(col, rowUp)) {
                 addAllowedMove(col, rowUp);
             }
-            if (isNotEmpty(col, rowUp)) {
+            if (!isEmpty(col, rowUp)) {
                 break;
             }
         }
+    }
+
+    private void checkRookMovesToTheRight(int col, int row) {
         for (int colRight = col + 1; colRight <= 7; colRight++) {
             if (isNotFriendly(colRight, row)) {
                 addAllowedMove(colRight, row);
             }
-            if (isNotEmpty(colRight, row)) {
+            if (!isEmpty(colRight, row)) {
                 break;
             }
         }
+    }
+
+    private void checkRookMovesDownwards(int col, int row) {
         for (int rowDown = row + 1; rowDown <= 7; rowDown++) {
             if (isNotFriendly(col, rowDown)) {
                 addAllowedMove(col, rowDown);
             }
-            if (isNotEmpty(col, rowDown)) {
+            if (!isEmpty(col, rowDown)) {
                 break;
             }
         }
@@ -139,6 +170,22 @@ public class Logic implements Protocol {
         if (topLeftBound(col - 2, row - 1) && isNotFriendly(col - 2, row - 1)) {
             addAllowedMove(col - 2, row - 1);
         }
+    }
+
+    private boolean topLeftBound(int col, int row) {
+        return col >= 0 && row >= 0;
+    }
+
+    private boolean bottomLeftBound(int col, int row) {
+        return col >= 0 && row <= 7;
+    }
+
+    private boolean topRightBound(int col, int row) {
+        return col <= 7 && row >= 0;
+    }
+
+    private boolean bottomRightBound(int col, int row) {
+        return col <= 7 && row <= 7;
     }
 
     private void allowedMovesOfBishop(int col, int row) {
@@ -581,27 +628,11 @@ public class Logic implements Protocol {
         return allowed;
     }
 
-    private boolean isNotEmpty(int col, int row) {
-        return !board.figureAt(col, row).empty;
+    private boolean isEmpty(int col, int row) {
+        return board.figureAt(col, row).empty;
     }
 
     private boolean isNotFriendly(int col, int row) {
         return board.figureAt(col, row).color != owner.getMyColor();
-    }
-
-    private boolean topLeftBound(int col, int row) {
-        return col >= 0 && row >= 0;
-    }
-
-    private boolean bottomLeftBound(int col, int row) {
-        return col >= 0 && row <= 7;
-    }
-
-    private boolean topRightBound(int col, int row) {
-        return col <= 7 && row >= 0;
-    }
-
-    private boolean bottomRightBound(int col, int row) {
-        return col <= 7 && row <= 7;
     }
 }
