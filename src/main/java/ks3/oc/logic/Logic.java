@@ -63,8 +63,8 @@ public class Logic implements Protocol {
         if (!simpleMoveAdded) {
             checkPawnStepRule(col, row);
         }
-        checkPawnCanAttackLeft(col, row);
-        checkPawnCanAttackRight(col, row);
+        checkPawnAttack(col - 1, row - 1, BoundaryValidators.LEFT);
+        checkPawnAttack(col + 1, row - 1, BoundaryValidators.RIGHT);
     }
 
     private boolean checkPawnFirstStepRule(Figure figure, int col, int row) {
@@ -82,15 +82,9 @@ public class Logic implements Protocol {
         }
     }
 
-    private void checkPawnCanAttackLeft(int col, int row) {
-        if (col != 0 && !isEmpty(col - 1, row - 1) && isNotFriendly(col - 1, row - 1)) {
-            addAllowedMove(col - 1, row - 1);
-        }
-    }
-
-    private void checkPawnCanAttackRight(int col, int row) {
-        if (col != 7 && !isEmpty(col + 1, row - 1) && isNotFriendly(col + 1, row - 1)) {
-            addAllowedMove(col + 1, row - 1);
+    private void checkPawnAttack(int col, int row, BoundaryValidator boundaryValidator) {
+        if (boundaryValidator.test(col, row) && !isEmpty(col, row) && isNotFriendly(col, row)) {
+            addAllowedMove(col, row);
         }
     }
 
