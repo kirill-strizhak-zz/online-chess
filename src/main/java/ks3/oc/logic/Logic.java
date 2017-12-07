@@ -125,29 +125,19 @@ public class Logic implements Protocol {
     }
 
     private void allowedMovesOfKing(int col, int row) {
-        if (((col - 1) >= 0) && ((row - 1) >= 0) && (board.figureAt(col - 1, row - 1).color != owner.getMyColor()) && (kingSafeAt(col - 1, row - 1, owner.getOppColor()))) {
-            addAllowedMove(col - 1, row - 1);
-        }
-        if (((col + 1) <= 7) && ((row - 1) >= 0) && (board.figureAt(col + 1, row - 1).color != owner.getMyColor()) && (kingSafeAt(col + 1, row - 1, owner.getOppColor()))) {
-            addAllowedMove(col + 1, row - 1);
-        }
-        if (((col - 1) >= 0) && ((row + 1) <= 7) && (board.figureAt(col - 1, row + 1).color != owner.getMyColor()) && (kingSafeAt(col - 1, row + 1, owner.getOppColor()))) {
-            addAllowedMove(col - 1, row + 1);
-        }
-        if (((col + 1) <= 7) && ((row + 1) <= 7) && (board.figureAt(col + 1, row + 1).color != owner.getMyColor()) && (kingSafeAt(col + 1, row + 1, owner.getOppColor()))) {
-            addAllowedMove(col + 1, row + 1);
-        }
-        if (((row - 1) >= 0) && (board.figureAt(col, row - 1).color != owner.getMyColor()) && (kingSafeAt(col, row - 1, owner.getOppColor()))) {
-            addAllowedMove(col, row - 1);
-        }
-        if (((row + 1) <= 7) && (board.figureAt(col, row + 1).color != owner.getMyColor()) && (kingSafeAt(col, row + 1, owner.getOppColor()))) {
-            addAllowedMove(col, row + 1);
-        }
-        if (((col + 1) <= 7) && (board.figureAt(col + 1, row).color != owner.getMyColor()) && (kingSafeAt(col + 1, row, owner.getOppColor()))) {
-            addAllowedMove(col + 1, row);
-        }
-        if (((col - 1) >= 0) && (board.figureAt(col - 1, row).color != owner.getMyColor()) && (kingSafeAt(col - 1, row, owner.getOppColor()))) {
-            addAllowedMove(col - 1, row);
+        checkAndAddAllowedKingMove(col - 1, row - 1, BoundaryValidators.TOP_LEFT);
+        checkAndAddAllowedKingMove(col + 1, row - 1, BoundaryValidators.TOP_RIGHT);
+        checkAndAddAllowedKingMove(col - 1, row + 1, BoundaryValidators.BOTTOM_LEFT);
+        checkAndAddAllowedKingMove(col + 1, row + 1, BoundaryValidators.BOTTOM_RIGHT);
+        checkAndAddAllowedKingMove(col, row - 1, BoundaryValidators.TOP);
+        checkAndAddAllowedKingMove(col, row + 1, BoundaryValidators.BOTTOM);
+        checkAndAddAllowedKingMove(col + 1, row, BoundaryValidators.RIGHT);
+        checkAndAddAllowedKingMove(col - 1, row, BoundaryValidators.LEFT);
+    }
+
+    private void checkAndAddAllowedKingMove(int col, int row, BoundaryValidator boundaryValidator) {
+        if (boundaryValidator.test(col, row) && isNotFriendly(col, row) && kingSafeAt(col, row, owner.getOppColor())) {
+            addAllowedMove(col, row);
         }
     }
 
