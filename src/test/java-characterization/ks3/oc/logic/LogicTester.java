@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
-public abstract class LogicMoveTester {
+abstract class LogicTester {
 
     @Mock
     private BoardState board;
@@ -24,7 +24,10 @@ public abstract class LogicMoveTester {
 
     protected Logic logic;
 
-    protected Figure[][] fig = {
+    private boolean check = false;
+    private boolean myTurn = true;
+
+    public Figure[][] fig = {
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() },
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() },
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() },
@@ -39,52 +42,58 @@ public abstract class LogicMoveTester {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         initFigure(col(), row());
+        when(board.isCheck()).thenAnswer((in) -> isCheck());
         when(board.figureAt(anyInt(), anyInt())).thenAnswer((in) -> {
             int col = (Integer) in.getArguments()[0];
             int row = (Integer) in.getArguments()[1];
             return fig[col][row];
         });
-        when(mainWindow.getMyColor()).thenReturn(Protocol.WHITE);
-        when(mainWindow.getOppColor()).thenReturn(Protocol.BLACK);
+        when(mainWindow.getMyColor()).thenAnswer((in) -> getMyColor());
+        when(mainWindow.getOppColor()).thenAnswer((in) -> getOppColor());
+        when(mainWindow.isMyTurn()).thenAnswer((in) -> isMyTurn());
         logic = new Logic(board, mainWindow);
     }
 
-    protected void initFigure(int col, int row) {
+    public void initFigure(int col, int row) {
         fig[col][row].empty = false;
         fig[col][row].firstStep = true;
         fig[col][row].type = type();
         fig[col][row].color = Protocol.WHITE;
     }
 
-    protected void initEnemy(int col, int row) {
-        initSimple(col, row, Protocol.BLACK, type());
+    public void initEnemy(int col, int row) {
+        initEnemy(col, row, type());
     }
 
-    protected void initEnemy(int col, int row, int type) {
+    public void initEnemy(int col, int row, int type) {
         initSimple(col, row, Protocol.BLACK, type);
     }
 
-    protected void initFriendly(int col, int row) {
-        initSimple(col, row, Protocol.WHITE, type());
+    public void initFriendly(int col, int row) {
+        initFriendly(col, row, type());
     }
 
-    private void initSimple(int col, int row, int color, int type) {
+    public void initFriendly(int col, int row, int type) {
+        initSimple(col, row, Protocol.WHITE, type);
+    }
+
+    public void initSimple(int col, int row, int color, int type) {
         fig[col][row].empty = false;
         fig[col][row].type = type;
         fig[col][row].color = color;
     }
 
-    protected void clearFigure(int col, int row) {
+    public void clearFigure(int col, int row) {
         fig[col][row].empty = true;
         fig[col][row].type = Protocol.NULL;
         fig[col][row].color = Protocol.NULL;
     }
 
-    protected void validate(Set<String> expected) {
+    public void validate(Set<String> expected) {
         validate(col(), row(), expected);
     }
 
-    protected void validate(int col, int row, Set<String> expected) {
+    public void validate(int col, int row, Set<String> expected) {
         logic.calculateAllowedMoves(fig[col][row], col, row);
         Set<String> result = convertResult();
         assertTrue("Result does not contain all expected values: " + result, result.containsAll(expected));
@@ -97,6 +106,30 @@ public abstract class LogicMoveTester {
             result.add(logic.getAllowed()[i][0] + ":" + logic.getAllowed()[i][1]);
         }
         return result;
+    }
+
+    public boolean isCheck() {
+        return check;
+    }
+
+    public void setCheck(boolean check) {
+        this.check = check;
+    }
+
+    public boolean isMyTurn() {
+        return myTurn;
+    }
+
+    public void setMyTurn(boolean myTurn) {
+        this.myTurn = myTurn;
+    }
+
+    public int getMyColor() {
+        return Protocol.WHITE;
+    }
+
+    public int getOppColor() {
+        return Protocol.BLACK;
     }
 
     protected abstract int col();

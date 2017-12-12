@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LogicKnightMoveTest extends LogicMoveTester {
+public class LogicKnightMoveTest extends LogicTester {
 
     private static final Set<String> ALL_LEGAL_MOVES =
             new HashSet<>(Arrays.asList("1:0", "3:0", "0:1", "4:1", "0:3", "4:3", "1:4", "3:4"));

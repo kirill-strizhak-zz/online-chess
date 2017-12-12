@@ -282,11 +282,13 @@ public class Logic implements Protocol {
     public boolean kingSideCastlingAllowed() {
         if (owner.getMyColor() == WHITE) {
             return (board.figureAt(5, 7).empty) && (board.figureAt(6, 7).empty)
-                    && (board.figureAt(7, 7).firstStep) && (board.figureAt(4, 7).firstStep)
+                    && (!isEmpty(7, 7) && board.figureAt(7, 7).firstStep)
+                    && (!isEmpty(4, 7) && board.figureAt(4, 7).firstStep)
                     && (!board.isCheck()) && (owner.isMyTurn());
         } else {
             return (board.figureAt(1, 7).empty) && (board.figureAt(2, 7).empty)
-                    && (board.figureAt(0, 7).firstStep) && (board.figureAt(3, 7).firstStep)
+                    && (!isEmpty(0, 7) && board.figureAt(0, 7).firstStep)
+                    && (!isEmpty(3, 7) && board.figureAt(3, 7).firstStep)
                     && (!board.isCheck()) && (owner.isMyTurn());
         }
     }
@@ -294,11 +296,13 @@ public class Logic implements Protocol {
     public boolean queenSideCastlingAllowed() {
         if (owner.getMyColor() == WHITE) {
             return (board.figureAt(1, 7).empty) && (board.figureAt(2, 7).empty) && (board.figureAt(3, 7).empty)
-                    && (board.figureAt(0, 7).firstStep) && (board.figureAt(4, 7).firstStep)
+                    && (!isEmpty(0, 7) && board.figureAt(0, 7).firstStep)
+                    && (!isEmpty(4, 7) && board.figureAt(4, 7).firstStep)
                     && (!board.isCheck()) && (owner.isMyTurn());
         } else {
             return (board.figureAt(4, 7).empty) && (board.figureAt(5, 7).empty) && (board.figureAt(6, 7).empty)
-                    && (board.figureAt(7, 7).firstStep) && (board.figureAt(3, 7).firstStep)
+                    && (!isEmpty(7, 7) && board.figureAt(7, 7).firstStep)
+                    && (!isEmpty(3, 7) && board.figureAt(3, 7).firstStep)
                     && (!board.isCheck()) && (owner.isMyTurn());
         }
     }
