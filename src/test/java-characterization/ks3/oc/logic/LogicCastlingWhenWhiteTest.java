@@ -75,6 +75,28 @@ public class LogicCastlingWhenWhiteTest extends LogicTester {
         assertFalse(logic.kingSideCastlingAllowed());
     }
 
+    // ~ ~ x ~ ~ x ~ ~
+    // o ~ * ~ o * ~ o
+    @Test
+    public void testCastling_WhenKingsPathUnderAttack() {
+        initRooks();
+        initEnemy(col() - 2, 6, Protocol.ROOK);
+        initEnemy(col() + 1, 6, Protocol.ROOK);
+        assertFalse(logic.queenSideCastlingAllowed());
+        assertFalse(logic.kingSideCastlingAllowed());
+    }
+
+    // ~ x ~ ~ ~ ~ ~ x
+    // o * ~ ~ o ~ ~ o
+    @Test
+    public void testCastling_WhenOnlyRooksPathUnderAttack() {
+        initRooks();
+        initEnemy(col() - 3, 6, Protocol.ROOK);
+        initEnemy(col() + 3, 6, Protocol.ROOK);
+        assertTrue(logic.queenSideCastlingAllowed());
+        assertTrue(logic.kingSideCastlingAllowed());
+    }
+
     private void initRooks() {
         initFriendly(0, 7, Protocol.ROOK);
         initFriendly(7, 7, Protocol.ROOK);

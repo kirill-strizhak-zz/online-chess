@@ -58,7 +58,7 @@ abstract class LogicTester {
         fig[col][row].empty = false;
         fig[col][row].firstStep = true;
         fig[col][row].type = type();
-        fig[col][row].color = Protocol.WHITE;
+        fig[col][row].color = getMyColor();
     }
 
     public void initEnemy(int col, int row) {
@@ -66,7 +66,7 @@ abstract class LogicTester {
     }
 
     public void initEnemy(int col, int row, int type) {
-        initSimple(col, row, Protocol.BLACK, type);
+        initSimple(col, row, getOppColor(), type);
     }
 
     public void initFriendly(int col, int row) {
@@ -74,7 +74,7 @@ abstract class LogicTester {
     }
 
     public void initFriendly(int col, int row, int type) {
-        initSimple(col, row, Protocol.WHITE, type);
+        initSimple(col, row, getMyColor(), type);
     }
 
     public void initSimple(int col, int row, int color, int type) {

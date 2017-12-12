@@ -305,7 +305,8 @@ public class Logic implements Protocol {
             }
         }
         return !isEmpty(rookCol, 7) && board.figureAt(rookCol, 7).firstStep
-                && !isEmpty(kingCol, 7) && board.figureAt(kingCol, 7).firstStep;
+                && !isEmpty(kingCol, 7) && board.figureAt(kingCol, 7).firstStep
+                && kingSafeAt(kingCol + colMod, 7) && kingSafeAt(kingCol + colMod * 2, 7);
     }
 
     public boolean mate(int col, int row, Figure[][] fig) {
