@@ -281,30 +281,31 @@ public class Logic implements Protocol {
 
     public boolean kingSideCastlingAllowed() {
         if (owner.getMyColor() == WHITE) {
-            return (board.figureAt(5, 7).empty) && (board.figureAt(6, 7).empty)
-                    && (!isEmpty(7, 7) && board.figureAt(7, 7).firstStep)
-                    && (!isEmpty(4, 7) && board.figureAt(4, 7).firstStep)
-                    && (!board.isCheck()) && (owner.isMyTurn());
+            return castlingAllowed(7, 4, -1);
         } else {
-            return (board.figureAt(1, 7).empty) && (board.figureAt(2, 7).empty)
-                    && (!isEmpty(0, 7) && board.figureAt(0, 7).firstStep)
-                    && (!isEmpty(3, 7) && board.figureAt(3, 7).firstStep)
-                    && (!board.isCheck()) && (owner.isMyTurn());
+            return castlingAllowed(0, 3, 1);
         }
     }
 
     public boolean queenSideCastlingAllowed() {
         if (owner.getMyColor() == WHITE) {
-            return (board.figureAt(1, 7).empty) && (board.figureAt(2, 7).empty) && (board.figureAt(3, 7).empty)
-                    && (!isEmpty(0, 7) && board.figureAt(0, 7).firstStep)
-                    && (!isEmpty(4, 7) && board.figureAt(4, 7).firstStep)
-                    && (!board.isCheck()) && (owner.isMyTurn());
+            return castlingAllowed(0, 4, 1);
         } else {
-            return (board.figureAt(4, 7).empty) && (board.figureAt(5, 7).empty) && (board.figureAt(6, 7).empty)
-                    && (!isEmpty(7, 7) && board.figureAt(7, 7).firstStep)
-                    && (!isEmpty(3, 7) && board.figureAt(3, 7).firstStep)
-                    && (!board.isCheck()) && (owner.isMyTurn());
+            return castlingAllowed(7, 3, -1);
         }
+    }
+
+    private boolean castlingAllowed(int rookCol, int kingCol, int colMod) {
+        if (!owner.isMyTurn() || board.isCheck()) {
+            return false;
+        }
+        for (int col = rookCol + colMod; col != kingCol; col += colMod) {
+            if (!isEmpty(col, 7)) {
+                return false;
+            }
+        }
+        return !isEmpty(rookCol, 7) && board.figureAt(rookCol, 7).firstStep
+                && !isEmpty(kingCol, 7) && board.figureAt(kingCol, 7).firstStep;
     }
 
     public boolean mate(int col, int row, Figure[][] fig) {
