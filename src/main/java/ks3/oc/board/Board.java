@@ -256,7 +256,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         fig[currX][currY].type = NULL;
         owner.setMyTurn(true);
         int z = owner.getMyColor() / 2;
-        check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
+        check = !logic.kingSafeAt(king[z][0], king[z][1]);
         if (!isLoading) {
             if (logic.mate(king[z][0], king[z][1], fig)) {
                 owner.setMyTurn(false);
@@ -306,7 +306,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
             sender.send(newInvertedX);
             sender.send(newInvertedY);
             sender.free();
-            check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
+            check = !logic.kingSafeAt(king[z][0], king[z][1]);
             if (!isLoading) {
                 Figure[][] mf = fig;
                 if (logic.mate(king[z][0], king[z][1], mf)) {

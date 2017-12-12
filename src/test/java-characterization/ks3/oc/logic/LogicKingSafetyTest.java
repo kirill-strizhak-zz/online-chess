@@ -148,6 +148,36 @@ public class LogicKingSafetyTest extends LogicMoveTester {
         validate(Collections.emptySet());
     }
 
+    // o ~ * ~ ~
+    // ~ * ~ ~ ~
+    // x ~ ~ ~ ~
+    // ~ ~ ~ ~ ~
+    // ~ ~ ~ ~ ~
+    @Test
+    public void testHandlesBoundaryChecks_WhenKingInTopLeft() {
+        clearFigure(col(), row());
+        initFigure(0, 0);
+        initEnemy(2, 0, Protocol.BISHOP);
+        Set<String> expected = new HashSet<>(2);
+        expected.addAll(Arrays.asList("1:0", "0:1"));
+        validate(0, 0, expected);
+    }
+
+    // ~ ~ ~ ~ ~
+    // ~ ~ ~ ~ ~
+    // ~ ~ ~ ~ x
+    // ~ ~ ~ * ~
+    // ~ ~ * ~ o
+    @Test
+    public void testHandlesBoundaryChecks_WhenKingInBottomRight() {
+        clearFigure(col(), row());
+        initFigure(7, 7);
+        initEnemy(7, 5, Protocol.BISHOP);
+        Set<String> expected = new HashSet<>(2);
+        expected.addAll(Arrays.asList("7:6", "6:7"));
+        validate(7, 7, expected);
+    }
+
     @Override
     protected int col() {
         return 2;

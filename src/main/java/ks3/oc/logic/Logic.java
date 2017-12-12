@@ -136,200 +136,69 @@ public class Logic implements Protocol {
     }
 
     private void checkAndAddAllowedKingMove(int col, int row, BoundaryValidator boundaryValidator) {
-        if (boundaryValidator.test(col, row) && isNotFriendly(col, row) && kingSafeAt(col, row, owner.getOppColor())) {
+        if (boundaryValidator.test(col, row) && isNotFriendly(col, row) && kingSafeAt(col, row)) {
             addAllowedMove(col, row);
         }
     }
 
-    public boolean kingSafeAt(int col, int row, int oppColor) {
-        int i, j;
+    public boolean kingSafeAt(int col, int row) {
+        return kingIsSafeFromPoint(col - 1, row - 1, PAWN, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromPoint(col + 1, row - 1, PAWN, BoundaryValidators.TOP_RIGHT)
 
-        // vertical-horizontal
-        for (i = (col - 1); i >= 0; i--) {
-            if ((board.figureAt(i, row).color == oppColor) && ((board.figureAt(i, row).type == ROOK) || (board.figureAt(i, row).type == QUEEN))) {
-                attacker[0] = i;
-                attacker[1] = row;
-                return false;
-            }
-            if ((board.figureAt(i, row).color != NULL) && (i != col)) {
-                break;
-            }
-        }
-        for (i = (row - 1); i >= 0; i--) {
-            if ((board.figureAt(col, i).color == oppColor) && ((board.figureAt(col, i).type == ROOK) || (board.figureAt(col, i).type == QUEEN))) {
-                attacker[0] = col;
-                attacker[1] = i;
-                return false;
-            }
-            if ((board.figureAt(col, i).color != NULL) && (i != row)) {
-                break;
-            }
-        }
-        for (i = (col + 1); i <= 7; i++) {
-            if ((board.figureAt(i, row).color == oppColor) && ((board.figureAt(i, row).type == ROOK) || (board.figureAt(i, row).type == QUEEN))) {
-                attacker[0] = i;
-                attacker[1] = row;
-                return false;
-            }
-            if ((board.figureAt(i, row).color != NULL) && (i != col)) {
-                break;
-            }
-        }
-        for (i = (row + 1); i <= 7; i++) {
-            if ((board.figureAt(col, i).color == oppColor) && ((board.figureAt(col, i).type == ROOK) || (board.figureAt(col, i).type == QUEEN))) {
-                attacker[0] = col;
-                attacker[1] = i;
-                return false;
-            }
-            if ((board.figureAt(col, i).color != NULL) && (i != row)) {
-                break;
-            }
-        }
+                && kingIsSafeFromPoint(col - 1, row - 2, KNIGHT, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromPoint(col - 2, row - 1, KNIGHT, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromPoint(col + 1, row - 2, KNIGHT, BoundaryValidators.TOP_RIGHT)
+                && kingIsSafeFromPoint(col + 2, row - 1, KNIGHT, BoundaryValidators.TOP_RIGHT)
+                && kingIsSafeFromPoint(col + 2, row + 1, KNIGHT, BoundaryValidators.BOTTOM_RIGHT)
+                && kingIsSafeFromPoint(col + 1, row + 2, KNIGHT, BoundaryValidators.BOTTOM_RIGHT)
+                && kingIsSafeFromPoint(col - 1, row + 2, KNIGHT, BoundaryValidators.BOTTOM_LEFT)
+                && kingIsSafeFromPoint(col - 2, row + 1, KNIGHT, BoundaryValidators.BOTTOM_LEFT)
 
-        // diagonals
-        j = row - 1;
-        for (i = (col - 1); i >= 0; i--) {
-            if (j < 0) {
-                break;
-            }
-            if ((board.figureAt(i, j).color == oppColor) && ((board.figureAt(i, j).type == BISHOP) || (board.figureAt(i, j).type == QUEEN))) {
-                attacker[0] = i;
-                attacker[1] = j;
+                && kingIsSafeFromPoint(col - 1, row - 1, KING, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromPoint(col + 1, row - 1, KING, BoundaryValidators.TOP_RIGHT)
+                && kingIsSafeFromPoint(col - 1, row + 1, KING, BoundaryValidators.BOTTOM_LEFT)
+                && kingIsSafeFromPoint(col + 1, row + 1, KING, BoundaryValidators.BOTTOM_RIGHT)
+                && kingIsSafeFromPoint(col, row - 1, KING, BoundaryValidators.TOP)
+                && kingIsSafeFromPoint(col, row + 1, KING, BoundaryValidators.BOTTOM)
+                && kingIsSafeFromPoint(col + 1, row, KING, BoundaryValidators.RIGHT)
+                && kingIsSafeFromPoint(col - 1, row, KING, BoundaryValidators.LEFT)
+
+                && kingIsSafeFromDirection(col, row, -1, 0, ROOK, BoundaryValidators.LEFT)
+                && kingIsSafeFromDirection(col, row, 1, 0, ROOK, BoundaryValidators.RIGHT)
+                && kingIsSafeFromDirection(col, row, 0, -1, ROOK, BoundaryValidators.TOP)
+                && kingIsSafeFromDirection(col, row, 0, 1, ROOK, BoundaryValidators.BOTTOM)
+
+                && kingIsSafeFromDirection(col, row, -1, -1, BISHOP, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromDirection(col, row, 1, -1, BISHOP, BoundaryValidators.TOP_RIGHT)
+                && kingIsSafeFromDirection(col, row, -1, 1, BISHOP, BoundaryValidators.BOTTOM_LEFT)
+                && kingIsSafeFromDirection(col, row, 1, 1, BISHOP, BoundaryValidators.BOTTOM_RIGHT);
+    }
+
+    private boolean kingIsSafeFromPoint(int col, int row, int possibleAttacker, BoundaryValidator boundaryValidator) {
+        if (boundaryValidator.test(col, row) && isNotFriendly(col, row) && board.figureAt(col, row).type == possibleAttacker) {
+            saveAttackerPosition(col, row);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean kingIsSafeFromDirection(int col, int row, int colMod, int rowMod, int possibleAttacker, BoundaryValidator boundaryValidator) {
+        for (col += colMod, row += rowMod; boundaryValidator.test(col, row); col += colMod, row += rowMod) {
+            if (isNotFriendly(col, row) && ((board.figureAt(col, row).type == possibleAttacker) || (board.figureAt(col, row).type == QUEEN))) {
+                saveAttackerPosition(col, row);
                 return false;
             }
-            if ((board.figureAt(i, j).color != NULL) && ((i != col) || (j != row))) {
+            if (!isEmpty(col, row)) {
                 break;
             }
-            j--;
         }
-        j = row + 1;
-        for (i = (col - 1); i >= 0; i--) {
-            if (j > 7) {
-                break;
-            }
-            if ((board.figureAt(i, j).color == oppColor) && ((board.figureAt(i, j).type == BISHOP) || (board.figureAt(i, j).type == QUEEN))) {
-                attacker[0] = i;
-                attacker[1] = j;
-                return false;
-            }
-            if ((board.figureAt(i, j).color != NULL) && ((i != col) || (j != row))) {
-                break;
-            }
-            j++;
-        }
-        j = row + 1;
-        for (i = (col + 1); i <= 7; i++) {
-            if (j > 7) {
-                break;
-            }
-            if ((board.figureAt(i, j).color == oppColor) && ((board.figureAt(i, j).type == BISHOP) || (board.figureAt(i, j).type == QUEEN))) {
-                attacker[0] = i;
-                attacker[1] = j;
-                return false;
-            }
-            if ((board.figureAt(i, j).color != NULL) && ((i != col) || (j != row))) {
-                break;
-            }
-            j++;
-        }
-        j = row - 1;
-        for (i = (col + 1); i <= 7; i++) {
-            if (j < 0) {
-                break;
-            }
-            if ((board.figureAt(i, j).color == oppColor) && ((board.figureAt(i, j).type == BISHOP) || (board.figureAt(i, j).type == QUEEN))) {
-                attacker[0] = i;
-                attacker[1] = j;
-                return false;
-            }
-            if ((board.figureAt(i, j).color != NULL) && ((i != col) || (j != row))) {
-                break;
-            }
-            j--;
-        }
-
-        // pawns in front of
-        if ((row != 0) && (col != 0) && (board.figureAt(col - 1, row - 1).color == oppColor) && (board.figureAt(col - 1, row - 1).type == PAWN)) {
-            attacker[0] = col - 1;
-            attacker[1] = row - 1;
-            return false;
-        }
-        if ((row != 0) && (col != 7) && (board.figureAt(col + 1, row - 1).color == oppColor) && (board.figureAt(col + 1, row - 1).type == PAWN)) {
-            attacker[0] = col + 1;
-            attacker[1] = row - 1;
-            return false;
-        }
-
-        // knights
-        if (((col - 1) >= 0) && ((row - 2) >= 0) && (board.figureAt(col - 1, row - 2).color == oppColor) && (board.figureAt(col - 1, row - 2).type == KNIGHT)) {
-            attacker[0] = col - 1;
-            attacker[1] = row - 2;
-            return false;
-        }
-        if (((col + 1) <= 7) && ((row - 2) >= 0) && (board.figureAt(col + 1, row - 2).color == oppColor) && (board.figureAt(col + 1, row - 2).type == KNIGHT)) {
-            attacker[0] = col + 1;
-            attacker[1] = row - 2;
-            return false;
-        }
-        if (((col + 2) <= 7) && ((row - 1) >= 0) && (board.figureAt(col + 2, row - 1).color == oppColor) && (board.figureAt(col + 2, row - 1).type == KNIGHT)) {
-            attacker[0] = col + 2;
-            attacker[1] = row - 1;
-            return false;
-        }
-        if (((col + 2) <= 7) && ((row + 1) <= 7) && (board.figureAt(col + 2, row + 1).color == oppColor) && (board.figureAt(col + 2, row + 1).type == KNIGHT)) {
-            attacker[0] = col + 2;
-            attacker[1] = row + 1;
-            return false;
-        }
-        if (((col + 1) <= 7) && ((row + 2) <= 7) && (board.figureAt(col + 1, row + 2).color == oppColor) && (board.figureAt(col + 1, row + 2).type == KNIGHT)) {
-            attacker[0] = col + 1;
-            attacker[1] = row + 2;
-            return false;
-        }
-        if (((col - 1) >= 0) && ((row + 2) <= 7) && (board.figureAt(col - 1, row + 2).color == oppColor) && (board.figureAt(col - 1, row + 2).type == KNIGHT)) {
-            attacker[0] = col - 1;
-            attacker[1] = row + 2;
-            return false;
-        }
-        if (((col - 2) >= 0) && ((row + 1) <= 7) && (board.figureAt(col - 2, row + 1).color == oppColor) && (board.figureAt(col - 2, row + 1).type == KNIGHT)) {
-            attacker[0] = col - 2;
-            attacker[1] = row + 1;
-            return false;
-        }
-        if (((col - 2) >= 0) && ((row - 1) >= 0) && (board.figureAt(col - 2, row - 1).color == oppColor) && (board.figureAt(col - 2, row - 1).type == KNIGHT)) {
-            attacker[0] = col - 2;
-            attacker[1] = row - 1;
-            return false;
-        }
-
-        // king
-        if (((col - 1) >= 0) && ((row - 1) >= 0) && (board.figureAt(col - 1, row - 1).color == oppColor) && (board.figureAt(col - 1, row - 1).type == KING)) {
-            return false;
-        }
-        if (((col + 1) <= 7) && ((row - 1) >= 0) && (board.figureAt(col + 1, row - 1).color == oppColor) && (board.figureAt(col + 1, row - 1).type == KING)) {
-            return false;
-        }
-        if (((col - 1) >= 0) && ((row + 1) <= 7) && (board.figureAt(col - 1, row + 1).color == oppColor) && (board.figureAt(col - 1, row + 1).type == KING)) {
-            return false;
-        }
-        if (((col + 1) <= 7) && ((row + 1) <= 7) && (board.figureAt(col + 1, row + 1).color == oppColor) && (board.figureAt(col + 1, row + 1).type == KING)) {
-            return false;
-        }
-        if ((row - 1) >= 0 && (board.figureAt(col, row - 1).color == oppColor) && (board.figureAt(col, row - 1).type == KING)) {
-            return false;
-        }
-        if ((row + 1) <= 7 && (board.figureAt(col, row + 1).color == oppColor) && (board.figureAt(col, row + 1).type == KING)) {
-            return false;
-        }
-        if ((col + 1) <= 7 && (board.figureAt(col + 1, row).color == oppColor) && (board.figureAt(col + 1, row).type == KING)) {
-            return false;
-        }
-        if ((col - 1) >= 0 && (board.figureAt(col - 1, row).color == oppColor) && (board.figureAt(col - 1, row).type == KING)) {
-            return false;
-        }
-
-        // finally...
         return true;
+    }
+
+    private void saveAttackerPosition(int col, int row) {
+        attacker[0] = col;
+        attacker[1] = row;
     }
 
     private void addAllowedMove(int col, int row) {
@@ -390,7 +259,7 @@ public class Logic implements Protocol {
                         board.moveKing(color, col, row);
                     }
                 }
-                if (!kingSafeAt(board.getKingCol(color), board.getKingRow(color), owner.getOppColor())) {
+                if (!kingSafeAt(board.getKingCol(color), board.getKingRow(color))) {
                     if (kingWasMoved) {
                         board.restoreKing(color);
                     }
@@ -438,7 +307,7 @@ public class Logic implements Protocol {
         if (board.isCheck()) {
             calculateAllowedMoves(fig[col][row], col, row);
             if (allowed[0][0] == -1) {
-                if (kingSafeAt(attacker[0], attacker[1], owner.getMyColor())) {
+                if (kingSafeAt(attacker[0], attacker[1])) {
                     return !canCover(col, row, fig);
                 }
             } else {
@@ -450,7 +319,7 @@ public class Logic implements Protocol {
                     fig[col][row].color = NULL;
                     bck = fig[allowed[k][0]][allowed[k][1]].color;
                     fig[allowed[k][0]][allowed[k][1]].color = owner.getMyColor();
-                    if (kingSafeAt(allowed[k][0], allowed[k][1], owner.getOppColor())) {
+                    if (kingSafeAt(allowed[k][0], allowed[k][1])) {
                         fig[allowed[k][0]][allowed[k][1]].color = bck;
                         fig[col][row].color = owner.getMyColor();
                         break;
@@ -474,7 +343,7 @@ public class Logic implements Protocol {
                         fig[k][l].color = NULL;
                         bck = fig[allowed[m][0]][allowed[m][1]].color;
                         fig[allowed[m][0]][allowed[m][1]].color = owner.getMyColor();
-                        if (kingSafeAt(col, row, owner.getOppColor())) {
+                        if (kingSafeAt(col, row)) {
                             fig[allowed[m][0]][allowed[m][1]].color = bck;
                             fig[k][l].color = owner.getMyColor();
                             return true;
