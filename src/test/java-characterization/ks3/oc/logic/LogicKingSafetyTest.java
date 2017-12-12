@@ -4,6 +4,7 @@ import ks3.oc.Protocol;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -108,10 +109,45 @@ public class LogicKingSafetyTest extends LogicMoveTester {
     }
 
     // ~ ~ ~ ~ ~
-    // ~ ~ ~ ~ ~
-    // ~ ~ ~ ~ ~
-    // ~ ~ ~ ~ ~
-    // ~ ~ ~ ~ ~
+    // x * * * *
+    // ~ * o ~ ~
+    // ~ ~ * ~ ~
+    // ~ ~ ~ * ~
+    @Test
+    public void testDetectsAttacksByQueens_WhenHorizontal() {
+        initEnemy(0, 1, Protocol.QUEEN);
+        Set<String> expected = new HashSet<>(3);
+        expected.addAll(Arrays.asList("3:2", "1:3", "3:3"));
+        validate(expected);
+    }
+
+    // ~ x ~ ~ ~
+    // ~ * * ~ ~
+    // ~ * o * ~
+    // ~ * ~ ~ *
+    // ~ * ~ ~ ~
+    @Test
+    public void testDetectsAttacksByQueens_WhenVertical() {
+        initEnemy(1, 0, Protocol.QUEEN);
+        Set<String> expected = new HashSet<>(3);
+        expected.addAll(Arrays.asList("3:1", "2:3", "3:3"));
+        validate(expected);
+    }
+
+    // ~ x ~ ~ ~
+    // ~ * * * x
+    // ~ * o * ~
+    // x * * * ~
+    // ~ ~ ~ x ~
+    @Test
+    public void testDetectsAttacksByKings() {
+        initEnemy(1, 0);
+        initEnemy(4, 1);
+        initEnemy(0, 3);
+        initEnemy(3, 4);
+        validate(Collections.emptySet());
+    }
+
     @Override
     protected int col() {
         return 2;
