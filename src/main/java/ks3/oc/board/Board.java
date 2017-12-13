@@ -6,6 +6,7 @@ import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
+import ks3.oc.swing.dialogs.SwingFigurePicker;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,7 +39,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         owner = own;
         sender = send;
         chat = ch;
-        logic = new Logic(this, owner);
+        logic = new Logic(this, owner, new SwingFigurePicker());
         hlight[0][0] = -1;
         this.setSize(480, 480);
         boardId = 1;

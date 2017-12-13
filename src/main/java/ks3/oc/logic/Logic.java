@@ -2,9 +2,9 @@ package ks3.oc.logic;
 
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
-import ks3.oc.Messenjah;
 import ks3.oc.Protocol;
 import ks3.oc.board.BoardState;
+import ks3.oc.dialogs.FigurePicker;
 
 public class Logic implements Protocol {
 
@@ -13,11 +13,13 @@ public class Logic implements Protocol {
     public boolean calculating = false;
     private BoardState board;
     private MainWindow owner;
+    private FigurePicker figurePicker;
     private int[] attacker = new int[2];
 
-    public Logic(BoardState brd, MainWindow own) {
-        board = brd;
-        owner = own;
+    public Logic(BoardState board, MainWindow owner, FigurePicker figurePicker) {
+        this.board = board;
+        this.owner = owner;
+        this.figurePicker = figurePicker;
         allowed[0][0] = -1;
     }
 
@@ -240,7 +242,7 @@ public class Logic implements Protocol {
                     board.draggedFigure().empty = true;
                     board.draggedFigure().type = NULL;
                     board.draggedFigure().color = NULL;
-                    new Messenjah(board, owner.getMyColor(), col, row);
+                    figurePicker.open(board, owner.getMyColor(), col, row);
                 } else {
                     copy(targetBackup, board.figureAt(col, row));
                     copy(sourceBackup, board.draggedFigure());

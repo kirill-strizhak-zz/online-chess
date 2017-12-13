@@ -1,6 +1,7 @@
 package ks3.oc;
 
 import ks3.oc.board.Board;
+import ks3.oc.swing.dialogs.Messenjah;
 import ks3.oc.swing.SwingMainWindow;
 
 import java.io.BufferedReader;

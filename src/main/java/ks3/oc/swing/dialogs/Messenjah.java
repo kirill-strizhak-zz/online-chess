@@ -1,5 +1,9 @@
-package ks3.oc;
+package ks3.oc.swing.dialogs;
 
+import ks3.oc.Logger;
+import ks3.oc.Protocol;
+import ks3.oc.Sender;
+import ks3.oc.Starter;
 import ks3.oc.board.Board;
 import ks3.oc.board.BoardState;
 import ks3.oc.swing.SwingMainWindow;
@@ -24,13 +28,13 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
     private BoardState board;
     private Starter starter;
     private Sender sender;
-    private int color,  x,  y,  oldSel;
+    private int color, x, y, oldSel;
     private int sel = 0;
     private int mode;
-    private JTextField addr,  port,  name;
-    private Checkbox cbServer,  cbClient,  cbWhite,  cbBlack;
+    private JTextField addr, port, name;
+    private Checkbox cbServer, cbClient, cbWhite, cbBlack;
     private String save = "localhost";
-    private JComboBox boardCB,  figureCB;
+    private JComboBox boardCB, figureCB;
     
     // About window
     public Messenjah() {
@@ -161,16 +165,16 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
     }
     
     // Figure chooser
-    public Messenjah(BoardState brd, int c, int x0, int y0) {
+    public Messenjah(BoardState boardState, int myColor, int col, int row) {
         super("Choose a figure to set");
         setSize(248, 87);
         setResizable(false);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         mode = 1;
-        color = c;
-        board = brd;
-        x = x0;
-        y = y0;
+        color = myColor;
+        board = boardState;
+        x = col;
+        y = row;
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

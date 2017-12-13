@@ -4,7 +4,7 @@ import ks3.oc.ChatPanel;
 import ks3.oc.Figure;
 import ks3.oc.Logger;
 import ks3.oc.MainWindow;
-import ks3.oc.Messenjah;
+import ks3.oc.swing.dialogs.Messenjah;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
 import ks3.oc.board.Board;

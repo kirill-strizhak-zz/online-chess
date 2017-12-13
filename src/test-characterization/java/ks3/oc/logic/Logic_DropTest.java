@@ -82,6 +82,21 @@ public class Logic_DropTest extends LogicTester {
         verify(board, times(1)).updateDraggedPosition();
     }
 
+    // ~ ~ # ~ ~
+    // ~ ~ o ~ ~
+    @Test
+    public void testPawnReachingLastRow() {
+        initFigure(col(), 1);
+        fig[col()][1].firstStep = false;
+        setDraggedFigure(col(), 1);
+        logic.calculateAllowedMoves(fig[col()][1], col(), 1);
+        logic.drop(col(), 0);
+        verifyEmpty(col(), 1);
+        verify(figurePicker, times(1)).open(board, getMyColor(), col(), 0);
+        verify(board, times(1)).setCheck(false);
+        verify(board, times(1)).makeMove(col(), 0);
+    }
+
     private void verifyEmpty(int col, int row) {
         Figure figure = fig[col][row];
         assertTrue(figure.empty);
