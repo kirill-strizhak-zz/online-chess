@@ -19,7 +19,6 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     private boolean check = false;
     private Figure[][] fig = new Figure[8][8]; // figures on board
     public int[][] king = new int[2][2]; // i = (0 - black; 1 - white;)
-    public int[] bckKing = new int[2];
     public int[][] hlight = new int[2][2];
     public int hlPos = 0;
     public Image board;
@@ -513,20 +512,6 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     @Override
     public boolean isFigureDroppedAtNewPosition(int col, int row) {
         return x != col || y != row;
-    }
-
-    @Override
-    public void moveKing(int color, int col, int row) {
-        bckKing[0] = king[color][0];
-        bckKing[1] = king[color][1];
-        king[color][0] = col;
-        king[color][1] = row;
-    }
-
-    @Override
-    public void restoreKing(int color) {
-        king[color][0] = bckKing[0];
-        king[color][1] = bckKing[1];
     }
 
     @Override

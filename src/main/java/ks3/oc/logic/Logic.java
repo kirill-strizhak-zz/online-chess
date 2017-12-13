@@ -232,7 +232,6 @@ public class Logic implements Protocol {
 
     public void drop(int col, int row) {
         int colorId = owner.getMyColor() / 2;
-        boolean kingWasMoved = false;
         Figure targetBackup = new Figure();
         Figure sourceBackup = new Figure();
         if (board.isFigureDroppedAtNewPosition(col, row)) {
@@ -254,21 +253,14 @@ public class Logic implements Protocol {
                     board.draggedFigure().empty = true;
                     board.draggedFigure().type = NULL;
                     board.draggedFigure().color = NULL;
-                    if (board.figureAt(col, row).type == KING) {
-                        kingWasMoved = true;
-                        board.moveKing(colorId, col, row);
-                    }
                 }
-                if (!kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId))) {
-                    if (kingWasMoved) {
-                        board.restoreKing(colorId);
-                    }
+                if (kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId))) {
+                    board.setCheck(false);
+                    board.makeMove(col, row);
+                } else {
                     copy(board.draggedFigure(), sourceBackup);
                     copy(board.figureAt(col, row), targetBackup);
                     board.updateDraggedPosition();
-                } else {
-                    board.setCheck(false);
-                    board.makeMove(col, row);
                 }
             } else {
                 board.updateDraggedPosition();

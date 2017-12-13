@@ -24,10 +24,6 @@ public interface BoardState {
 
     boolean isFigureDroppedAtNewPosition(int col, int row);
 
-    void moveKing(int color, int col, int row);
-
-    void restoreKing(int color);
-
     int getKingCol(int color);
 
     int getKingRow(int color);

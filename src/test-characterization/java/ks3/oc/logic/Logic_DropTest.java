@@ -60,7 +60,6 @@ public class Logic_DropTest extends LogicTester {
         logic.drop(col(), targetRow);
         verifyEmpty(col(), row());
         verifyMoved(col(), targetRow);
-        verify(board, times(1)).moveKing(getMyColor() / 2, col(), targetRow);
         verify(board, times(1)).setCheck(false);
         verify(board, times(1)).makeMove(col(), targetRow);
     }
