@@ -236,41 +236,42 @@ public class Logic implements Protocol {
         int colorId = owner.getMyColor() / 2;
         Figure targetBackup = new Figure();
         Figure sourceBackup = new Figure();
-        if (board.isFigureDroppedAtNewPosition(col, row)) {
-            if (isAllowed(col, row)) {
-                if ((board.draggedFigure().type == PAWN) && (row == 0)) {
-                    board.draggedFigure().empty = true;
-                    board.draggedFigure().type = NULL;
-                    board.draggedFigure().color = NULL;
-                    figurePicker.open(board, owner.getMyColor(), col, row);
-                } else {
-                    copy(targetBackup, board.figureAt(col, row));
-                    copy(sourceBackup, board.draggedFigure());
-                    board.figureAt(col, row).oX = col * 60;
-                    board.figureAt(col, row).oY = row * 60;
-                    board.figureAt(col, row).empty = false;
-                    board.figureAt(col, row).firstStep = false;
-                    board.figureAt(col, row).type = board.draggedFigure().type;
-                    board.figureAt(col, row).color = board.draggedFigure().color;
-                    board.draggedFigure().empty = true;
-                    board.draggedFigure().type = NULL;
-                    board.draggedFigure().color = NULL;
-                }
-                if (kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId))) {
-                    board.setCheck(false);
-                    board.makeMove(col, row);
-                } else {
-                    copy(board.draggedFigure(), sourceBackup);
-                    copy(board.figureAt(col, row), targetBackup);
-                    board.updateDraggedPosition();
-                }
+        if (isAllowed(col, row)) {
+            if ((board.draggedFigure().type == PAWN) && (row == 0)) {
+                clearSourcePosition();
+                figurePicker.open(board, owner.getMyColor(), col, row);
             } else {
+                copy(targetBackup, board.figureAt(col, row));
+                copy(sourceBackup, board.draggedFigure());
+                moveToTargetPosition(col, row);
+                clearSourcePosition();
+            }
+            if (kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId))) {
+                board.setCheck(false);
+                board.makeMove(col, row);
+            } else {
+                copy(board.draggedFigure(), sourceBackup);
+                copy(board.figureAt(col, row), targetBackup);
                 board.updateDraggedPosition();
             }
         } else {
-            board.draggedFigure().oX = col * 60;
-            board.draggedFigure().oY = row * 60;
+            board.updateDraggedPosition();
         }
+    }
+
+    private void moveToTargetPosition(int col, int row) {
+        board.figureAt(col, row).oX = col * 60;
+        board.figureAt(col, row).oY = row * 60;
+        board.figureAt(col, row).empty = false;
+        board.figureAt(col, row).firstStep = false;
+        board.figureAt(col, row).type = board.draggedFigure().type;
+        board.figureAt(col, row).color = board.draggedFigure().color;
+    }
+
+    private void clearSourcePosition() {
+        board.draggedFigure().empty = true;
+        board.draggedFigure().type = NULL;
+        board.draggedFigure().color = NULL;
     }
 
     public boolean kingSideCastlingAllowed() {

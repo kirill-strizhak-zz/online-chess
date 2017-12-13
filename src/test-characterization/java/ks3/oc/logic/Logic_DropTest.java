@@ -16,11 +16,10 @@ public class Logic_DropTest extends LogicTester {
     // ~ ~ o ~ ~
     @Test
     public void testCoordinatesUpdated_WhenDroppedAtOldPosition() {
-        setDroppedAtNewPosition(false);
         setDraggedFigure(col(), row());
+        logic.calculateAllowedMoves(fig[col()][row()], col(), row());
         logic.drop(col(), row());
-        assertEquals(col() * 60, getDraggedFigure().oX);
-        assertEquals(row() * 60, getDraggedFigure().oY);
+        verify(board, times(1)).updateDraggedPosition();
     }
 
     // ~ ~ ~ ~ ~
@@ -29,6 +28,7 @@ public class Logic_DropTest extends LogicTester {
     @Test
     public void testDraggedPositionUpdated_WhenDroppedInUnallowedPosition() {
         setDraggedFigure(col(), row());
+        logic.calculateAllowedMoves(fig[col()][row()], col(), row());
         logic.drop(0, 1);
         verify(board, times(1)).updateDraggedPosition();
     }

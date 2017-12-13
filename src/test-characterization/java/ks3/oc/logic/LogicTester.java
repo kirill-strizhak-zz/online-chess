@@ -29,7 +29,6 @@ abstract class LogicTester {
 
     private boolean check = false;
     private boolean myTurn = true;
-    private boolean droppedAtNewPosition = true;
     private Figure draggedFigure;
     private int kingCol;
     private int kingRow;
@@ -50,7 +49,6 @@ abstract class LogicTester {
         MockitoAnnotations.initMocks(this);
         initFigure(col(), row());
         when(board.isCheck()).thenAnswer((in) -> isCheck());
-        when(board.isFigureDroppedAtNewPosition(anyInt(), anyInt())).thenAnswer((in) -> isDroppedAtNewPosition());
         when(board.draggedFigure()).thenAnswer((in) -> getDraggedFigure());
         when(board.getKingCol(anyInt())).thenAnswer((in) -> getKingCol());
         when(board.getKingRow(anyInt())).thenAnswer((in) -> getKingRow());
@@ -133,14 +131,6 @@ abstract class LogicTester {
 
     public void setMyTurn(boolean myTurn) {
         this.myTurn = myTurn;
-    }
-
-    public boolean isDroppedAtNewPosition() {
-        return droppedAtNewPosition;
-    }
-
-    public void setDroppedAtNewPosition(boolean droppedAtNewPosition) {
-        this.droppedAtNewPosition = droppedAtNewPosition;
     }
 
     public Figure getDraggedFigure() {

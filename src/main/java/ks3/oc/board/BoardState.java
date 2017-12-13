@@ -22,8 +22,6 @@ public interface BoardState {
 
     void updateDraggedPosition();
 
-    boolean isFigureDroppedAtNewPosition(int col, int row);
-
     int getKingCol(int color);
 
     int getKingRow(int color);

@@ -511,11 +511,6 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     }
 
     @Override
-    public boolean isFigureDroppedAtNewPosition(int col, int row) {
-        return x != col || y != row;
-    }
-
-    @Override
     public int getKingCol(int color) {
         return king[color][0];
     }
