@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 abstract class LogicTester {
 
     @Mock
-    private BoardState board;
+    protected BoardState board;
     @Mock
     private MainWindow mainWindow;
 
@@ -26,8 +26,12 @@ abstract class LogicTester {
 
     private boolean check = false;
     private boolean myTurn = true;
+    private boolean droppedAtNewPosition = true;
+    private Figure draggedFigure;
+    private int kingCol;
+    private int kingRow;
 
-    public Figure[][] fig = {
+    protected Figure[][] fig = {
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() },
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() },
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() },
@@ -43,6 +47,10 @@ abstract class LogicTester {
         MockitoAnnotations.initMocks(this);
         initFigure(col(), row());
         when(board.isCheck()).thenAnswer((in) -> isCheck());
+        when(board.isFigureDroppedAtNewPosition(anyInt(), anyInt())).thenAnswer((in) -> isDroppedAtNewPosition());
+        when(board.draggedFigure()).thenAnswer((in) -> getDraggedFigure());
+        when(board.getKingCol(anyInt())).thenAnswer((in) -> getKingCol());
+        when(board.getKingRow(anyInt())).thenAnswer((in) -> getKingRow());
         when(board.figureAt(anyInt(), anyInt())).thenAnswer((in) -> {
             int col = (Integer) in.getArguments()[0];
             int row = (Integer) in.getArguments()[1];
@@ -122,6 +130,35 @@ abstract class LogicTester {
 
     public void setMyTurn(boolean myTurn) {
         this.myTurn = myTurn;
+    }
+
+    public boolean isDroppedAtNewPosition() {
+        return droppedAtNewPosition;
+    }
+
+    public void setDroppedAtNewPosition(boolean droppedAtNewPosition) {
+        this.droppedAtNewPosition = droppedAtNewPosition;
+    }
+
+    public Figure getDraggedFigure() {
+        return draggedFigure;
+    }
+
+    public void setDraggedFigure(int col, int row) {
+        this.draggedFigure = fig[col][row];
+    }
+
+    public int getKingCol() {
+        return kingCol;
+    }
+
+    public int getKingRow() {
+        return kingRow;
+    }
+
+    public void setKingPosition(int col, int row) {
+        kingCol = col;
+        kingRow = row;
     }
 
     public int getMyColor() {

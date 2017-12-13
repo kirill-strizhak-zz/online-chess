@@ -221,20 +221,20 @@ public class Logic implements Protocol {
         return false;
     }
 
-    private void copy(Figure a, Figure b) {
-        a.empty = b.empty;
-        a.firstStep = b.firstStep;
-        a.type = b.type;
-        a.color = b.color;
-        a.oX = b.oX;
-        a.oY = b.oY;
+    private void copy(Figure to, Figure from) {
+        to.empty = from.empty;
+        to.firstStep = from.firstStep;
+        to.type = from.type;
+        to.color = from.color;
+        to.oX = from.oX;
+        to.oY = from.oY;
     }
 
     public void drop(int col, int row) {
-        int color = owner.getMyColor() / 2;
+        int colorId = owner.getMyColor() / 2;
         boolean kingWasMoved = false;
-        Figure f1 = new Figure();
-        Figure f2 = new Figure();
+        Figure targetBackup = new Figure();
+        Figure sourceBackup = new Figure();
         if (board.isFigureDroppedAtNewPosition(col, row)) {
             if (isAllowed(col, row)) {
                 if ((board.draggedFigure().type == PAWN) && (row == 0)) {
@@ -243,8 +243,8 @@ public class Logic implements Protocol {
                     board.draggedFigure().color = NULL;
                     new Messenjah(board, owner.getMyColor(), col, row);
                 } else {
-                    copy(f1, board.figureAt(col, row));
-                    copy(f2, board.draggedFigure());
+                    copy(targetBackup, board.figureAt(col, row));
+                    copy(sourceBackup, board.draggedFigure());
                     board.figureAt(col, row).oX = col * 60;
                     board.figureAt(col, row).oY = row * 60;
                     board.figureAt(col, row).empty = false;
@@ -256,15 +256,15 @@ public class Logic implements Protocol {
                     board.draggedFigure().color = NULL;
                     if (board.figureAt(col, row).type == KING) {
                         kingWasMoved = true;
-                        board.moveKing(color, col, row);
+                        board.moveKing(colorId, col, row);
                     }
                 }
-                if (!kingSafeAt(board.getKingCol(color), board.getKingRow(color))) {
+                if (!kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId))) {
                     if (kingWasMoved) {
-                        board.restoreKing(color);
+                        board.restoreKing(colorId);
                     }
-                    copy(board.draggedFigure(), f2);
-                    copy(board.figureAt(col, row), f1);
+                    copy(board.draggedFigure(), sourceBackup);
+                    copy(board.figureAt(col, row), targetBackup);
                     board.updateDraggedPosition();
                 } else {
                     board.setCheck(false);
