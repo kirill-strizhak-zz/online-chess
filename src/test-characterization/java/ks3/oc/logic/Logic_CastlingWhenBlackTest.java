@@ -2,7 +2,7 @@ package ks3.oc.logic;
 
 import ks3.oc.Protocol;
 
-public class LogicCastlingWhenBlackTest extends LogicCastlingWhenWhiteTest {
+public class Logic_CastlingWhenBlackTest extends Logic_CastlingWhenWhiteTest {
 
     @Override
     protected int col() {

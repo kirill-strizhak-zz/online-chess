@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LogicKingSafetyTest extends LogicTester {
+public class Logic_SafetyOfKingTest extends LogicTester {
 
     // x ~ ~ ~ x
     // ~ * ~ * ~

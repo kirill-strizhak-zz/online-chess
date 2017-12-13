@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LogicPawnMoveTest extends LogicTester {
+public class Logic_MovePawnTest extends LogicTester {
 
     // ~ # ~
     // ~ # ~

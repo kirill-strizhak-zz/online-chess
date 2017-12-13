@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LogicQueenMoveTest extends LogicTester {
+public class Logic_MoveQueenTest extends LogicTester {
 
     private static final Set<String> IMMEDIATE_SURROUNDINGS =
             new HashSet<>(Arrays.asList("1:1", "2:1", "3:1", "1:2", "3:2", "1:3", "2:3", "3:3"));
