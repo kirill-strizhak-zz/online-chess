@@ -10,6 +10,45 @@ import java.util.Set;
 
 public class Logic_SafetyOfKingTest extends LogicTester {
 
+    // ~ ~ ~ ~ ~
+    // ~ ~ ~ ~ ~
+    // ~ ~ o ~ ~
+    // ~ ~ ~ ~ ~
+    // ~ ~ ~ ~ ~
+    @Test
+    public void testSafe_WhenAllClear() {
+        Set<String> expected = new HashSet<>(8);
+        expected.addAll(Arrays.asList("1:1", "2:1", "3:1", "1:2", "3:2", "1:3", "2:3", "3:3"));
+        validate(expected);
+    }
+
+    // ~ ~ ~ ~ ~
+    // ~ ! ~ ~ ~
+    // ~ ~ o ~ ~
+    // ~ ~ ~ ~ ~
+    // ~ ~ ~ ~ ~
+    @Test
+    public void testSafe_WhenHasFriendlyInRange() {
+        initFriendly(1, 1, Protocol.PAWN);
+        Set<String> expected = new HashSet<>(7);
+        expected.addAll(Arrays.asList("2:1", "3:1", "1:2", "3:2", "1:3", "2:3", "3:3"));
+        validate(expected);
+    }
+
+    // ~ ~ x ~ ~
+    // ~ ~ ! ~ ~
+    // ~ ~ o ~ ~
+    // ~ ~ ~ ~ ~
+    // ~ ~ ~ ~ ~
+    @Test
+    public void testSafe_WhenEnemyBlockedByFriendly() {
+        initEnemy(2, 0, Protocol.ROOK);
+        initFriendly(2, 1, Protocol.PAWN);
+        Set<String> expected = new HashSet<>(7);
+        expected.addAll(Arrays.asList("1:1", "3:1", "1:2", "3:2", "1:3", "2:3", "3:3"));
+        validate(expected);
+    }
+
     // x ~ ~ ~ x
     // ~ * ~ * ~
     // ~ ~ o ~ ~

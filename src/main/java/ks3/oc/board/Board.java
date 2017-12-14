@@ -22,6 +22,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     private boolean check = false;
     private Figure[][] fig = new Figure[8][8]; // figures on board
     public int[][] king = new int[2][2]; // i = (0 - black; 1 - white;)
+    public int[] bckKing = new int[2];
     public int[][] hlight = new int[2][2];
     public int hlPos = 0;
     public Image board;
@@ -214,8 +215,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     
     private void drawKingSafety(Graphics g) {
         if (debug) {
-            drawKingSafetyOfColor(g, owner.getMyColor() / 2, owner.getMyColor());
-            drawKingSafetyOfColor(g, owner.getOppColor() / 2, owner.getOppColor());
+            drawKingSafetyOfColor(g, owner.getMyColor() / 2, owner.getOppColor());
+            drawKingSafetyOfColor(g, owner.getOppColor() / 2, owner.getMyColor());
         }
     }
     
@@ -226,7 +227,14 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         int y = kingRow * 60;
         g.setColor(Color.WHITE);
         g.fillRect(x, y, 10, 13);
-        drawColorCoded(!logic.kingSafeAt(kingCol, kingRow, color), g, "s", x, y + 10);
+        boolean isSafe = logic.kingSafeAt(kingCol, kingRow, color);
+        String indicator = isSafe ? "s" : "!!!";
+        drawColorCoded(!isSafe, g, indicator, x, y + 10);
+        if (!isSafe) {
+            int[] att = logic.getAttacker();
+            g.setColor(Color.RED);
+            g.drawRect(att[0] * 60 + 20, att[1] * 60 + 20, 20, 20);
+        }
     }
 
     @Override
@@ -280,6 +288,9 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         fig[5][row] = createFigure(BISHOP, color, 5, row);
         fig[queenCol][row] = createFigure(QUEEN, color, queenCol, row);
         fig[kingCol][row] = createFigure(KING, color, kingCol, row);
+        int colorId = color / 2;
+        king[colorId][0] = kingCol;
+        king[colorId][1] = row;
     }
 
     private void initKingCoordinates(int kingCol, int blackFigureRow, int whiteFigureRow) {
@@ -309,6 +320,11 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         fig[currX][currY].firstStep = false;
         fig[currX][currY].color = NULL;
         fig[currX][currY].type = NULL;
+        if (fig[newX][newY].type == KING) {
+            int colorId = owner.getOppColor() / 2;
+            king[colorId][0] = newX;
+            king[colorId][1] = newY;
+        }
         owner.setMyTurn(true);
         int z = owner.getMyColor() / 2;
         check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
@@ -571,6 +587,20 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     public void updateDraggedPosition() {
         fig[x][y].oX = dragX * 60;
         fig[x][y].oY = dragY * 60;
+    }
+
+    @Override
+    public void moveKing(int color, int col, int row) {
+        bckKing[0] = king[color][0];
+        bckKing[1] = king[color][1];
+        king[color][0] = col;
+        king[color][1] = row;
+    }
+
+    @Override
+    public void restoreKing(int color) {
+        king[color][0] = bckKing[0];
+        king[color][1] = bckKing[1];
     }
 
     @Override
