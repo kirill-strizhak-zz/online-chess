@@ -138,46 +138,47 @@ public class Logic implements Protocol {
     }
 
     private void checkAndAddAllowedKingMove(int col, int row, BoundaryValidator boundaryValidator) {
-        if (boundaryValidator.test(col, row) && isNotFriendly(col, row) && kingSafeAt(col, row)) {
+        if (boundaryValidator.test(col, row) && isNotFriendly(col, row) && kingSafeAt(col, row, owner.getOppColor())) {
             addAllowedMove(col, row);
         }
     }
 
-    public boolean kingSafeAt(int col, int row) {
-        return kingIsSafeFromPoint(col - 1, row - 1, PAWN, BoundaryValidators.TOP_LEFT)
-                && kingIsSafeFromPoint(col + 1, row - 1, PAWN, BoundaryValidators.TOP_RIGHT)
+    public boolean kingSafeAt(int col, int row, int oppColor) {
+        return kingIsSafeFromPoint(col - 1, row - 1, oppColor, PAWN, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromPoint(col + 1, row - 1, oppColor, PAWN, BoundaryValidators.TOP_RIGHT)
 
-                && kingIsSafeFromPoint(col - 1, row - 2, KNIGHT, BoundaryValidators.TOP_LEFT)
-                && kingIsSafeFromPoint(col - 2, row - 1, KNIGHT, BoundaryValidators.TOP_LEFT)
-                && kingIsSafeFromPoint(col + 1, row - 2, KNIGHT, BoundaryValidators.TOP_RIGHT)
-                && kingIsSafeFromPoint(col + 2, row - 1, KNIGHT, BoundaryValidators.TOP_RIGHT)
-                && kingIsSafeFromPoint(col + 2, row + 1, KNIGHT, BoundaryValidators.BOTTOM_RIGHT)
-                && kingIsSafeFromPoint(col + 1, row + 2, KNIGHT, BoundaryValidators.BOTTOM_RIGHT)
-                && kingIsSafeFromPoint(col - 1, row + 2, KNIGHT, BoundaryValidators.BOTTOM_LEFT)
-                && kingIsSafeFromPoint(col - 2, row + 1, KNIGHT, BoundaryValidators.BOTTOM_LEFT)
+                && kingIsSafeFromPoint(col - 1, row - 2, oppColor, KNIGHT, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromPoint(col - 2, row - 1, oppColor, KNIGHT, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromPoint(col + 1, row - 2, oppColor, KNIGHT, BoundaryValidators.TOP_RIGHT)
+                && kingIsSafeFromPoint(col + 2, row - 1, oppColor, KNIGHT, BoundaryValidators.TOP_RIGHT)
+                && kingIsSafeFromPoint(col + 2, row + 1, oppColor, KNIGHT, BoundaryValidators.BOTTOM_RIGHT)
+                && kingIsSafeFromPoint(col + 1, row + 2, oppColor, KNIGHT, BoundaryValidators.BOTTOM_RIGHT)
+                && kingIsSafeFromPoint(col - 1, row + 2, oppColor, KNIGHT, BoundaryValidators.BOTTOM_LEFT)
+                && kingIsSafeFromPoint(col - 2, row + 1, oppColor, KNIGHT, BoundaryValidators.BOTTOM_LEFT)
 
-                && kingIsSafeFromPoint(col - 1, row - 1, KING, BoundaryValidators.TOP_LEFT)
-                && kingIsSafeFromPoint(col + 1, row - 1, KING, BoundaryValidators.TOP_RIGHT)
-                && kingIsSafeFromPoint(col - 1, row + 1, KING, BoundaryValidators.BOTTOM_LEFT)
-                && kingIsSafeFromPoint(col + 1, row + 1, KING, BoundaryValidators.BOTTOM_RIGHT)
-                && kingIsSafeFromPoint(col, row - 1, KING, BoundaryValidators.TOP)
-                && kingIsSafeFromPoint(col, row + 1, KING, BoundaryValidators.BOTTOM)
-                && kingIsSafeFromPoint(col + 1, row, KING, BoundaryValidators.RIGHT)
-                && kingIsSafeFromPoint(col - 1, row, KING, BoundaryValidators.LEFT)
+                && kingIsSafeFromPoint(col - 1, row - 1, oppColor, KING, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromPoint(col + 1, row - 1, oppColor, KING, BoundaryValidators.TOP_RIGHT)
+                && kingIsSafeFromPoint(col - 1, row + 1, oppColor, KING, BoundaryValidators.BOTTOM_LEFT)
+                && kingIsSafeFromPoint(col + 1, row + 1, oppColor, KING, BoundaryValidators.BOTTOM_RIGHT)
+                && kingIsSafeFromPoint(col, row - 1, oppColor, KING, BoundaryValidators.TOP)
+                && kingIsSafeFromPoint(col, row + 1, oppColor, KING, BoundaryValidators.BOTTOM)
+                && kingIsSafeFromPoint(col + 1, row, oppColor, KING, BoundaryValidators.RIGHT)
+                && kingIsSafeFromPoint(col - 1, row, oppColor, KING, BoundaryValidators.LEFT)
 
-                && kingIsSafeFromDirection(col, row, -1, 0, ROOK, BoundaryValidators.LEFT)
-                && kingIsSafeFromDirection(col, row, 1, 0, ROOK, BoundaryValidators.RIGHT)
-                && kingIsSafeFromDirection(col, row, 0, -1, ROOK, BoundaryValidators.TOP)
-                && kingIsSafeFromDirection(col, row, 0, 1, ROOK, BoundaryValidators.BOTTOM)
+                && kingIsSafeFromDirection(col, row, -1, 0, oppColor, ROOK, BoundaryValidators.LEFT)
+                && kingIsSafeFromDirection(col, row, 1, 0, oppColor, ROOK, BoundaryValidators.RIGHT)
+                && kingIsSafeFromDirection(col, row, 0, -1, oppColor, ROOK, BoundaryValidators.TOP)
+                && kingIsSafeFromDirection(col, row, 0, 1, oppColor, ROOK, BoundaryValidators.BOTTOM)
 
-                && kingIsSafeFromDirection(col, row, -1, -1, BISHOP, BoundaryValidators.TOP_LEFT)
-                && kingIsSafeFromDirection(col, row, 1, -1, BISHOP, BoundaryValidators.TOP_RIGHT)
-                && kingIsSafeFromDirection(col, row, -1, 1, BISHOP, BoundaryValidators.BOTTOM_LEFT)
-                && kingIsSafeFromDirection(col, row, 1, 1, BISHOP, BoundaryValidators.BOTTOM_RIGHT);
+                && kingIsSafeFromDirection(col, row, -1, -1, oppColor, BISHOP, BoundaryValidators.TOP_LEFT)
+                && kingIsSafeFromDirection(col, row, 1, -1, oppColor, BISHOP, BoundaryValidators.TOP_RIGHT)
+                && kingIsSafeFromDirection(col, row, -1, 1, oppColor, BISHOP, BoundaryValidators.BOTTOM_LEFT)
+                && kingIsSafeFromDirection(col, row, 1, 1, oppColor, BISHOP, BoundaryValidators.BOTTOM_RIGHT);
     }
 
-    private boolean kingIsSafeFromPoint(int col, int row, int possibleAttacker, BoundaryValidator boundaryValidator) {
-        if (boundaryValidator.test(col, row) && isNotFriendly(col, row) && board.figureAt(col, row).type == possibleAttacker) {
+    private boolean kingIsSafeFromPoint(int col, int row, int oppColor, int possibleAttacker, BoundaryValidator boundaryValidator) {
+        if (boundaryValidator.test(col, row) && board.figureAt(col, row).color == oppColor
+                && board.figureAt(col, row).type == possibleAttacker) {
             saveAttackerPosition(col, row);
             return false;
         } else {
@@ -185,9 +186,10 @@ public class Logic implements Protocol {
         }
     }
 
-    private boolean kingIsSafeFromDirection(int col, int row, int colMod, int rowMod, int possibleAttacker, BoundaryValidator boundaryValidator) {
+    private boolean kingIsSafeFromDirection(int col, int row, int colMod, int rowMod, int oppColor, int possibleAttacker, BoundaryValidator boundaryValidator) {
         for (col += colMod, row += rowMod; boundaryValidator.test(col, row); col += colMod, row += rowMod) {
-            if (isNotFriendly(col, row) && ((board.figureAt(col, row).type == possibleAttacker) || (board.figureAt(col, row).type == QUEEN))) {
+            if (board.figureAt(col, row).color == oppColor
+                    && ((board.figureAt(col, row).type == possibleAttacker) || (board.figureAt(col, row).type == QUEEN))) {
                 saveAttackerPosition(col, row);
                 return false;
             }
@@ -246,7 +248,7 @@ public class Logic implements Protocol {
                 moveToTargetPosition(col, row);
                 clearSourcePosition();
             }
-            if (kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId))) {
+            if (kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId), owner.getOppColor())) {
                 board.setCheck(false);
                 board.makeMove(col, row);
             } else {
@@ -301,14 +303,15 @@ public class Logic implements Protocol {
         }
         return !isEmpty(rookCol, 7) && board.figureAt(rookCol, 7).firstStep
                 && !isEmpty(kingCol, 7) && board.figureAt(kingCol, 7).firstStep
-                && kingSafeAt(kingCol + colMod, 7) && kingSafeAt(kingCol + colMod * 2, 7);
+                && kingSafeAt(kingCol + colMod, 7, owner.getOppColor())
+                && kingSafeAt(kingCol + colMod * 2, 7, owner.getOppColor());
     }
 
     public boolean mate(int col, int row, Figure[][] fig) {
         if (board.isCheck()) {
             calculateAllowedMoves(fig[col][row], col, row);
             if (allowed[0][0] == -1) {
-                if (kingSafeAt(attacker[0], attacker[1])) {
+                if (kingSafeAt(attacker[0], attacker[1], owner.getMyColor())) {
                     return !canCover(col, row, fig);
                 }
             } else {
@@ -320,7 +323,7 @@ public class Logic implements Protocol {
                     fig[col][row].color = NULL;
                     bck = fig[allowed[k][0]][allowed[k][1]].color;
                     fig[allowed[k][0]][allowed[k][1]].color = owner.getMyColor();
-                    if (kingSafeAt(allowed[k][0], allowed[k][1])) {
+                    if (kingSafeAt(allowed[k][0], allowed[k][1], owner.getOppColor())) {
                         fig[allowed[k][0]][allowed[k][1]].color = bck;
                         fig[col][row].color = owner.getMyColor();
                         break;
@@ -344,7 +347,7 @@ public class Logic implements Protocol {
                         fig[k][l].color = NULL;
                         bck = fig[allowed[m][0]][allowed[m][1]].color;
                         fig[allowed[m][0]][allowed[m][1]].color = owner.getMyColor();
-                        if (kingSafeAt(col, row)) {
+                        if (kingSafeAt(col, row, owner.getOppColor())) {
                             fig[allowed[m][0]][allowed[m][1]].color = bck;
                             fig[k][l].color = owner.getMyColor();
                             return true;
@@ -359,7 +362,7 @@ public class Logic implements Protocol {
         return false;
     }
 
-    protected int[][] getAllowed() {
+    public int[][] getAllowed() {
         return allowed;
     }
 

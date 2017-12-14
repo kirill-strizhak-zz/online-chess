@@ -16,6 +16,8 @@ import java.awt.event.MouseMotionAdapter;
 
 public class Board extends JPanel implements Protocol, Runnable, BoardState {
 
+    private boolean debug = false;
+    
     private boolean isDragging = false;
     private boolean check = false;
     private Figure[][] fig = new Figure[8][8]; // figures on board
@@ -156,6 +158,9 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                                 figureSet[fig[i][j].color][fig[i][j].type],
                                 fig[i][j].oX, fig[i][j].oY, this);
                     }
+                    if (debug) {
+                        drawDebugInfo(g, i, j);
+                    }
                 }
             }
             if ((owner.isMyTurn()) && (hlight[0][0] != -1)) {
@@ -170,7 +175,39 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                 g.drawImage(
                         figureSet[fig[x][y].color + 1][fig[x][y].type],
                         fig[x][y].oX, fig[x][y].oY, this);
+
+                if (debug) {
+                    drawAllowed(g, logic.getAllowed());
+                }
             }
+        }
+    }
+    
+    private void drawDebugInfo(Graphics g, int col, int row) {
+        int x = col * 60;
+        int y = row * 60;
+        g.setColor(Color.WHITE);
+        g.fillRect(x, y, 10, 60);
+        drawColorCoded(fig[col][row].empty, g, "e", x, y + 10);
+        drawColorCoded(fig[col][row].firstStep, g, "f", x, y + 20);
+        drawColorCoded(fig[col][row].color == NULL, g, "c", x, y + 30);
+        drawColorCoded(fig[col][row].type == NULL, g, "t", x, y + 40);
+    }
+    
+    private void drawColorCoded(boolean condition, Graphics g, String string, int x, int y) {
+        if (condition) {
+            g.setColor(Color.RED);
+            g.drawString(string, x, y);
+        } else {
+            g.setColor(Color.DARK_GRAY);
+            g.drawString(string, x, y);
+        }
+    }
+    
+    private void drawAllowed(Graphics g, int[][] allowed) {
+        for (int i = 0; allowed[i][0] != -1; i++) {
+            g.setColor(Color.BLUE);
+            g.drawString("x", allowed[i][0] * 60, allowed[i][1] * 60 + 50);
         }
     }
 
@@ -256,7 +293,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         fig[currX][currY].type = NULL;
         owner.setMyTurn(true);
         int z = owner.getMyColor() / 2;
-        check = !logic.kingSafeAt(king[z][0], king[z][1]);
+        check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
         if (!isLoading) {
             if (logic.mate(king[z][0], king[z][1], fig)) {
                 owner.setMyTurn(false);
@@ -306,7 +343,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
             sender.send(newInvertedX);
             sender.send(newInvertedY);
             sender.free();
-            check = !logic.kingSafeAt(king[z][0], king[z][1]);
+            check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
             if (!isLoading) {
                 Figure[][] mf = fig;
                 if (logic.mate(king[z][0], king[z][1], mf)) {
