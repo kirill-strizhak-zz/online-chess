@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
-abstract class LogicTester {
+public abstract class LogicTester {
 
     @Mock
     protected BoardState board;
