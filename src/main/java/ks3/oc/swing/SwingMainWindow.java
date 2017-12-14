@@ -131,6 +131,7 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
         JMenuItem preferences = new JMenuItem("Preferences");
         JMenuItem about = new JMenuItem("About");
         JMenuItem dump = new JMenuItem("Dump");
+        JCheckBoxMenuItem overlay = new JCheckBoxMenuItem("Overlay", board.isDebug());
         game.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -163,10 +164,14 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
             }
         });
         dump.addActionListener(new ActionListener() {
-
             public void actionPerformed(ActionEvent e) {
                 save();
             }
+        });
+        overlay.addActionListener((ev) -> {
+            board.setDebug(!board.isDebug());
+            overlay.setSelected(board.isDebug());
+            board.repaint();
         });
         if (type == SERVER) {
             JMenu file = new JMenu("File");
@@ -228,6 +233,7 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
         game.add(preferences);
         help.add(about);
         debug.add(dump);
+        debug.add(overlay);
         menuBar.add(game);
         menuBar.add(help);
         menuBar.add(debug);

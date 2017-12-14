@@ -158,9 +158,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                                 figureSet[fig[i][j].color][fig[i][j].type],
                                 fig[i][j].oX, fig[i][j].oY, this);
                     }
-                    if (debug) {
-                        drawDebugInfo(g, i, j);
-                    }
+                    drawDebugInfo(g, i, j);
                 }
             }
             if ((owner.isMyTurn()) && (hlight[0][0] != -1)) {
@@ -176,22 +174,23 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                         figureSet[fig[x][y].color + 1][fig[x][y].type],
                         fig[x][y].oX, fig[x][y].oY, this);
 
-                if (debug) {
-                    drawAllowed(g, logic.getAllowed());
-                }
+                drawAllowed(g, logic.getAllowed());
             }
+            drawKingSafety(g);
         }
     }
     
     private void drawDebugInfo(Graphics g, int col, int row) {
-        int x = col * 60;
-        int y = row * 60;
-        g.setColor(Color.WHITE);
-        g.fillRect(x, y, 10, 60);
-        drawColorCoded(fig[col][row].empty, g, "e", x, y + 10);
-        drawColorCoded(fig[col][row].firstStep, g, "f", x, y + 20);
-        drawColorCoded(fig[col][row].color == NULL, g, "c", x, y + 30);
-        drawColorCoded(fig[col][row].type == NULL, g, "t", x, y + 40);
+        if (debug) {
+            int x = col * 60;
+            int y = row * 60;
+            g.setColor(Color.WHITE);
+            g.fillRect(x, y, 10, 60);
+            drawColorCoded(fig[col][row].empty, g, "e", x, y + 10);
+            drawColorCoded(fig[col][row].firstStep, g, "f", x, y + 20);
+            drawColorCoded(fig[col][row].color == NULL, g, "c", x, y + 30);
+            drawColorCoded(fig[col][row].type == NULL, g, "t", x, y + 40);
+        }
     }
     
     private void drawColorCoded(boolean condition, Graphics g, String string, int x, int y) {
@@ -205,10 +204,29 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     }
     
     private void drawAllowed(Graphics g, int[][] allowed) {
-        for (int i = 0; allowed[i][0] != -1; i++) {
-            g.setColor(Color.BLUE);
-            g.drawString("x", allowed[i][0] * 60, allowed[i][1] * 60 + 50);
+        if (debug) {
+            for (int i = 0; allowed[i][0] != -1; i++) {
+                g.setColor(Color.BLUE);
+                g.drawString("x", allowed[i][0] * 60, allowed[i][1] * 60 + 50);
+            }
         }
+    }
+    
+    private void drawKingSafety(Graphics g) {
+        if (debug) {
+            drawKingSafetyOfColor(g, owner.getMyColor() / 2, owner.getMyColor());
+            drawKingSafetyOfColor(g, owner.getOppColor() / 2, owner.getOppColor());
+        }
+    }
+    
+    private void drawKingSafetyOfColor(Graphics g, int colorId, int color) {
+        int kingCol = getKingCol(colorId);
+        int kingRow = getKingRow(colorId);
+        int x = kingCol * 60 + 10;
+        int y = kingRow * 60;
+        g.setColor(Color.WHITE);
+        g.fillRect(x, y, 10, 13);
+        drawColorCoded(!logic.kingSafeAt(kingCol, kingRow, color), g, "s", x, y + 10);
     }
 
     @Override
@@ -519,6 +537,14 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
 
     protected Figure[][] figures() {
         return fig;
+    }
+
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     @Override
