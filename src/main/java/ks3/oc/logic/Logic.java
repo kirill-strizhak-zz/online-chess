@@ -225,7 +225,7 @@ public class Logic implements Protocol {
         return false;
     }
 
-    private void copy(Figure to, Figure from) {
+    private void copy(Figure from, Figure to) {
         to.empty = from.empty;
         to.firstStep = from.firstStep;
         to.type = from.type;
@@ -237,31 +237,29 @@ public class Logic implements Protocol {
     public void drop(int col, int row) {
         int colorId = owner.getMyColor() / 2;
         boolean kingWasMoved = false;
-        Figure targetBackup = new Figure();
-        Figure sourceBackup = new Figure();
+        Figure targetFigure = new Figure();
+        Figure sourceFigure = new Figure();
         if (isAllowed(col, row)) {
-            if ((board.draggedFigure().type == PAWN) && (row == 0)) {
-                clearSourcePosition();
-                figurePicker.open(board, owner.getMyColor(), col, row);
-            } else {
-                copy(targetBackup, board.figureAt(col, row));
-                copy(sourceBackup, board.draggedFigure());
-                moveToTargetPosition(col, row);
-                clearSourcePosition();
-                if (sourceBackup.type == KING) {
-                    kingWasMoved = true;
-                    board.moveKing(colorId, col, row);
-                }
+            copy(board.figureAt(col, row), targetFigure);
+            copy(board.draggedFigure(), sourceFigure);
+            moveToTargetPosition(col, row);
+            clearSourcePosition();
+            if (sourceFigure.type == KING) {
+                kingWasMoved = true;
+                board.moveKing(colorId, col, row);
             }
             if (kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId), owner.getOppColor())) {
+                if (sourceFigure.type == PAWN && row == 0) {
+                    figurePicker.open(board, owner.getMyColor(), col, row);
+                }
                 board.setCheck(false);
                 board.makeMove(col, row);
             } else {
                 if (kingWasMoved) {
                     board.restoreKing(colorId);
                 }
-                copy(board.draggedFigure(), sourceBackup);
-                copy(board.figureAt(col, row), targetBackup);
+                copy(sourceFigure, board.draggedFigure());
+                copy(targetFigure, board.figureAt(col, row));
                 board.updateDraggedPosition();
             }
         } else {
