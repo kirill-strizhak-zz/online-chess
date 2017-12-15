@@ -228,15 +228,6 @@ public class Logic implements Protocol {
         return false;
     }
 
-    private void copy(Figure from, Figure to) {
-        to.empty = from.empty;
-        to.firstStep = from.firstStep;
-        to.type = from.type;
-        to.color = from.color;
-        to.oX = from.oX;
-        to.oY = from.oY;
-    }
-
     public void drop(int col, int row) {
         int colorId = owner.getMyColor() / 2;
         boolean kingWasMoved = false;
@@ -245,8 +236,7 @@ public class Logic implements Protocol {
         if (isAllowed(col, row)) {
             copy(board.figureAt(col, row), targetFigure);
             copy(board.draggedFigure(), sourceFigure);
-            moveToTargetPosition(col, row);
-            clearSourcePosition();
+            moveAndClear(board.draggedFigure(), col, row);
             if (sourceFigure.type == KING) {
                 kingWasMoved = true;
                 board.moveKing(colorId, col, row);
@@ -270,19 +260,26 @@ public class Logic implements Protocol {
         }
     }
 
-    private void moveToTargetPosition(int col, int row) {
+    private void copy(Figure from, Figure to) {
+        to.empty = from.empty;
+        to.firstStep = from.firstStep;
+        to.type = from.type;
+        to.color = from.color;
+        to.oX = from.oX;
+        to.oY = from.oY;
+    }
+
+    private void moveAndClear(Figure figure, int col, int row) {
         board.figureAt(col, row).oX = col * 60;
         board.figureAt(col, row).oY = row * 60;
         board.figureAt(col, row).empty = false;
         board.figureAt(col, row).firstStep = false;
-        board.figureAt(col, row).type = board.draggedFigure().type;
-        board.figureAt(col, row).color = board.draggedFigure().color;
-    }
-
-    private void clearSourcePosition() {
-        board.draggedFigure().empty = true;
-        board.draggedFigure().type = NULL;
-        board.draggedFigure().color = NULL;
+        board.figureAt(col, row).type = figure.type;
+        board.figureAt(col, row).color = figure.color;
+        
+        figure.empty = true;
+        figure.type = NULL;
+        figure.color = NULL;
     }
 
     public boolean kingSideCastlingAllowed() {
@@ -347,22 +344,24 @@ public class Logic implements Protocol {
 
     private boolean canCover(int col, int row, Figure[][] fig) {
         int k, l, bck;
+        Figure sourceFigure = new Figure();
+        Figure targetFigure = new Figure();
         for (k = 0; k <= 7; k++) {
             for (l = 0; l <= 7; l++) {
                 if ((fig[k][l].color == owner.getMyColor()) && (fig[k][l].type != KING)) {
                     calculateAllowedMoves(fig[k][l], k, l);
                     int m = 0;
                     while (allowed[m][0] != -1) {
-                        fig[k][l].color = NULL;
-                        bck = fig[allowed[m][0]][allowed[m][1]].color;
-                        fig[allowed[m][0]][allowed[m][1]].color = owner.getMyColor();
+                        copy(fig[k][l], sourceFigure);
+                        copy(fig[allowed[m][0]][allowed[m][1]], targetFigure);
+                        moveAndClear(fig[k][l], allowed[m][0], allowed[m][1]);
                         if (kingSafeAt(col, row, owner.getOppColor())) {
-                            fig[allowed[m][0]][allowed[m][1]].color = bck;
-                            fig[k][l].color = owner.getMyColor();
+                            copy(sourceFigure, fig[k][l]);
+                            copy(targetFigure, fig[allowed[m][0]][allowed[m][1]]);
                             return true;
                         }
-                        fig[allowed[m][0]][allowed[m][1]].color = bck;
-                        fig[k][l].color = owner.getMyColor();
+                        copy(sourceFigure, fig[k][l]);
+                        copy(targetFigure, fig[allowed[m][0]][allowed[m][1]]);
                         ++m;
                     }
                 }
