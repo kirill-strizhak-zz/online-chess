@@ -1,6 +1,8 @@
 package ks3.oc.logic;
 
 import ks3.oc.Protocol;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -215,6 +217,19 @@ public class Logic_SafetyOfKingTest extends LogicTester {
         Set<String> expected = new HashSet<>(2);
         expected.addAll(Arrays.asList("7:6", "6:7"));
         validate(7, 7, expected);
+    }
+
+    // ~ ~ x ~ ~
+    // ~ ~ * ~ ~
+    // ~ ~ o ~ ~
+    // ~ ~ * ~ ~
+    // ~ ~ * ~ ~
+    @Test
+    public void testTakesIntoAccountSelfWhenCalculatingEnemyLOS() {
+        initEnemy(2, 0, Protocol.ROOK);
+        Set<String> expected = new HashSet<>(6);
+        expected.addAll(Arrays.asList("1:1", "3:1", "1:2", "3:2", "1:3", "3:3"));
+        validate(expected);
     }
 
     @Override

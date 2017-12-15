@@ -193,6 +193,9 @@ public class Logic implements Protocol {
                 saveAttackerPosition(col, row);
                 return false;
             }
+            if (board.figureAt(col, row).color == owner.getMyColor() && board.figureAt(col, row).type == KING) {
+                continue;
+            }
             if (!isEmpty(col, row)) {
                 break;
             }
