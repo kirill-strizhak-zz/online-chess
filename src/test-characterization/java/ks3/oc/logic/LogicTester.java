@@ -103,7 +103,7 @@ public abstract class LogicTester {
     }
 
     public void validate(int col, int row, Set<String> expected) {
-        logic.calculateAllowedMoves(fig[col][row], col, row);
+        logic.calculateAllowedMoves(col, row);
         Set<String> result = convertResult();
         assertTrue("Result does not contain all expected values: " + result, result.containsAll(expected));
         assertTrue("Result has unexpected values: " + result, expected.containsAll(result));

@@ -17,7 +17,7 @@ public class Logic_DropTest extends LogicTester {
     @Test
     public void testCoordinatesUpdated_WhenDroppedAtOldPosition() {
         setDraggedFigure(col(), row());
-        logic.calculateAllowedMoves(fig[col()][row()], col(), row());
+        logic.calculateAllowedMoves(col(), row());
         logic.drop(col(), row());
         verify(board, times(1)).updateDraggedPosition();
     }
@@ -28,7 +28,7 @@ public class Logic_DropTest extends LogicTester {
     @Test
     public void testDraggedPositionUpdated_WhenDroppedInUnallowedPosition() {
         setDraggedFigure(col(), row());
-        logic.calculateAllowedMoves(fig[col()][row()], col(), row());
+        logic.calculateAllowedMoves(col(), row());
         logic.drop(0, 1);
         verify(board, times(1)).updateDraggedPosition();
     }
@@ -39,7 +39,7 @@ public class Logic_DropTest extends LogicTester {
     @Test
     public void testDroppedAtAllowedPosition() {
         setDraggedFigure(col(), row());
-        logic.calculateAllowedMoves(fig[col()][row()], col(), row());
+        logic.calculateAllowedMoves(col(), row());
         int targetRow = row() - 1;
         logic.drop(col(), targetRow);
         verifyEmpty(col(), row());
@@ -55,7 +55,7 @@ public class Logic_DropTest extends LogicTester {
     public void testKingDroppedAtAllowedPosition() {
         initFriendly(col(), row(), Protocol.KING);
         setDraggedFigure(col(), row());
-        logic.calculateAllowedMoves(fig[col()][row()], col(), row());
+        logic.calculateAllowedMoves(col(), row());
         int targetRow = row() - 1;
         logic.drop(col(), targetRow);
         verifyEmpty(col(), row());
@@ -74,7 +74,7 @@ public class Logic_DropTest extends LogicTester {
         setKingPosition(kingCol, row());
         initEnemy(col() + 2, row(), Protocol.ROOK);
         setDraggedFigure(col(), row());
-        logic.calculateAllowedMoves(fig[col()][row()], col(), row());
+        logic.calculateAllowedMoves(col(), row());
         int targetRow = row() - 1;
         logic.drop(col(), targetRow);
         verifyEmpty(col(), targetRow);
@@ -89,7 +89,7 @@ public class Logic_DropTest extends LogicTester {
         initFigure(col(), 1);
         fig[col()][1].firstStep = false;
         setDraggedFigure(col(), 1);
-        logic.calculateAllowedMoves(fig[col()][1], col(), 1);
+        logic.calculateAllowedMoves(col(), 1);
         logic.drop(col(), 0);
         verifyEmpty(col(), 1);
         verify(figurePicker, times(1)).open(board, getMyColor(), col(), 0);

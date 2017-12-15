@@ -23,12 +23,12 @@ public class Logic implements Protocol {
         allowed[0][0] = -1;
     }
 
-    public void calculateAllowedMoves(Figure figure, int col, int row) {
+    public void calculateAllowedMoves(int col, int row) {
         calculating = true;
-        switch (figure.type) {
+        switch (board.figureAt(col, row).type) {
             case PAWN:
                 allowed[0][0] = -1;
-                allowedMovesOfPawn(figure, col, row);
+                allowedMovesOfPawn(col, row);
                 arrPos = 0;
                 break;
             case ROOK:
@@ -60,8 +60,8 @@ public class Logic implements Protocol {
         calculating = false;
     }
 
-    private void allowedMovesOfPawn(Figure figure, int col, int row) {
-        boolean simpleMoveAdded = checkPawnFirstStepRule(figure, col, row);
+    private void allowedMovesOfPawn(int col, int row) {
+        boolean simpleMoveAdded = checkPawnFirstStepRule(col, row);
         if (!simpleMoveAdded) {
             checkPawnStepRule(col, row);
         }
@@ -69,8 +69,8 @@ public class Logic implements Protocol {
         checkPawnAttack(col + 1, row - 1, BoundaryValidators.RIGHT);
     }
 
-    private boolean checkPawnFirstStepRule(Figure figure, int col, int row) {
-        boolean conditionMet = figure.firstStep && isEmpty(col, row - 1) && isEmpty(col, row - 2);
+    private boolean checkPawnFirstStepRule(int col, int row) {
+        boolean conditionMet = board.figureAt(col, row).firstStep && isEmpty(col, row - 1) && isEmpty(col, row - 2);
         if (conditionMet) {
             addAllowedMove(col, row - 1);
             addAllowedMove(col, row - 2);
@@ -315,7 +315,7 @@ public class Logic implements Protocol {
 
     public boolean mate(int col, int row) {
         if (board.isCheck()) {
-            calculateAllowedMoves(board.figureAt(col, row), col, row);
+            calculateAllowedMoves(col, row);
             if (allowed[0][0] == -1) {
                 return !canCover(col, row);
             }
@@ -331,7 +331,7 @@ public class Logic implements Protocol {
             for (int row = 0; row <= 7; row++) {
                 currentFigure = board.figureAt(col, row);
                 if (currentFigure.color == owner.getMyColor() && currentFigure.type != KING) {
-                    calculateAllowedMoves(currentFigure, col, row);
+                    calculateAllowedMoves(col, row);
                     int idx = -1;
                     int targetCol, targetRow;
                     while (allowed[++idx][0] != -1) {

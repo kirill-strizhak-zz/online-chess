@@ -62,7 +62,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                 if ((fig[x][y].color == owner.getMyColor()) && (owner.isMyTurn())) {
                     dragX = x;
                     dragY = y;
-                    logic.calculateAllowedMoves(fig[x][y], x, y);
+                    logic.calculateAllowedMoves(x, y);
                     drawOnTop = fig[x][y];
                     isDragging = true;
                 }
