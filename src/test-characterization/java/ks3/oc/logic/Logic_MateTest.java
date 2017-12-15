@@ -18,7 +18,7 @@ public class Logic_MateTest extends LogicTester {
     // ~ ~ ~ ~ ~
     @Test
     public void testMate_WhenNotInCheck() {
-        assertFalse(logic.mate(col(), row(), fig));
+        assertFalse(logic.mate(col(), row()));
     }
 
     // ~ x x ~ ~
@@ -31,7 +31,7 @@ public class Logic_MateTest extends LogicTester {
         setCheck(true);
         initEnemy(1, 0, Protocol.ROOK);
         initEnemy(2, 0, Protocol.ROOK);
-        assertFalse(logic.mate(col(), row(), fig));
+        assertFalse(logic.mate(col(), row()));
     }
 
     // ~ x ~ x ~
@@ -45,7 +45,7 @@ public class Logic_MateTest extends LogicTester {
         initEnemy(1, 0, Protocol.ROOK);
         initEnemy(3, 0, Protocol.ROOK);
         initEnemy(2, 1, Protocol.ROOK);
-        assertFalse(logic.mate(col(), row(), fig));
+        assertFalse(logic.mate(col(), row()));
     }
 
     // ~ x x x ~
@@ -59,7 +59,7 @@ public class Logic_MateTest extends LogicTester {
         initEnemy(1, 0, Protocol.ROOK);
         initEnemy(2, 0, Protocol.ROOK);
         initEnemy(3, 0, Protocol.ROOK);
-        assertTrue(logic.mate(col(), row(), fig));
+        assertTrue(logic.mate(col(), row()));
     }
 
     // ~ x x x ~
@@ -74,7 +74,7 @@ public class Logic_MateTest extends LogicTester {
         initEnemy(2, 0, Protocol.ROOK);
         initEnemy(3, 0, Protocol.ROOK);
         initFriendly(4, 1, Protocol.QUEEN);
-        assertFalse(logic.mate(col(), row(), fig));
+        assertFalse(logic.mate(col(), row()));
     }
 
     // ~ x x x ~
@@ -89,7 +89,7 @@ public class Logic_MateTest extends LogicTester {
         initEnemy(2, 0, Protocol.ROOK);
         initEnemy(3, 0, Protocol.ROOK);
         initFriendly(4, 2, Protocol.QUEEN);
-        assertFalse(logic.mate(col(), row(), fig));
+        assertFalse(logic.mate(col(), row()));
     }
 
     // ~ x x x ~
@@ -104,7 +104,7 @@ public class Logic_MateTest extends LogicTester {
         initEnemy(2, 0, Protocol.ROOK);
         initEnemy(3, 0, Protocol.ROOK);
         initFriendly(4, 4, Protocol.QUEEN);
-        assertTrue(logic.mate(col(), row(), fig));
+        assertTrue(logic.mate(col(), row()));
     }
 
     // ~ x x x ~
@@ -119,7 +119,7 @@ public class Logic_MateTest extends LogicTester {
         initEnemy(2, 0, Protocol.ROOK);
         initEnemy(3, 0, Protocol.ROOK);
         initEnemy(2, 1, Protocol.ROOK);
-        assertTrue(logic.mate(col(), row(), fig));
+        assertTrue(logic.mate(col(), row()));
     }
 
     // ~ x * x ~
@@ -135,7 +135,7 @@ public class Logic_MateTest extends LogicTester {
         initEnemy(3, 0, Protocol.ROOK);
         initEnemy(2, 3, Protocol.ROOK);
         initEnemy(2, 5, Protocol.ROOK);
-        assertTrue(logic.mate(col(), row(), fig));
+        assertTrue(logic.mate(col(), row()));
     }
 
     @Override

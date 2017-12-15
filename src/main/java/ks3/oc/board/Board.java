@@ -329,7 +329,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         int z = owner.getMyColor() / 2;
         check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
         if (!isLoading) {
-            if (logic.mate(king[z][0], king[z][1], fig)) {
+            if (logic.mate(king[z][0], king[z][1])) {
                 owner.setMyTurn(false);
                 try {
                     while (!sender.isFree()) {
@@ -379,8 +379,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
             sender.free();
             check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
             if (!isLoading) {
-                Figure[][] mf = fig;
-                if (logic.mate(king[z][0], king[z][1], mf)) {
+                if (logic.mate(king[z][0], king[z][1])) {
                     owner.setMyTurn(false);
                     while (!sender.isFree()) {
                         owner.say("B: waiting to send coordinates");

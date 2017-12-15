@@ -313,56 +313,40 @@ public class Logic implements Protocol {
                 && kingSafeAt(kingCol + colMod * 2, 7, owner.getOppColor());
     }
 
-    public boolean mate(int col, int row, Figure[][] fig) {
+    public boolean mate(int col, int row) {
         if (board.isCheck()) {
-            calculateAllowedMoves(fig[col][row], col, row);
+            calculateAllowedMoves(board.figureAt(col, row), col, row);
             if (allowed[0][0] == -1) {
-                if (kingSafeAt(attacker[0], attacker[1], owner.getMyColor())) {
-                    return !canCover(col, row, fig);
-                }
-            } else {
-                int k, bck;
-                for (k = 0; k < 8; k++) {
-                    if (allowed[k][0] == -1) {
-                        return !canCover(col, row, fig);
-                    }
-                    fig[col][row].color = NULL;
-                    bck = fig[allowed[k][0]][allowed[k][1]].color;
-                    fig[allowed[k][0]][allowed[k][1]].color = owner.getMyColor();
-                    if (kingSafeAt(allowed[k][0], allowed[k][1], owner.getOppColor())) {
-                        fig[allowed[k][0]][allowed[k][1]].color = bck;
-                        fig[col][row].color = owner.getMyColor();
-                        break;
-                    }
-                    fig[allowed[k][0]][allowed[k][1]].color = bck;
-                    fig[col][row].color = owner.getMyColor();
-                }
+                return !canCover(col, row);
             }
         }
         return false;
     }
 
-    private boolean canCover(int col, int row, Figure[][] fig) {
-        int k, l, bck;
+    private boolean canCover(int kingCol, int kingRow) {
+        Figure currentFigure;
         Figure sourceFigure = new Figure();
         Figure targetFigure = new Figure();
-        for (k = 0; k <= 7; k++) {
-            for (l = 0; l <= 7; l++) {
-                if ((fig[k][l].color == owner.getMyColor()) && (fig[k][l].type != KING)) {
-                    calculateAllowedMoves(fig[k][l], k, l);
-                    int m = 0;
-                    while (allowed[m][0] != -1) {
-                        copy(fig[k][l], sourceFigure);
-                        copy(fig[allowed[m][0]][allowed[m][1]], targetFigure);
-                        moveAndClear(fig[k][l], allowed[m][0], allowed[m][1]);
-                        if (kingSafeAt(col, row, owner.getOppColor())) {
-                            copy(sourceFigure, fig[k][l]);
-                            copy(targetFigure, fig[allowed[m][0]][allowed[m][1]]);
+        for (int col = 0; col <= 7; col++) {
+            for (int row = 0; row <= 7; row++) {
+                currentFigure = board.figureAt(col, row);
+                if (currentFigure.color == owner.getMyColor() && currentFigure.type != KING) {
+                    calculateAllowedMoves(currentFigure, col, row);
+                    int idx = -1;
+                    int targetCol, targetRow;
+                    while (allowed[++idx][0] != -1) {
+                        targetCol = allowed[idx][0];
+                        targetRow = allowed[idx][1];
+                        copy(currentFigure, sourceFigure);
+                        copy(board.figureAt(targetCol, targetRow), targetFigure);
+                        moveAndClear(currentFigure, targetCol, targetRow);
+                        if (kingSafeAt(kingCol, kingRow, owner.getOppColor())) {
+                            copy(sourceFigure, currentFigure);
+                            copy(targetFigure, board.figureAt(targetCol, targetRow));
                             return true;
                         }
-                        copy(sourceFigure, fig[k][l]);
-                        copy(targetFigure, fig[allowed[m][0]][allowed[m][1]]);
-                        ++m;
+                        copy(sourceFigure, currentFigure);
+                        copy(targetFigure, board.figureAt(targetCol, targetRow));
                     }
                 }
             }
