@@ -230,7 +230,6 @@ public class Logic implements Protocol {
 
     public void drop(int col, int row) {
         int colorId = owner.getMyColor() / 2;
-        boolean kingWasMoved = false;
         Figure targetFigure = new Figure();
         Figure sourceFigure = new Figure();
         if (isAllowed(col, row)) {
@@ -238,19 +237,18 @@ public class Logic implements Protocol {
             copy(board.draggedFigure(), sourceFigure);
             moveAndClear(board.draggedFigure(), col, row);
             if (sourceFigure.type == KING) {
-                kingWasMoved = true;
                 board.moveKing(colorId, col, row);
-            }
-            if (kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId), owner.getOppColor())) {
+                board.setCheck(false);
+                board.makeMove(col, row);
+
+            } else if (kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId), owner.getOppColor())) {
                 if (sourceFigure.type == PAWN && row == 0) {
                     figurePicker.open(board, owner.getMyColor(), col, row);
                 }
                 board.setCheck(false);
                 board.makeMove(col, row);
+
             } else {
-                if (kingWasMoved) {
-                    board.restoreKing(colorId);
-                }
                 copy(sourceFigure, board.draggedFigure());
                 copy(targetFigure, board.figureAt(col, row));
                 board.updateDraggedPosition();
