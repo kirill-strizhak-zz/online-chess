@@ -6,6 +6,7 @@ import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
+import ks3.oc.swing.SwingDebugOverlay;
 import ks3.oc.swing.dialogs.SwingFigurePicker;
 
 import javax.swing.*;
@@ -16,7 +17,7 @@ import java.awt.event.MouseMotionAdapter;
 
 public class Board extends JPanel implements Protocol, Runnable, BoardState {
 
-    private boolean debug = false;
+    private final SwingDebugOverlay debugOverlay;
     
     private boolean isDragging = false;
     private boolean check = false;
@@ -29,7 +30,6 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     public Image figureSet[][] = new Image[4][6]; // black; black selected; white; white selected
     private MainWindow owner;
     public int dragX, dragY, x, y;
-    private Figure drawOnTop = null;
     private Sender sender;
     private ChatPanel chat;
     private Logic logic;
@@ -39,6 +39,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
 
     public Board(MainWindow own, Sender send, ChatPanel ch) {
         super();
+        debugOverlay = new SwingDebugOverlay();
         owner = own;
         sender = send;
         chat = ch;
@@ -63,7 +64,6 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                     dragX = x;
                     dragY = y;
                     logic.calculateAllowedMoves(x, y);
-                    drawOnTop = fig[x][y];
                     isDragging = true;
                 }
             }
@@ -159,7 +159,6 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                                 figureSet[fig[i][j].color][fig[i][j].type],
                                 fig[i][j].oX, fig[i][j].oY, this);
                     }
-                    drawDebugInfo(g, i, j);
                 }
             }
             if ((owner.isMyTurn()) && (hlight[0][0] != -1)) {
@@ -170,70 +169,12 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                 g.drawRect(hlight[1][0], hlight[1][1], 59, 59);
                 g.setColor(myRed);
             }
-            if (isDragging && !(drawOnTop == null)) {
+            if (isDragging()) {
                 g.drawImage(
                         figureSet[fig[x][y].color + 1][fig[x][y].type],
                         fig[x][y].oX, fig[x][y].oY, this);
-
-                drawAllowed(g, logic.getAllowed());
             }
-            drawKingSafety(g);
-        }
-    }
-    
-    private void drawDebugInfo(Graphics g, int col, int row) {
-        if (debug) {
-            int x = col * 60;
-            int y = row * 60;
-            g.setColor(Color.WHITE);
-            g.fillRect(x, y, 10, 60);
-            drawColorCoded(fig[col][row].empty, g, "e", x, y + 10);
-            drawColorCoded(fig[col][row].firstStep, g, "f", x, y + 20);
-            drawColorCoded(fig[col][row].color == NULL, g, "c", x, y + 30);
-            drawColorCoded(fig[col][row].type == NULL, g, "t", x, y + 40);
-        }
-    }
-    
-    private void drawColorCoded(boolean condition, Graphics g, String string, int x, int y) {
-        if (condition) {
-            g.setColor(Color.RED);
-            g.drawString(string, x, y);
-        } else {
-            g.setColor(Color.DARK_GRAY);
-            g.drawString(string, x, y);
-        }
-    }
-    
-    private void drawAllowed(Graphics g, int[][] allowed) {
-        if (debug) {
-            for (int i = 0; allowed[i][0] != -1; i++) {
-                g.setColor(Color.BLUE);
-                g.drawString("x", allowed[i][0] * 60, allowed[i][1] * 60 + 50);
-            }
-        }
-    }
-    
-    private void drawKingSafety(Graphics g) {
-        if (debug) {
-            drawKingSafetyOfColor(g, owner.getMyColor() / 2, owner.getOppColor());
-            drawKingSafetyOfColor(g, owner.getOppColor() / 2, owner.getMyColor());
-        }
-    }
-    
-    private void drawKingSafetyOfColor(Graphics g, int colorId, int color) {
-        int kingCol = getKingCol(colorId);
-        int kingRow = getKingRow(colorId);
-        int x = kingCol * 60 + 10;
-        int y = kingRow * 60;
-        g.setColor(Color.WHITE);
-        g.fillRect(x, y, 10, 13);
-        boolean isSafe = logic.kingSafeAt(kingCol, kingRow, color);
-        String indicator = isSafe ? "s" : "!!!";
-        drawColorCoded(!isSafe, g, indicator, x, y + 10);
-        if (!isSafe) {
-            int[] att = logic.getAttacker();
-            g.setColor(Color.RED);
-            g.drawRect(att[0] * 60 + 20, att[1] * 60 + 20, 20, 20);
+            debugOverlay.draw(g, this, logic, owner.getMyColor(), owner.getOppColor());
         }
     }
 
@@ -555,11 +496,16 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     }
 
     public boolean isDebug() {
-        return debug;
+        return debugOverlay.isEnabled();
     }
 
-    public void setDebug(boolean debug) {
-        this.debug = debug;
+    public void setDebug(boolean enambled) {
+        debugOverlay.setEnabled(enambled);
+    }
+
+    @Override
+    public boolean isDragging() {
+        return isDragging;
     }
 
     @Override

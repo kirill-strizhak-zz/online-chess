@@ -12,6 +12,8 @@ public interface BoardState {
 
     void giveTurn();
 
+    boolean isDragging();
+
     boolean isCheck();
 
     void setCheck(boolean check);
