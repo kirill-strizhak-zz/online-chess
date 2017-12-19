@@ -4,6 +4,7 @@ import ks3.oc.ChatPanel;
 import ks3.oc.Figure;
 import ks3.oc.Logger;
 import ks3.oc.MainWindow;
+import ks3.oc.board.start.ClassicStartingBoardInitializer;
 import ks3.oc.swing.dialogs.Messenjah;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
@@ -266,7 +267,7 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
 
     public void reset() {
         setMyTurn(false);
-        board.initFigures();
+        board.initFigures(new ClassicStartingBoardInitializer());
         board.hlight[0][0] = -1;
         if (getMyColor() == WHITE) {
             setMyTurn(true);

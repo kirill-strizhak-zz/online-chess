@@ -1,6 +1,8 @@
 package ks3.oc.board;
 
 import ks3.oc.ChatPanel;
+import ks3.oc.board.start.ClassicStartingBoardInitializer;
+import ks3.oc.board.start.StartingBoardInitializer;
 import ks3.oc.logic.Logic;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
@@ -49,7 +51,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         boardId = 1;
         figureId = 0;
         loadImg();
-        initFigures();
+        initFigures(new ClassicStartingBoardInitializer());
         addMouseListener(new MouseAdapter() {
 
             @Override
@@ -70,7 +72,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (isDragging) {
+                if (isDragging()) {
                     isDragging = false;
                     int a = e.getX() / 60;
                     int b = e.getY() / 60;
@@ -98,7 +100,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (isDragging) {
+                if (isDragging()) {
                     fig[x][y].oX = e.getX() - 30;
                     if (fig[x][y].oX > 420) {
                         fig[x][y].oX = 420;
@@ -183,7 +185,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         paint(g);
     }
 
-    public void initFigures() {
+    public void initFigures(StartingBoardInitializer startingBoardInitializer) {
         while (owner.getMyColor() == -1) {
             try {
                 Thread.sleep(100);
@@ -191,64 +193,11 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
             }
         }
 
-        BoardSetup setup;
         if (owner.getMyColor() == BLACK) {
-            setup = BoardSetup.PLAYING_BLACK;
+            startingBoardInitializer.initFigureData(BoardSetup.PLAYING_BLACK, fig, king);
         } else {
-            setup = BoardSetup.PLAYING_WHITE;
+            startingBoardInitializer.initFigureData(BoardSetup.PLAYING_WHITE, fig, king);
         }
-
-        initMiddleRows();
-        initPawnRow(setup.blackPawnRow, BLACK);
-        initPawnRow(setup.whitePawnRow, WHITE);
-        initFigureRow(setup.blackFigureRow, setup.queenCol, setup.kingCol, BLACK);
-        initFigureRow(setup.whiteFigureRow, setup.queenCol, setup.kingCol, WHITE);
-        initKingCoordinates(setup.kingCol, setup.blackFigureRow, setup.whiteFigureRow);
-    }
-
-    private void initMiddleRows() {
-        for (int row = 2; row < 6; row++) {
-            for (int col = 0; col < 8; col++) {
-                fig[col][row] = new Figure();
-            }
-        }
-    }
-
-    private void initPawnRow(int row, int color) {
-        for (int col = 0; col <= 7; col++) {
-            fig[col][row] = createFigure(PAWN, color, col, row);
-        }
-    }
-
-    private void initFigureRow(int row, int queenCol, int kingCol, int color) {
-        fig[0][row] = createFigure(ROOK, color, 0, row);
-        fig[7][row] = createFigure(ROOK, color, 7, row);
-        fig[1][row] = createFigure(KNIGHT, color, 1, row);
-        fig[6][row] = createFigure(KNIGHT, color, 6, row);
-        fig[2][row] = createFigure(BISHOP, color, 2, row);
-        fig[5][row] = createFigure(BISHOP, color, 5, row);
-        fig[queenCol][row] = createFigure(QUEEN, color, queenCol, row);
-        fig[kingCol][row] = createFigure(KING, color, kingCol, row);
-        int colorId = color / 2;
-        king[colorId][0] = kingCol;
-        king[colorId][1] = row;
-    }
-
-    private void initKingCoordinates(int kingCol, int blackFigureRow, int whiteFigureRow) {
-        king[0][0] = kingCol;
-        king[1][0] = kingCol;
-        king[0][1] = blackFigureRow;
-        king[1][1] = whiteFigureRow;
-    }
-
-    private Figure createFigure(int type, int color, int col, int row) {
-        Figure figure = new Figure();
-        figure.empty = false;
-        figure.type = type;
-        figure.color = color;
-        figure.oX = col * 60;
-        figure.oY = row * 60;
-        return figure;
     }
 
     public void makeMove(int currX, int currY, int newX, int newY) {
