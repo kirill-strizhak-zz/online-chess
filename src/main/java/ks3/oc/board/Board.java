@@ -19,7 +19,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.io.IOException;
 
-public class Board extends JPanel implements Protocol, Runnable, BoardState {
+public class Board extends JPanel implements Protocol, BoardState {
+
+    private static final int CELL_SIZE = 60;
 
     private final SwingDebugOverlay debugOverlay;
     private final Logger log;
@@ -31,7 +33,7 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     public int[] bckKing = new int[2];
     public int[][] hlight = new int[2][2];
     public int hlPos = 0;
-    public Image board;
+    public Image boardBackground;
     public Image figureSet[][] = new Image[4][6]; // black; black selected; white; white selected
     private MainWindow owner;
     public int dragX, dragY, x, y;
@@ -59,44 +61,14 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         addMouseListener(new MouseAdapter() {
 
             @Override
-            public void mousePressed(MouseEvent e) {
-                x = e.getX() / 60;
-                y = e.getY() / 60;
-                if (x > 7) x = 7;
-                else if (x < 0) x = 0;
-                if (y > 7) y = 7;
-                else if (y < 0) y = 0;
-                if ((fig[x][y].color == owner.getMyColor()) && (owner.isMyTurn())) {
-                    dragX = x;
-                    dragY = y;
-                    logic.calculateAllowedMoves(x, y);
-                    isDragging = true;
-                }
+            public void mousePressed(MouseEvent event) {
+                selectFigure(event.getX() / CELL_SIZE, event.getY() / CELL_SIZE);
             }
 
             @Override
-            public void mouseReleased(MouseEvent e) {
+            public void mouseReleased(MouseEvent event) {
                 if (isDragging()) {
-                    isDragging = false;
-                    int a = e.getX() / 60;
-                    int b = e.getY() / 60;
-                    if (a > 7) a = 7;
-                    else if (a < 0) a = 0;
-                    if (b > 7) b = 7;
-                    else if (b < 0) b = 0;
-                    if ((fig[a][b].color == fig[x][y].color) && (!fig[a][b].empty)) {
-                        fig[x][y].oX = dragX * 60;
-                        fig[x][y].oY = dragY * 60;
-                    } else {
-                        while (logic.calculating) {
-                            try {
-                                Thread.sleep(10);
-                            } catch (InterruptedException ex) {
-                                //ignore
-                            }
-                        }
-                        logic.drop(a, b);
-                    }
+                    releaseFigure(event.getX() / CELL_SIZE, event.getY() / CELL_SIZE);
                 }
                 repaint();
             }
@@ -104,44 +76,82 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         addMouseMotionListener(new MouseMotionAdapter() {
 
             @Override
-            public void mouseDragged(MouseEvent e) {
+            public void mouseDragged(MouseEvent event) {
                 if (isDragging()) {
-                    fig[x][y].oX = e.getX() - 30;
-                    if (fig[x][y].oX > 420) {
-                        fig[x][y].oX = 420;
-                    } else {
-                        if (fig[x][y].oX < 0) {
-                            fig[x][y].oX = 0;
-                        }
-                    }
-                    fig[x][y].oY = e.getY() - 30;
-                    if (fig[x][y].oY > 420) {
-                        fig[x][y].oY = 420;
-                    } else {
-                        if (fig[x][y].oY < 0) {
-                            fig[x][y].oY = 0;
-                        }
-                    }
+                    dragFigure(event.getX(), event.getY());
                     repaint();
                 }
             }
         });
-        new Thread(this).start();
         owner.say("B: ini completed");
+    }
+
+    public void selectFigure(int col, int row) {
+        x = col;
+        y = row;
+        if (col > 7) col = 7;
+        else if (col < 0) col = 0;
+        if (row > 7) row = 7;
+        else if (row < 0) row = 0;
+        if ((fig[col][row].color == owner.getMyColor()) && (owner.isMyTurn())) {
+            dragX = col;
+            dragY = row;
+            logic.calculateAllowedMoves(col, row);
+            isDragging = true;
+        }
+    }
+
+    public void releaseFigure(int col, int row) {
+        isDragging = false;
+        if (col > 7) col = 7;
+        else if (col < 0) col = 0;
+        if (row > 7) row = 7;
+        else if (row < 0) row = 0;
+        if ((fig[col][row].color == fig[x][y].color) && (!fig[col][row].empty)) {
+            fig[x][y].oX = dragX * CELL_SIZE;
+            fig[x][y].oY = dragY * CELL_SIZE;
+        } else {
+            while (logic.calculating) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ex) {
+                    //ignore
+                }
+            }
+            logic.drop(col, row);
+        }
+    }
+
+    public void dragFigure(int dragX, int dragY) {
+        fig[x][y].oX = dragX - (CELL_SIZE / 2);
+        if (fig[x][y].oX > 420) {
+            fig[x][y].oX = 420;
+        } else {
+            if (fig[x][y].oX < 0) {
+                fig[x][y].oX = 0;
+            }
+        }
+        fig[x][y].oY = dragY - (CELL_SIZE / 2);
+        if (fig[x][y].oY > 420) {
+            fig[x][y].oY = 420;
+        } else {
+            if (fig[x][y].oY < 0) {
+                fig[x][y].oY = 0;
+            }
+        }
     }
 
     public void loadImg() {
         MediaTracker mt = new MediaTracker(this);
-        board = getToolkit().getImage(getClass().getResource("/img/" + boardId + ".jpg"));
-        mt.addImage(board, 0);
+        boardBackground = getToolkit().getImage(getClass().getResource("/img/" + boardId + ".jpg"));
+        mt.addImage(boardBackground, 0);
         try {
             mt.waitForAll();
         } catch (InterruptedException ex) {
             //ignore
         }
-        int i, j;
-        for (i = 0; i <= 3; i++) {
-            for (j = 0; j <= 5; j++) {
+        for (int i = 0; i <= 3; i++) {
+            for (int j = 0; j <= 5; j++) {
                 figureSet[i][j] = getToolkit().getImage(getClass().getResource("/img/" + (i + figureId) + j + ".gif"));
                 mt.addImage(figureSet[i][j], 0);
                 try {
@@ -153,35 +163,31 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         }
     }
 
-    public void run() {
-    }
-
     @Override
     public void paint(Graphics g) {
-        g.drawImage(board, 0, 0, this);
+        g.drawImage(boardBackground, 0, 0, this);
         if (!isLoading) {
-            int i, j;
-            for (i = 0; i <= 7; i++) {
-                for (j = 0; j <= 7; j++) {
-                    if ((!fig[i][j].empty) && (fig[i][j].color != NULL)) {
-                        g.drawImage(
-                                figureSet[fig[i][j].color][fig[i][j].type],
-                                fig[i][j].oX, fig[i][j].oY, this);
+            Figure figure;
+            for (int col = 0; col <= 7; col++) {
+                for (int row = 0; row <= 7; row++) {
+                    if (!isCellEmpty(col, row)) {
+                        figure = figureAt(col, row);
+                        g.drawImage(getImageOfFigure(figure), figure.oX, figure.oY, this);
                     }
                 }
             }
-            if ((owner.isMyTurn()) && (hlight[0][0] != -1)) {
+            if (needToDrawHighlight()) {
                 g.setColor(myRed);
-                g.drawRect(hlight[0][0] - 1, hlight[0][1] - 1, 61, 61);
-                g.drawRect(hlight[0][0], hlight[0][1], 59, 59);
-                g.drawRect(hlight[1][0] - 1, hlight[1][1] - 1, 61, 61);
-                g.drawRect(hlight[1][0], hlight[1][1], 59, 59);
+                int[][] highlight = getHighlight();
+                g.drawRect(highlight[0][0] - 1, highlight[0][1] - 1, CELL_SIZE + 1, CELL_SIZE + 1);
+                g.drawRect(highlight[0][0], highlight[0][1], CELL_SIZE - 1, CELL_SIZE - 1);
+                g.drawRect(highlight[1][0] - 1, highlight[1][1] - 1, CELL_SIZE + 1, CELL_SIZE + 1);
+                g.drawRect(highlight[1][0], highlight[1][1], CELL_SIZE - 1, CELL_SIZE - 1);
                 g.setColor(myRed);
             }
             if (isDragging()) {
-                g.drawImage(
-                        figureSet[fig[x][y].color + 1][fig[x][y].type],
-                        fig[x][y].oX, fig[x][y].oY, this);
+                figure = getDraggedFigure();
+                g.drawImage(getImageOfDraggedFigure(), figure.oX, figure.oY, this);
             }
             debugOverlay.draw(g, this, logic, owner.getMyColor(), owner.getOppColor());
         }
@@ -190,6 +196,31 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     @Override
     public void update(Graphics g) {
         paint(g);
+    }
+
+    public int[][] getHighlight() {
+        return hlight;
+    }
+
+    public boolean isCellEmpty(int col, int row) {
+        return fig[col][row].empty;
+    }
+
+    public boolean needToDrawHighlight() {
+        return owner.isMyTurn() && hlight[0][0] != -1;
+    }
+
+    public Image getImageOfFigure(Figure figure) {
+        return figureSet[figure.color][figure.type];
+    }
+
+    public Image getImageOfDraggedFigure() {
+        Figure figure = fig[x][y];
+        return figureSet[figure.color + 1][figure.type];
+    }
+
+    public Figure getDraggedFigure() {
+        return fig[x][y];
     }
 
     public void initFigures(StartingBoardInitializer startingBoardInitializer) {
@@ -209,8 +240,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     }
 
     public void makeMove(int currX, int currY, int newX, int newY) {
-        fig[newX][newY].oX = newX * 60;
-        fig[newX][newY].oY = newY * 60;
+        fig[newX][newY].oX = newX * CELL_SIZE;
+        fig[newX][newY].oY = newY * CELL_SIZE;
         fig[newX][newY].empty = false;
         fig[newX][newY].type = fig[currX][currY].type;
         fig[newX][newY].color = fig[currX][currY].color;
@@ -250,10 +281,10 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                 chat.addChatLine("* You lose! Check and mate.", "sys_&^_tem");
             }
         }
-        hlight[0][0] = newX * 60;
-        hlight[0][1] = newY * 60;
-        hlight[1][0] = currX * 60;
-        hlight[1][1] = currY * 60;
+        hlight[0][0] = newX * CELL_SIZE;
+        hlight[0][1] = newY * CELL_SIZE;
+        hlight[1][0] = currX * CELL_SIZE;
+        hlight[1][1] = currY * CELL_SIZE;
         repaint();
     }
 
@@ -342,12 +373,12 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     public void localSetFigure(int x, int y, int color, int type, boolean isEmpty, boolean firstStep) {
         fig[x][y].empty = isEmpty;
         fig[x][y].firstStep = firstStep;
-        fig[x][y].oX = x * 60;
-        fig[x][y].oY = y * 60;
+        fig[x][y].oX = x * CELL_SIZE;
+        fig[x][y].oY = y * CELL_SIZE;
         fig[x][y].color = color;
         fig[x][y].type = type;
-        hlight[hlPos][0] = x * 60;
-        hlight[hlPos][1] = y * 60;
+        hlight[hlPos][0] = x * CELL_SIZE;
+        hlight[hlPos][1] = y * CELL_SIZE;
         if (hlPos == 1) {
             hlPos = 0;
         } else {
@@ -495,8 +526,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
 
     @Override
     public void updateDraggedPosition() {
-        fig[x][y].oX = dragX * 60;
-        fig[x][y].oY = dragY * 60;
+        fig[x][y].oX = dragX * CELL_SIZE;
+        fig[x][y].oY = dragY * CELL_SIZE;
     }
 
     @Override
