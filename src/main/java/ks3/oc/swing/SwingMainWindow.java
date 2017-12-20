@@ -4,12 +4,15 @@ import ks3.oc.ChatPanel;
 import ks3.oc.Figure;
 import ks3.oc.Logger;
 import ks3.oc.MainWindow;
-import ks3.oc.board.start.ClassicStartingBoardInitializer;
-import ks3.oc.swing.dialogs.Messenjah;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
 import ks3.oc.board.Board;
+import ks3.oc.board.start.ClassicStartingBoardInitializer;
+import ks3.oc.dialogs.AboutWindow;
+import ks3.oc.dialogs.PreferencesWindow;
 import ks3.oc.logic.Logic;
+import ks3.oc.swing.dialogs.SwingAboutWindow;
+import ks3.oc.swing.dialogs.SwingPreferencesWindow;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,12 +43,15 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
     private int oppColor;
     private int myColor = -1;
     private boolean myTurn = false;
-    private Messenjah aboutWND;
+    private AboutWindow aboutWindow;
+    private PreferencesWindow preferencesWindow;
     private Logic logic = null;
     private JMenuItem shortXchng, longXchng;
 
     public SwingMainWindow(Logger log, int type, int c, String addr, int port, String name) {
         super("Online Chess");
+        aboutWindow = new SwingAboutWindow();
+        preferencesWindow = new SwingPreferencesWindow();
         self = this;
         this.log = log;
         setSize(768, 531);
@@ -183,14 +189,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
                 load();
             });
         }
-        about.addActionListener(event -> {
-            if (aboutWND == null) {
-                aboutWND = new Messenjah();
-            } else {
-                aboutWND.setVisible(true);
-            }
-        });
-        preferences.addActionListener(event -> new Messenjah(board));
+        about.addActionListener(event -> aboutWindow.open());
+        preferences.addActionListener(event -> preferencesWindow.open(board));
         game.add(shortXchng);
         game.add(longXchng);
         game.addSeparator();

@@ -1,8 +1,9 @@
 package ks3.oc;
 
 import ks3.oc.board.Board;
-import ks3.oc.swing.dialogs.Messenjah;
+import ks3.oc.dialogs.NewGameConfirmation;
 import ks3.oc.swing.SwingMainWindow;
+import ks3.oc.swing.dialogs.SwingNewGameConfirmation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,12 +17,14 @@ public class Receiver implements Runnable, Protocol {
     private Sender sender;
     private ChatPanel chat = null;
     private Board board = null;
+    private NewGameConfirmation newGameConfirmation;
 
     public Receiver(SwingMainWindow own, Logger log, BufferedReader b, Sender send) {
         this.log = log;
         br = b;
         owner = own;
         sender = send;
+        newGameConfirmation = new SwingNewGameConfirmation();
     }
 
     public void run() {
@@ -88,7 +91,7 @@ public class Receiver implements Runnable, Protocol {
                         }
                         break;
                     case OFFER_RESET:
-                        new Messenjah(log, sender, owner);
+                        newGameConfirmation.open(log, sender, owner);
                         break;
                     case ACCEPT_RESET:
                         owner.reset();

@@ -4,7 +4,6 @@ import ks3.oc.Logger;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
 import ks3.oc.Starter;
-import ks3.oc.board.Board;
 import ks3.oc.board.BoardState;
 import ks3.oc.swing.SwingMainWindow;
 
@@ -219,13 +218,13 @@ public class Messenjah extends JFrame implements Protocol {
     }
 
     // preferences panel
-    public Messenjah(Board brd) {
+    public Messenjah(BoardState boardState) {
         super("Preferences");
         setSize(400, 300);
         setResizable(false);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setLayout(new GridLayout(3, 1));
-        board = brd;
+        board = boardState;
         mode = 0;
         int i;
         ImageIcon[] boardIcons = new ImageIcon[4];
