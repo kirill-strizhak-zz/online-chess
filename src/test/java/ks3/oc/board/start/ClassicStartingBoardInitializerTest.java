@@ -14,7 +14,7 @@ public class ClassicStartingBoardInitializerTest {
 
     private Figure[][] figures;
     private int[][] kings;
-    
+
     private final Figure[] whiteFigureSet = generateFigureSet(Board.WHITE);
     private final Figure[] blackFigureSet = generateFigureSet(Board.BLACK);
 

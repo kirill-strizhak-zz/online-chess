@@ -274,7 +274,7 @@ public class Logic implements Protocol {
         board.figureAt(col, row).firstStep = false;
         board.figureAt(col, row).type = figure.type;
         board.figureAt(col, row).color = figure.color;
-        
+
         figure.empty = true;
         figure.type = NULL;
         figure.color = NULL;
@@ -355,7 +355,7 @@ public class Logic implements Protocol {
     public int[][] getAllowed() {
         return allowed;
     }
-    
+
     public int[] getAttacker() {
         return attacker;
     }

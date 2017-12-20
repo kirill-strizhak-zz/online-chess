@@ -16,14 +16,12 @@ public class Receiver implements Runnable, Protocol {
     private Sender sender;
     private ChatPanel chat = null;
     private Board board = null;
-    private Thread trtr;
 
     public Receiver(SwingMainWindow own, Logger log, BufferedReader b, Sender send) {
         this.log = log;
         br = b;
         owner = own;
         sender = send;
-        trtr = sender.getThread();
     }
 
     public void run() {
@@ -38,8 +36,9 @@ public class Receiver implements Runnable, Protocol {
                         owner.opponentName = name;
                         while (chat == null) {
                             try {
-                                trtr.sleep(100);
-                            } catch (Exception e) {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                //ignore
                             }
                             chat = owner.getChat();
                         }
@@ -53,8 +52,9 @@ public class Receiver implements Runnable, Protocol {
                         int newY = br.read();
                         while (board == null) {
                             try {
-                                trtr.sleep(100);
-                            } catch (Exception e) {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                //ignore
                             }
                             board = owner.getBoard();
                         }
@@ -64,8 +64,9 @@ public class Receiver implements Runnable, Protocol {
                         String msg = br.readLine();
                         while (chat == null) {
                             try {
-                                trtr.sleep(100);
-                            } catch (Exception e) {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                //ignore
                             }
                             chat = owner.getChat();
                         }
@@ -87,7 +88,7 @@ public class Receiver implements Runnable, Protocol {
                         }
                         break;
                     case OFFER_RESET:
-                        Messenjah m = new Messenjah(log, sender, owner);
+                        new Messenjah(log, sender, owner);
                         break;
                     case ACCEPT_RESET:
                         owner.reset();
@@ -95,8 +96,9 @@ public class Receiver implements Runnable, Protocol {
                     case DECLINE_RESET:
                         while (chat == null) {
                             try {
-                                trtr.sleep(100);
-                            } catch (Exception e) {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                //ignore
                             }
                             chat = owner.getChat();
                         }
@@ -109,27 +111,15 @@ public class Receiver implements Runnable, Protocol {
                         int type = br.read();
                         int a = br.read();
                         int f = br.read();
-                        boolean isEmpty,
-                         firstStep;
-                        //owner.say("x: "+x+"  y: "+y+"  c: "+color+"  t: "+type+"  em: "+a+"  fStep: "+f);
-                        if (a == 1) {
-                            isEmpty = true;
-                        } else {
-                            isEmpty = false;
-                        }
-                        if (f == 1) {
-                            firstStep = true;
-                        } else {
-                            firstStep = false;
-                        }
                         while (board == null) {
                             try {
-                                trtr.sleep(100);
-                            } catch (Exception e) {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                //ignore
                             }
                             board = owner.getBoard();
                         }
-                        board.localSetFigure(x, y, color, type, isEmpty, firstStep);
+                        board.localSetFigure(x, y, color, type, a == 1, f == 1);
                         break;
                     case GIVE_TURN:
                         owner.setMyTurn(true);
@@ -141,16 +131,14 @@ public class Receiver implements Runnable, Protocol {
                         owner.setMyTurn(false);
                         while (chat == null) {
                             try {
-                                trtr.sleep(100);
-                            } catch (Exception e) {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                //ignore
                             }
                             chat = owner.getChat();
                         }
                         chat.addChatLine("* You win! Check and mate", "sys_&^_tem");
                         break;
-                    /*case CLEAR:
-                    board.localClear();
-                    break;*/
                 }
             } catch (IOException e) {
                 owner.say("Receiver: can't reach opponent");

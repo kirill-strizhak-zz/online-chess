@@ -26,10 +26,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
-public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainWindow {
-    
+public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
+
     private static final String ERR_BASE = "oc.MainFrame::";
-    
+
     private Logger log;
     private SwingMainWindow self = null;
     public String opponentName;
@@ -37,17 +37,14 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
     private ChatPanel chatPanel = null;
     private Board board = null;
     private Sender sender = null;
-    private int type;
     private int oppColor;
     private int myColor = -1;
     private boolean myTurn = false;
-    private Thread trtr;
     private Messenjah aboutWND;
     private Logic logic = null;
-    private JMenuItem shortXchng,  longXchng;
-    public boolean debug = true;
+    private JMenuItem shortXchng, longXchng;
 
-    public SwingMainWindow(Logger log, int t, int c, String addr, int port, String name) {
+    public SwingMainWindow(Logger log, int type, int c, String addr, int port, String name) {
         super("Online Chess");
         self = this;
         this.log = log;
@@ -57,20 +54,8 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
         setBackground(Color.black);
         setResizable(false);
 
-        trtr = new Thread(this);
-        trtr.start();
-
         myName = name;
-        type = t;
         sender = new Sender(this, log, type, addr, port);
-        while (sender == null) {
-            log.log(ERR_BASE + "(): sender = null");
-            try {
-                trtr.sleep(1000);
-            } catch (Exception e) {
-                log.log(ERR_BASE + "(): exception while waiting for sender: " + e.getMessage());
-            }
-        }
         if (type == SERVER) {
             setMyColor(c);
             if (getMyColor() == BLACK) {
@@ -81,7 +66,7 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
             try {
                 while (!sender.isFree()) {
                     log.log(ERR_BASE + "(): waiting to send color");
-                    trtr.sleep(1000);
+                    Thread.sleep(1000);
                 }
                 sender.send(COLOR);
                 if (getMyColor() == WHITE) {
@@ -99,13 +84,13 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
         while (getMyColor() == -1) {
             log.log(ERR_BASE + "(): waiting for color");
             try {
-                trtr.sleep(1000);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 log.log(ERR_BASE + "(): exception while waiting to receive color: " + e.getMessage());
             }
         }
 
-        board = new Board(this, sender, chatPanel);
+        board = new Board(log, this, sender, chatPanel);
         getContentPane().add("Center", board);
 
         chatPanel = new ChatPanel(sender, this);
@@ -114,7 +99,7 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
         try {
             while (!sender.isFree()) {
                 log.log(ERR_BASE + "(): waiting to send name");
-                trtr.sleep(1000);
+                Thread.sleep(1000);
             }
             sender.send(NAME);
             sender.send(myName);
@@ -138,7 +123,7 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
             public void mousePressed(MouseEvent e) {
                 while (logic == null) {
                     try {
-                        trtr.sleep(1000);
+                        Thread.sleep(1000);
                     } catch (Exception ex) {
                         self.log.log(ERR_BASE + "gamePressed(): " + ex.getMessage());
                     }
@@ -148,28 +133,18 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
                 longXchng.setEnabled(logic.queenSideCastlingAllowed());
             }
         });
-        shortXchng.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                if (shortXchng.isEnabled()) {
-                    board.shortXchng();
-                }
+        shortXchng.addActionListener(event -> {
+            if (shortXchng.isEnabled()) {
+                board.shortXchng();
             }
         });
-        longXchng.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                if (longXchng.isEnabled()) {
-                    board.longXchng();
-                }
+        longXchng.addActionListener(event -> {
+            if (longXchng.isEnabled()) {
+                board.longXchng();
             }
         });
-        dump.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                save();
-            }
-        });
-        overlay.addActionListener((ev) -> {
+        dump.addActionListener(event -> save());
+        overlay.addActionListener(event -> {
             board.setDebug(!board.isDebug());
             overlay.setSelected(board.isDebug());
             board.repaint();
@@ -189,45 +164,33 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
                     while (!sender.isFree()) {
                         self.log.log(ERR_BASE + "newGame(): waiting to send RESET");
                         try {
-                            trtr.sleep(1000);
-                        } catch (Exception sleepe) {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ex) {
+                            //ignore
                         }
                     }
                     try {
                         sender.send(OFFER_RESET);
-                    } catch (Exception ioe) {
+                    } catch (IOException ex) {
+                        log.log(ex.getMessage());
                     }
                     sender.free();
                 }
             });
-            saveGame.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    save();
-                }
+            saveGame.addActionListener(event -> save());
+            loadGame.addActionListener(event -> {
+                board.isLoading = true;
+                load();
             });
-            //saveGame.setEnabled(false);
-            loadGame.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    board.isLoading = true;
-                    load();
-                }
-            });
-        //loadGame.setEnabled(false);
         }
-        about.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (aboutWND == null) {
-                    aboutWND = new Messenjah();
-                } else {
-                    aboutWND.setVisible(true);
-                }
+        about.addActionListener(event -> {
+            if (aboutWND == null) {
+                aboutWND = new Messenjah();
+            } else {
+                aboutWND.setVisible(true);
             }
         });
-        preferences.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Messenjah m = new Messenjah(board);
-            }
-        });
+        preferences.addActionListener(event -> new Messenjah(board));
         game.add(shortXchng);
         game.add(longXchng);
         game.addSeparator();
@@ -247,22 +210,21 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
                 while (!sender.isFree()) {
                     self.log.log(ERR_BASE + "windowClosing(): waiting to send CLOSE");
                     try {
-                        trtr.sleep(1000);
-                    } catch (Exception sleepe) {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        //ignore
                     }
                 }
                 try {
                     sender.send(CLOSE);
-                } catch (Exception ex) {
+                } catch (IOException ex) {
+                    log.log(ex.getMessage());
                 }
                 sender.suicide("MF: client closed app");
                 System.exit(0);
             }
         });
         this.setVisible(true);
-    }
-
-    public void run() {
     }
 
     public void reset() {
@@ -292,7 +254,7 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
     private void save() {
         int i, j;
         boolean t = isMyTurn();
-        String cat = "";
+        String cat;
         setMyTurn(false);
         board.reaveTurn();
         try {
@@ -323,7 +285,6 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
         String str;
         setMyTurn(false);
         board.reaveTurn();
-        //Figure f = new Figure();
         StringTokenizer breaker;
         try {
             board.globalClear();
@@ -364,7 +325,7 @@ public class SwingMainWindow extends JFrame implements Protocol, Runnable, MainW
         board.repaint();
         board.isLoading = false;
     }
-    
+
     @Override
     public void say(String s) {
         log.log(s);

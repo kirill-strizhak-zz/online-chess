@@ -17,11 +17,12 @@ import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.io.IOException;
 
-public class Messenjah extends JFrame implements Protocol, Runnable {
-    
+public class Messenjah extends JFrame implements Protocol {
+
     public static final String ERR_BASE = "oc.Messenjah::";
-    
+
     private Logger log;
     private Messenjah self;
     private SwingMainWindow owner;
@@ -35,7 +36,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
     private Checkbox cbServer, cbClient, cbWhite, cbBlack;
     private String save = "localhost";
     private JComboBox boardCB, figureCB;
-    
+
     // About window
     public Messenjah() {
         super("About Online Chess");
@@ -57,7 +58,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         b.addActionListener(event -> setVisible(false));
         setVisible(true);
     }
-    
+
     // Starter window
     public Messenjah(Starter strt) {
         super("Start game");
@@ -163,7 +164,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         getContentPane().add("South", start);
         setVisible(true);
     }
-    
+
     // Figure chooser
     public Messenjah(BoardState boardState, int myColor, int col, int row) {
         super("Choose a figure to set");
@@ -216,7 +217,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         });
         setVisible(true);
     }
-    
+
     // preferences panel
     public Messenjah(Board brd) {
         super("Preferences");
@@ -268,7 +269,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         pack();
         setVisible(true);
     }
-    
+
     // new game
     public Messenjah(Logger log, Sender send, SwingMainWindow own) {
         super("Start new game?");
@@ -280,8 +281,6 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         sender = send;
         owner = own;
         mode = 0;
-        Thread trtr = new Thread(this);
-        trtr.start();
         setLayout(new GridLayout(2, 1));
         JPanel top = new JPanel();
         JPanel bottom = new JPanel();
@@ -299,7 +298,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
                     }
                     sender.send(ACCEPT_RESET);
                     sender.free();
-                } catch (Exception ex) {
+                } catch (InterruptedException | IOException ex) {
                     self.log.log(ERR_BASE + "NewGame:yesListener():: exception: " + ex.getMessage());
                 }
                 owner.reset();
@@ -315,7 +314,7 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
                     }
                     sender.send(DECLINE_RESET);
                     sender.free();
-                } catch (Exception ex) {
+                } catch (InterruptedException | IOException ex) {
                     self.log.log(ERR_BASE + "NewGame:noListener():: exception: " + ex.getMessage());
                 }
                 dispose();
@@ -330,9 +329,6 @@ public class Messenjah extends JFrame implements Protocol, Runnable {
         getContentPane().add(top);
         getContentPane().add(bottom);
         setVisible(true);
-    }
-
-    public void run() {
     }
 
     @Override

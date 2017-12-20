@@ -1,13 +1,14 @@
 package ks3.oc.board;
 
 import ks3.oc.ChatPanel;
-import ks3.oc.board.start.ClassicStartingBoardInitializer;
-import ks3.oc.board.start.StartingBoardInitializer;
-import ks3.oc.logic.Logic;
 import ks3.oc.Figure;
+import ks3.oc.Logger;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
+import ks3.oc.board.start.ClassicStartingBoardInitializer;
+import ks3.oc.board.start.StartingBoardInitializer;
+import ks3.oc.logic.Logic;
 import ks3.oc.swing.SwingDebugOverlay;
 import ks3.oc.swing.dialogs.SwingFigurePicker;
 
@@ -16,11 +17,13 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.io.IOException;
 
 public class Board extends JPanel implements Protocol, Runnable, BoardState {
 
     private final SwingDebugOverlay debugOverlay;
-    
+    private final Logger log;
+
     private boolean isDragging = false;
     private boolean check = false;
     private Figure[][] fig = new Figure[8][8]; // figures on board
@@ -39,9 +42,10 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     public int boardId, figureId;
     public boolean isLoading = false;
 
-    public Board(MainWindow own, Sender send, ChatPanel ch) {
+    public Board(Logger log, MainWindow own, Sender send, ChatPanel ch) {
         super();
         debugOverlay = new SwingDebugOverlay();
+        this.log = log;
         owner = own;
         sender = send;
         chat = ch;
@@ -87,7 +91,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                         while (logic.calculating) {
                             try {
                                 Thread.sleep(10);
-                            } catch (Exception ex) {
+                            } catch (InterruptedException ex) {
+                                //ignore
                             }
                         }
                         logic.drop(a, b);
@@ -131,7 +136,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         mt.addImage(board, 0);
         try {
             mt.waitForAll();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ex) {
+            //ignore
         }
         int i, j;
         for (i = 0; i <= 3; i++) {
@@ -140,7 +146,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                 mt.addImage(figureSet[i][j], 0);
                 try {
                     mt.waitForAll();
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ex) {
+                    //ignore
                 }
             }
         }
@@ -189,7 +196,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         while (owner.getMyColor() == -1) {
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ex) {
+                //ignore
             }
         }
 
@@ -228,12 +236,14 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                     }
                     sender.send(MATE);
                     sender.free();
-                } catch (Exception e) {
+                } catch (IOException | InterruptedException ex) {
+                    log.log(ex.getMessage());
                 }
                 while (chat == null) {
                     try {
                         Thread.sleep(1000);
-                    } catch (Exception e) {
+                    } catch (InterruptedException ex) {
+                        //ignore
                     }
                     chat = owner.getChat();
                 }
@@ -275,7 +285,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                         owner.say("B: waiting to send coordinates");
                         try {
                             Thread.sleep(1000);
-                        } catch (Exception e) {
+                        } catch (InterruptedException ex) {
+                            //ignore
                         }
                     }
                     sender.send(MATE);
@@ -283,14 +294,16 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
                     while (chat == null) {
                         try {
                             Thread.sleep(1000);
-                        } catch (Exception e) {
+                        } catch (InterruptedException ex) {
+                            //ignore
                         }
                         chat = owner.getChat();
                     }
                     chat.addChatLine("* You lose! Check and mate.", "sys_&^_tem");
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException ex) {
+            log.log(ex.getMessage());
         }
         repaint();
     }
@@ -321,7 +334,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
             sender.send(type);
             sender.send(iIsEmpty);
             sender.send(iFirstStep);
-        } catch (Exception e) {
+        } catch (IOException ex) {
+            log.log(ex.getMessage());
         }
     }
 
@@ -346,14 +360,16 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
     public void giveTurn() {
         try {
             sender.send(GIVE_TURN);
-        } catch (Exception e) {
+        } catch (IOException ex) {
+            log.log(ex.getMessage());
         }
     }
 
     public void reaveTurn() {
         try {
             sender.send(REAVE_TURN);
-        } catch (Exception e) {
+        } catch (IOException ex) {
+            log.log(ex.getMessage());
         }
     }
 
@@ -367,7 +383,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
             owner.say("B: waiting to send coordinates");
             try {
                 Thread.sleep(1000);
-            } catch (Exception e) {
+            } catch (InterruptedException ex) {
+                //ignore
             }
         }
         if (owner.getMyColor() == WHITE) {
@@ -392,7 +409,8 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
             owner.say("B: waiting to send coordinates");
             try {
                 Thread.sleep(1000);
-            } catch (Exception e) {
+            } catch (InterruptedException ex) {
+                //ignore
             }
         }
         if (owner.getMyColor() == WHITE) {
@@ -417,12 +435,14 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
             owner.say("B: waiting to send CLEAR");
             try {
                 Thread.sleep(1000);
-            } catch (Exception e) {
+            } catch (InterruptedException ex) {
+                //ignore
             }
         }
         try {
             sender.send(CLEAR);
-        } catch (Exception e) {
+        } catch (IOException ex) {
+            log.log(ex.getMessage());
         }
         sender.free();
     }
@@ -440,16 +460,12 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         }
     }
 
-    protected Figure[][] figures() {
-        return fig;
-    }
-
     public boolean isDebug() {
         return debugOverlay.isEnabled();
     }
 
-    public void setDebug(boolean enambled) {
-        debugOverlay.setEnabled(enambled);
+    public void setDebug(boolean enabled) {
+        debugOverlay.setEnabled(enabled);
     }
 
     @Override
@@ -489,12 +505,6 @@ public class Board extends JPanel implements Protocol, Runnable, BoardState {
         bckKing[1] = king[color][1];
         king[color][0] = col;
         king[color][1] = row;
-    }
-
-    @Override
-    public void restoreKing(int color) {
-        king[color][0] = bckKing[0];
-        king[color][1] = bckKing[1];
     }
 
     @Override
