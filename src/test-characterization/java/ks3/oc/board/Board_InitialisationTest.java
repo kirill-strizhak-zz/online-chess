@@ -21,7 +21,7 @@ public class Board_InitialisationTest {
 
     @Test
     public void testInitCompletes() {
-        new Board(null, mainWindow, null, null);
+        new Board(null, null, mainWindow, null, null);
         verify(mainWindow, times(1)).say("B: ini completed");
     }
 }

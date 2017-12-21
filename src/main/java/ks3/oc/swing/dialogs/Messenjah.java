@@ -5,6 +5,8 @@ import ks3.oc.Protocol;
 import ks3.oc.Sender;
 import ks3.oc.Starter;
 import ks3.oc.board.BoardState;
+import ks3.oc.res.FigureSet;
+import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.SwingMainWindow;
 
 import javax.swing.*;
@@ -23,6 +25,7 @@ public class Messenjah extends JFrame implements Protocol {
     public static final String ERR_BASE = "oc.Messenjah::";
 
     private Logger log;
+    private ResourceManager resourceManager;
     private Messenjah self;
     private SwingMainWindow owner;
     private BoardState board;
@@ -217,63 +220,12 @@ public class Messenjah extends JFrame implements Protocol {
         setVisible(true);
     }
 
-    // preferences panel
-    public Messenjah(BoardState boardState) {
-        super("Preferences");
-        setSize(400, 300);
-        setResizable(false);
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        setLayout(new GridLayout(3, 1));
-        board = boardState;
-        mode = 0;
-        int i;
-        ImageIcon[] boardIcons = new ImageIcon[4];
-        ImageIcon[] figureIcons = new ImageIcon[2];
-        for (i = 0; i <= 3; i++) {
-            boardIcons[i] = new ImageIcon("img/t" + i + ".gif");
-        }
-        for (i = 0; i <= 1; i++) {
-            figureIcons[i] = new ImageIcon("img/f" + i + ".gif");
-        }
-        boardCB = new JComboBox<>(boardIcons);
-        figureCB = new JComboBox<>(figureIcons);
-        boardCB.setSelectedIndex(board.getBoardId());
-        figureCB.setSelectedIndex(board.getFigureId() / 4);
-        JPanel brdPanel = new JPanel();
-        JPanel figPanel = new JPanel();
-        JPanel buttPanel = new JPanel();
-        brdPanel.setLayout(new BorderLayout());
-        figPanel.setLayout(new BorderLayout());
-        buttPanel.setLayout(new GridLayout(1, 2));
-        JLabel brdTxt = new JLabel("Select board background   ");
-        JLabel figTxt = new JLabel("Select figure set         ");
-        JButton ok = new JButton("Ok");
-        JButton cancel = new JButton("Cancel");
-        ok.setSize(80, 30);
-        cancel.setSize(80, 30);
-        brdPanel.add("West", brdTxt);
-        brdPanel.add("Center", boardCB);
-        figPanel.add("West", figTxt);
-        figPanel.add("Center", figureCB);
-        buttPanel.add(ok);
-        buttPanel.add(cancel);
-        getContentPane().add(brdPanel);
-        getContentPane().add(figPanel);
-        getContentPane().add(buttPanel);
-        ok.addActionListener(event -> {
-            board.reloadImages(boardCB.getSelectedIndex(), figureCB.getSelectedIndex() * 4);
-            dispose();
-        });
-        cancel.addActionListener(event -> dispose());
-        pack();
-        setVisible(true);
-    }
-
     // new game
-    public Messenjah(Logger log, Sender send, SwingMainWindow own) {
+    public Messenjah(Logger log, ResourceManager resourceManager, Sender send, SwingMainWindow own) {
         super("Start new game?");
         self = this;
         this.log = log;
+        this.resourceManager = resourceManager;
         setSize(250, 100);
         setResizable(false);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -342,10 +294,11 @@ public class Messenjah extends JFrame implements Protocol {
                 g.drawRect(64, 23, 59, 59);
                 g.drawRect(124, 23, 59, 59);
                 g.drawRect(184, 23, 59, 59);
-                g.drawImage(board.getFigureImage(color, ROOK), 4, 23, this);
-                g.drawImage(board.getFigureImage(color, KNIGHT), 64, 23, this);
-                g.drawImage(board.getFigureImage(color, BISHOP), 124, 23, this);
-                g.drawImage(board.getFigureImage(color, QUEEN), 184, 23, this);
+                FigureSet figureSet = resourceManager.getFigureSet();
+                g.drawImage(figureSet.getImage(color, ROOK), 4, 23, this);
+                g.drawImage(figureSet.getImage(color, KNIGHT), 64, 23, this);
+                g.drawImage(figureSet.getImage(color, BISHOP), 124, 23, this);
+                g.drawImage(figureSet.getImage(color, QUEEN), 184, 23, this);
                 g.setColor(Color.black);
                 g.drawRect(sel * 60 + 4, 23, 59, 59);
                 break;

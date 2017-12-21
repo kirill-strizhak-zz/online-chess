@@ -9,6 +9,7 @@ import ks3.oc.Sender;
 import ks3.oc.board.start.ClassicStartingBoardInitializer;
 import ks3.oc.board.start.StartingBoardInitializer;
 import ks3.oc.logic.Logic;
+import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.SwingDebugOverlay;
 import ks3.oc.swing.dialogs.SwingFigurePicker;
 
@@ -23,6 +24,7 @@ public class Board extends JPanel implements Protocol, BoardState {
 
     private static final int CELL_SIZE = 60;
 
+    private final ResourceManager resourceManager;
     private final SwingDebugOverlay debugOverlay;
     private final Logger log;
 
@@ -33,20 +35,18 @@ public class Board extends JPanel implements Protocol, BoardState {
     public int[] bckKing = new int[2];
     public int[][] hlight = new int[2][2];
     public int hlPos = 0;
-    public Image boardBackground;
-    public Image figureSet[][] = new Image[4][6]; // black; black selected; white; white selected
     private MainWindow owner;
     public int dragX, dragY, x, y;
     private Sender sender;
     private ChatPanel chat;
     private Logic logic;
     private Color myRed = new Color(220, 0, 0);
-    public int boardId, figureId;
     public boolean isLoading = false;
 
-    public Board(Logger log, MainWindow own, Sender send, ChatPanel ch) {
+    public Board(Logger log, ResourceManager resourceManager, MainWindow own, Sender send, ChatPanel ch) {
         super();
-        debugOverlay = new SwingDebugOverlay();
+        this.resourceManager = resourceManager;
+        this.debugOverlay = new SwingDebugOverlay();
         this.log = log;
         owner = own;
         sender = send;
@@ -54,9 +54,6 @@ public class Board extends JPanel implements Protocol, BoardState {
         logic = new Logic(this, owner, new SwingFigurePicker());
         hlight[0][0] = -1;
         this.setSize(480, 480);
-        boardId = 1;
-        figureId = 0;
-        loadImg();
         initFigures(new ClassicStartingBoardInitializer());
         addMouseListener(new MouseAdapter() {
 
@@ -141,31 +138,9 @@ public class Board extends JPanel implements Protocol, BoardState {
         }
     }
 
-    public void loadImg() {
-        MediaTracker mt = new MediaTracker(this);
-        boardBackground = getToolkit().getImage(getClass().getResource("/img/" + boardId + ".jpg"));
-        mt.addImage(boardBackground, 0);
-        try {
-            mt.waitForAll();
-        } catch (InterruptedException ex) {
-            //ignore
-        }
-        for (int i = 0; i <= 3; i++) {
-            for (int j = 0; j <= 5; j++) {
-                figureSet[i][j] = getToolkit().getImage(getClass().getResource("/img/" + (i + figureId) + j + ".gif"));
-                mt.addImage(figureSet[i][j], 0);
-                try {
-                    mt.waitForAll();
-                } catch (InterruptedException ex) {
-                    //ignore
-                }
-            }
-        }
-    }
-
     @Override
     public void paint(Graphics g) {
-        g.drawImage(boardBackground, 0, 0, this);
+        g.drawImage(resourceManager.getBoard(), 0, 0, this);
         if (!isLoading) {
             Figure figure;
             for (int col = 0; col <= 7; col++) {
@@ -211,12 +186,11 @@ public class Board extends JPanel implements Protocol, BoardState {
     }
 
     public Image getImageOfFigure(Figure figure) {
-        return figureSet[figure.color][figure.type];
+        return resourceManager.getFigureSet().getImage(figure.color, figure.type);
     }
 
     public Image getImageOfDraggedFigure() {
-        Figure figure = fig[x][y];
-        return figureSet[figure.color + 1][figure.type];
+        return resourceManager.getFigureSet().getImage(fig[x][y].color + 1, fig[x][y].type);
     }
 
     public Figure getDraggedFigure() {
@@ -285,7 +259,7 @@ public class Board extends JPanel implements Protocol, BoardState {
         hlight[0][1] = newY * CELL_SIZE;
         hlight[1][0] = currX * CELL_SIZE;
         hlight[1][1] = currY * CELL_SIZE;
-        repaint();
+        refresh();
     }
 
     @Override
@@ -336,7 +310,7 @@ public class Board extends JPanel implements Protocol, BoardState {
         } catch (IOException | InterruptedException ex) {
             log.log(ex.getMessage());
         }
-        repaint();
+        refresh();
     }
 
     @Override
@@ -384,7 +358,7 @@ public class Board extends JPanel implements Protocol, BoardState {
         } else {
             ++hlPos;
         }
-        repaint();
+        refresh();
     }
 
     @Override
@@ -431,7 +405,7 @@ public class Board extends JPanel implements Protocol, BoardState {
         }
         giveTurn();
         sender.free();
-        repaint();
+        refresh();
     }
 
     public void longXchng() {
@@ -457,7 +431,7 @@ public class Board extends JPanel implements Protocol, BoardState {
         }
         giveTurn();
         sender.free();
-        repaint();
+        refresh();
     }
 
     public void globalClear() {
@@ -549,30 +523,12 @@ public class Board extends JPanel implements Protocol, BoardState {
     }
 
     @Override
-    public void reloadImages(int boardId, int figureId) {
-        this.boardId = boardId;
-        this.figureId = figureId;
-        loadImg();
-        repaint();
-    }
-
-    @Override
-    public int getBoardId() {
-        return boardId;
-    }
-
-    @Override
-    public int getFigureId() {
-        return figureId;
-    }
-
-    @Override
     public void setHlPos(int hlPos) {
         this.hlPos = hlPos;
     }
 
     @Override
-    public Image getFigureImage(int color, int type) {
-        return figureSet[color][type];
+    public void refresh() {
+        repaint();
     }
 }

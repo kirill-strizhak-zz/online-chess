@@ -2,6 +2,7 @@ package ks3.oc;
 
 import ks3.oc.board.Board;
 import ks3.oc.dialogs.NewGameConfirmation;
+import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.SwingMainWindow;
 import ks3.oc.swing.dialogs.SwingNewGameConfirmation;
 
@@ -9,6 +10,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 public class Receiver implements Runnable, Protocol {
+
+    private final ResourceManager resourceManager;
 
     private Logger log = null;
     private boolean active = true;
@@ -19,7 +22,8 @@ public class Receiver implements Runnable, Protocol {
     private Board board = null;
     private NewGameConfirmation newGameConfirmation;
 
-    public Receiver(SwingMainWindow own, Logger log, BufferedReader b, Sender send) {
+    public Receiver(SwingMainWindow own, Logger log, ResourceManager resourceManager, BufferedReader b, Sender send) {
+        this.resourceManager = resourceManager;
         this.log = log;
         br = b;
         owner = own;
@@ -91,7 +95,7 @@ public class Receiver implements Runnable, Protocol {
                         }
                         break;
                     case OFFER_RESET:
-                        newGameConfirmation.open(log, sender, owner);
+                        newGameConfirmation.open(log, resourceManager, sender, owner);
                         break;
                     case ACCEPT_RESET:
                         owner.reset();

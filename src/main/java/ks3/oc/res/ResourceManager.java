@@ -53,7 +53,9 @@ public class ResourceManager {
             throw new MissingResourcesError("Failed to load required resources");
         }
 
+        this.figureSetName = figureSetName;
         loadFigureSet(figureSetName);
+        this.boardName = boardName;
         loadBoard(boardName);
     }
 
@@ -74,13 +76,11 @@ public class ResourceManager {
                 figureImages[colorIdx][typeIdx] = tryToLoadRequiredResource(imagePath);
             }
         }
-        this.figureSetName = figureSetName;
         figureSets.put(figureSetName, new FigureSet(figureImages));
     }
 
     private void loadBoard(String boardName) {
-        this.boardName = boardName;
-        String resourcePath = boardPath + boardName + ".gif";
+        String resourcePath = boardPath + boardName + ".jpg";
         boards.put(boardName, tryToLoadRequiredResource(resourcePath));
     }
 
@@ -122,6 +122,20 @@ public class ResourceManager {
         }
     }
 
+    public void selectFigureSet(String figureSetName) {
+        this.figureSetName = figureSetName;
+        if (!figureSets.containsKey(figureSetName)) {
+            loadFigureSet(figureSetName);
+        }
+    }
+
+    public void selectBoard(String boardName) {
+        this.boardName = boardName;
+        if (!boards.containsKey(boardName)) {
+            loadBoard(boardName);
+        }
+    }
+
     public Map<String, Image> getFigureSetIcons() {
         return wrappedFigureSetIcons;
     }
@@ -134,7 +148,15 @@ public class ResourceManager {
         return figureSets.get(figureSetName);
     }
 
-    public Object getBoard() {
+    public Image getBoard() {
         return boards.get(boardName);
+    }
+
+    public String getFigureSetName() {
+        return figureSetName;
+    }
+
+    public String getBoardName() {
+        return boardName;
     }
 }

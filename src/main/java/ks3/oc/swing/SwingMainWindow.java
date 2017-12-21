@@ -11,6 +11,7 @@ import ks3.oc.board.start.ClassicStartingBoardInitializer;
 import ks3.oc.dialogs.AboutWindow;
 import ks3.oc.dialogs.PreferencesWindow;
 import ks3.oc.logic.Logic;
+import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.dialogs.SwingAboutWindow;
 import ks3.oc.swing.dialogs.SwingPreferencesWindow;
 
@@ -33,6 +34,9 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
     private static final String ERR_BASE = "oc.MainFrame::";
 
+    private final AboutWindow aboutWindow;
+    private final PreferencesWindow preferencesWindow;
+
     private Logger log;
     private SwingMainWindow self = null;
     public String opponentName;
@@ -43,15 +47,11 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
     private int oppColor;
     private int myColor = -1;
     private boolean myTurn = false;
-    private AboutWindow aboutWindow;
-    private PreferencesWindow preferencesWindow;
     private Logic logic = null;
     private JMenuItem shortXchng, longXchng;
 
-    public SwingMainWindow(Logger log, int type, int c, String addr, int port, String name) {
+    public SwingMainWindow(Logger log, ResourceManager resourceManager, int type, int c, String addr, int port, String name) {
         super("Online Chess");
-        aboutWindow = new SwingAboutWindow();
-        preferencesWindow = new SwingPreferencesWindow();
         self = this;
         this.log = log;
         setSize(768, 531);
@@ -61,7 +61,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         setResizable(false);
 
         myName = name;
-        sender = new Sender(this, log, type, addr, port);
+        sender = new Sender(this, log, resourceManager, type, addr, port);
         if (type == SERVER) {
             setMyColor(c);
             if (getMyColor() == BLACK) {
@@ -96,11 +96,14 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             }
         }
 
-        board = new Board(log, this, sender, chatPanel);
+        board = new Board(log, resourceManager, this, sender, chatPanel);
         getContentPane().add("Center", board);
 
         chatPanel = new ChatPanel(sender, this);
         getContentPane().add("East", chatPanel);
+
+        this.aboutWindow = new SwingAboutWindow();
+        this.preferencesWindow = new SwingPreferencesWindow(resourceManager, board);
 
         try {
             while (!sender.isFree()) {
@@ -190,7 +193,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             });
         }
         about.addActionListener(event -> aboutWindow.open());
-        preferences.addActionListener(event -> preferencesWindow.open(board));
+        preferences.addActionListener(event -> preferencesWindow.open());
         game.add(shortXchng);
         game.add(longXchng);
         game.addSeparator();

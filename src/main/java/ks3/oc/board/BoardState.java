@@ -2,8 +2,6 @@ package ks3.oc.board;
 
 import ks3.oc.Figure;
 
-import java.awt.*;
-
 public interface BoardState {
 
     void makeMove(int newX, int newY);
@@ -30,13 +28,7 @@ public interface BoardState {
 
     int getKingRow(int color);
 
-    void reloadImages(int boardId, int figureId);
-
-    int getBoardId();
-
-    int getFigureId();
-
     void setHlPos(int hlPos);
 
-    Image getFigureImage(int color, int type);
+    void refresh();
 }

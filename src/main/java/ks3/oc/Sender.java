@@ -1,5 +1,6 @@
 package ks3.oc;
 
+import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.SwingMainWindow;
 
 import java.io.BufferedReader;
@@ -22,7 +23,7 @@ public class Sender implements Protocol {
     private SwingMainWindow owner;
     private boolean free = true;
 
-    public Sender(SwingMainWindow own, Logger log, int type, String host, int port) {
+    public Sender(SwingMainWindow own, Logger log, ResourceManager resourceManager, int type, String host, int port) {
         this.log = log;
         owner = own;
         try {
@@ -57,7 +58,7 @@ public class Sender implements Protocol {
             OutputStreamWriter outw = new OutputStreamWriter(out);
             BufferedReader br = new BufferedReader(inr);
             pw = new PrintWriter(outw);
-            Receiver receiver = new Receiver(owner, log, br, this);
+            Receiver receiver = new Receiver(owner, log, resourceManager, br, this);
             new Thread(receiver).start();
             owner.say("Sender: ini completed");
         } catch (Exception e) {
