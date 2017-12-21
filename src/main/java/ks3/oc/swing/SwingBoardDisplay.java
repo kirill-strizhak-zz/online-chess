@@ -32,7 +32,6 @@ public class SwingBoardDisplay extends JPanel implements BoardDisplay {
         this.debugOverlay = new SwingDebugOverlay();
         this.setSize(480, 480);
         addMouseListener(new MouseAdapter() {
-
             @Override
             public void mousePressed(MouseEvent event) {
                 boardState.selectFigure(event.getX() / BoardState.CELL_SIZE, event.getY() / BoardState.CELL_SIZE);
@@ -47,7 +46,6 @@ public class SwingBoardDisplay extends JPanel implements BoardDisplay {
             }
         });
         addMouseMotionListener(new MouseMotionAdapter() {
-
             @Override
             public void mouseDragged(MouseEvent event) {
                 if (boardState.isDragging()) {
