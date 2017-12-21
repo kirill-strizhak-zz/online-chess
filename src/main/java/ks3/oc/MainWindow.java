@@ -4,8 +4,6 @@ public interface MainWindow {
 
     ChatPanel getChat();
 
-    void say(String s);
-
     int getOppColor();
 
     int getMyColor();

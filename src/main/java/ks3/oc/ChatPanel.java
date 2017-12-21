@@ -1,6 +1,7 @@
 package ks3.oc;
 
 import ks3.oc.swing.SwingMainWindow;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +13,8 @@ import java.util.Date;
 import java.util.StringTokenizer;
 
 public class ChatPanel extends JPanel implements Protocol {
+
+    private static final Logger LOGGER = Logger.getLogger(ChatPanel.class);
 
     private JTextArea chat;
     private JTextField txt;
@@ -49,14 +52,14 @@ public class ChatPanel extends JPanel implements Protocol {
         });
         add("South", txt);
         time = new SimpleDateFormat(DATE_FORMAT);
-        owner.say("CP: ini completed");
+        LOGGER.info("Initialization completed");
     }
 
     public void sendChat(String s) {
+        LOGGER.info("Waiting to send chat");
         while (!sender.isFree()) {
             try {
-                owner.say("CP: waiting to send chat");
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException ex) {
                 //ignore
             }
@@ -64,8 +67,8 @@ public class ChatPanel extends JPanel implements Protocol {
         try {
             sender.send(CHAT);
             sender.send(s);
-        } catch (IOException e) {
-            owner.say("CP: cannot send chat");
+        } catch (IOException ex) {
+            LOGGER.error("Failed to send chat", ex);
             addChatLine("* Cannot send chat: connection lost", "sys_&^_tem");
         }
         sender.free();

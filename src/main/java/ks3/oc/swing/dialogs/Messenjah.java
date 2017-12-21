@@ -1,6 +1,5 @@
 package ks3.oc.swing.dialogs;
 
-import ks3.oc.Logger;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
 import ks3.oc.Starter;
@@ -8,6 +7,7 @@ import ks3.oc.board.BoardState;
 import ks3.oc.res.FigureSet;
 import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.SwingMainWindow;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,11 +22,9 @@ import java.io.IOException;
 
 public class Messenjah extends JFrame implements Protocol {
 
-    public static final String ERR_BASE = "oc.Messenjah::";
+    private static final Logger LOGGER = Logger.getLogger(Messenjah.class);
 
-    private Logger log;
     private ResourceManager resourceManager;
-    private Messenjah self;
     private SwingMainWindow owner;
     private BoardState board;
     private Starter starter;
@@ -37,7 +35,6 @@ public class Messenjah extends JFrame implements Protocol {
     private JTextField addr, port, name;
     private Checkbox cbServer, cbClient, cbWhite, cbBlack;
     private String save = "localhost";
-    private JComboBox boardCB, figureCB;
 
     // About window
     public Messenjah() {
@@ -221,10 +218,8 @@ public class Messenjah extends JFrame implements Protocol {
     }
 
     // new game
-    public Messenjah(Logger log, ResourceManager resourceManager, Sender send, SwingMainWindow own) {
+    public Messenjah(ResourceManager resourceManager, Sender send, SwingMainWindow own) {
         super("Start new game?");
-        self = this;
-        this.log = log;
         this.resourceManager = resourceManager;
         setSize(250, 100);
         setResizable(false);
@@ -243,14 +238,14 @@ public class Messenjah extends JFrame implements Protocol {
         yes.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
+                    LOGGER.info("Waiting to accept reset");
                     while (!sender.isFree()) {
-                        owner.say("M: waiting to send acc_reset");
-                        Thread.sleep(100);
+                        Thread.sleep(10);
                     }
                     sender.send(ACCEPT_RESET);
                     sender.free();
                 } catch (InterruptedException | IOException ex) {
-                    self.log.log(ERR_BASE + "NewGame:yesListener():: exception: " + ex.getMessage());
+                    LOGGER.error("Failed to accept reset", ex);
                 }
                 owner.reset();
                 dispose();
@@ -259,14 +254,14 @@ public class Messenjah extends JFrame implements Protocol {
         no.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
+                    LOGGER.info("Waiting to decline reset");
                     while (!sender.isFree()) {
-                        owner.say("M: waiting to send dec_reset");
-                        Thread.sleep(100);
+                        Thread.sleep(10);
                     }
                     sender.send(DECLINE_RESET);
                     sender.free();
                 } catch (InterruptedException | IOException ex) {
-                    self.log.log(ERR_BASE + "NewGame:noListener():: exception: " + ex.getMessage());
+                    LOGGER.error("Failed to decline reset", ex);
                 }
                 dispose();
             }

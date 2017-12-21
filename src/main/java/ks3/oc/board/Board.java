@@ -2,7 +2,6 @@ package ks3.oc.board;
 
 import ks3.oc.ChatPanel;
 import ks3.oc.Figure;
-import ks3.oc.Logger;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
@@ -12,6 +11,7 @@ import ks3.oc.logic.Logic;
 import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.SwingDebugOverlay;
 import ks3.oc.swing.dialogs.SwingFigurePicker;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,11 +22,12 @@ import java.io.IOException;
 
 public class Board extends JPanel implements Protocol, BoardState {
 
+    private static final Logger LOGGER = Logger.getLogger(Board.class);
+
     private static final int CELL_SIZE = 60;
 
     private final ResourceManager resourceManager;
     private final SwingDebugOverlay debugOverlay;
-    private final Logger log;
 
     private boolean isDragging = false;
     private boolean check = false;
@@ -43,11 +44,10 @@ public class Board extends JPanel implements Protocol, BoardState {
     private Color myRed = new Color(220, 0, 0);
     public boolean isLoading = false;
 
-    public Board(Logger log, ResourceManager resourceManager, MainWindow own, Sender send, ChatPanel ch) {
+    public Board(ResourceManager resourceManager, MainWindow own, Sender send, ChatPanel ch) {
         super();
         this.resourceManager = resourceManager;
         this.debugOverlay = new SwingDebugOverlay();
-        this.log = log;
         owner = own;
         sender = send;
         chat = ch;
@@ -80,7 +80,7 @@ public class Board extends JPanel implements Protocol, BoardState {
                 }
             }
         });
-        owner.say("B: ini completed");
+        LOGGER.info("Initialization completed");
     }
 
     public void selectFigure(int col, int row) {
@@ -235,18 +235,18 @@ public class Board extends JPanel implements Protocol, BoardState {
             if (logic.mate(king[z][0], king[z][1])) {
                 owner.setMyTurn(false);
                 try {
+                    LOGGER.info("Waiting to send coordinates");
                     while (!sender.isFree()) {
-                        owner.say("B: waiting to send coordinates");
-                        Thread.sleep(1000);
+                        Thread.sleep(10);
                     }
                     sender.send(MATE);
                     sender.free();
                 } catch (IOException | InterruptedException ex) {
-                    log.log(ex.getMessage());
+                    LOGGER.error("Failed to send mate notification", ex);
                 }
                 while (chat == null) {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(100);
                     } catch (InterruptedException ex) {
                         //ignore
                     }
@@ -272,9 +272,9 @@ public class Board extends JPanel implements Protocol, BoardState {
             invertedY = Math.abs(7 - dragY);
             newInvertedX = Math.abs(7 - newX);
             newInvertedY = Math.abs(7 - newY);
+            LOGGER.info("Waiting to send coordinates");
             while (!sender.isFree()) {
-                owner.say("B: waiting to send coordinates");
-                Thread.sleep(1000);
+                Thread.sleep(10);
             }
             sender.send(COORDINATES);
             sender.send(invertedX);
@@ -286,10 +286,10 @@ public class Board extends JPanel implements Protocol, BoardState {
             if (!isLoading) {
                 if (logic.mate(king[z][0], king[z][1])) {
                     owner.setMyTurn(false);
+                    LOGGER.info("Waiting to send coordinates");
                     while (!sender.isFree()) {
-                        owner.say("B: waiting to send coordinates");
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(10);
                         } catch (InterruptedException ex) {
                             //ignore
                         }
@@ -298,7 +298,7 @@ public class Board extends JPanel implements Protocol, BoardState {
                     sender.free();
                     while (chat == null) {
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(100);
                         } catch (InterruptedException ex) {
                             //ignore
                         }
@@ -308,7 +308,7 @@ public class Board extends JPanel implements Protocol, BoardState {
                 }
             }
         } catch (IOException | InterruptedException ex) {
-            log.log(ex.getMessage());
+            LOGGER.error("Failed to send move", ex);
         }
         refresh();
     }
@@ -340,7 +340,7 @@ public class Board extends JPanel implements Protocol, BoardState {
             sender.send(iIsEmpty);
             sender.send(iFirstStep);
         } catch (IOException ex) {
-            log.log(ex.getMessage());
+            LOGGER.error("Failed to set figure", ex);
         }
     }
 
@@ -366,7 +366,7 @@ public class Board extends JPanel implements Protocol, BoardState {
         try {
             sender.send(GIVE_TURN);
         } catch (IOException ex) {
-            log.log(ex.getMessage());
+            LOGGER.error("Failed to give turn", ex);
         }
     }
 
@@ -374,7 +374,7 @@ public class Board extends JPanel implements Protocol, BoardState {
         try {
             sender.send(REAVE_TURN);
         } catch (IOException ex) {
-            log.log(ex.getMessage());
+            LOGGER.error("Failed to reave turn", ex);
         }
     }
 
@@ -384,10 +384,10 @@ public class Board extends JPanel implements Protocol, BoardState {
 
     public void shortXchng() {
         owner.setMyTurn(false);
+        LOGGER.info("Waiting to send coordinates");
         while (!sender.isFree()) {
-            owner.say("B: waiting to send coordinates");
             try {
-                Thread.sleep(1000);
+                Thread.sleep(10);
             } catch (InterruptedException ex) {
                 //ignore
             }
@@ -410,10 +410,10 @@ public class Board extends JPanel implements Protocol, BoardState {
 
     public void longXchng() {
         owner.setMyTurn(false);
+        LOGGER.info("Waiting to send coordinates");
         while (!sender.isFree()) {
-            owner.say("B: waiting to send coordinates");
             try {
-                Thread.sleep(1000);
+                Thread.sleep(10);
             } catch (InterruptedException ex) {
                 //ignore
             }
@@ -436,10 +436,10 @@ public class Board extends JPanel implements Protocol, BoardState {
 
     public void globalClear() {
         localClear();
+        LOGGER.info("Waiting to send clear notification");
         while (!sender.isFree()) {
-            owner.say("B: waiting to send CLEAR");
             try {
-                Thread.sleep(1000);
+                Thread.sleep(10);
             } catch (InterruptedException ex) {
                 //ignore
             }
@@ -447,7 +447,7 @@ public class Board extends JPanel implements Protocol, BoardState {
         try {
             sender.send(CLEAR);
         } catch (IOException ex) {
-            log.log(ex.getMessage());
+            LOGGER.error("Failed to send clear notification", ex);
         }
         sender.free();
     }

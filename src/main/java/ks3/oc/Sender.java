@@ -2,6 +2,7 @@ package ks3.oc;
 
 import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.SwingMainWindow;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,29 +14,27 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-
 public class Sender implements Protocol {
 
-    private final Logger log;
+    private static final Logger LOGGER = Logger.getLogger(Sender.class);
 
     private Socket sock;
     private PrintWriter pw;
     private SwingMainWindow owner;
     private boolean free = true;
 
-    public Sender(SwingMainWindow own, Logger log, ResourceManager resourceManager, int type, String host, int port) {
-        this.log = log;
+    public Sender(SwingMainWindow own, ResourceManager resourceManager, int type, String host, int port) {
         owner = own;
         try {
             if (type == 0) {
                 boolean connected = false;
                 while (!connected) {
                     ServerSocket server = new ServerSocket(port);
-                    owner.say("Sender: waiting for connection...");
+                    LOGGER.info("Waiting for connection...");
                     sock = server.accept();
                     byte b = (byte) sock.getInputStream().read();
                     if (b != IDENT) {
-                        owner.say("Sender: unknown app, connection closed");
+                        LOGGER.info("Unknown app, connection closed");
                         sock.close();
                         continue;
                     }
@@ -43,7 +42,7 @@ public class Sender implements Protocol {
                     sock.getOutputStream().write(IDENT);
                 }
             } else {
-                owner.say("Sender: connecting to server");
+                LOGGER.info("Connecting to server");
                 sock = new Socket(host, port);
                 sock.getOutputStream().write(IDENT);
                 byte b = (byte) sock.getInputStream().read();
@@ -51,22 +50,18 @@ public class Sender implements Protocol {
                     throw new IOException("Invalid identification token received");
                 }
             }
-            owner.say("Sender: connection established, creating i/o streams");
+            LOGGER.info("Connection established, creating i/o streams");
             InputStream in = sock.getInputStream();
             OutputStream out = sock.getOutputStream();
             InputStreamReader inr = new InputStreamReader(in);
             OutputStreamWriter outw = new OutputStreamWriter(out);
             BufferedReader br = new BufferedReader(inr);
             pw = new PrintWriter(outw);
-            Receiver receiver = new Receiver(owner, log, resourceManager, br, this);
+            Receiver receiver = new Receiver(owner, resourceManager, br, this);
             new Thread(receiver).start();
-            owner.say("Sender: ini completed");
-        } catch (Exception e) {
-            if (type == 0) {
-                owner.say("Error:Sender: port " + port + " is taken");
-            } else {
-                owner.say("Error:Sender: noone there - " + host + ":" + port);
-            }
+            LOGGER.info("Initialization completed");
+        } catch (IOException ex) {
+            LOGGER.error("Failed to establish connection", ex);
         }
     }
 
@@ -80,13 +75,13 @@ public class Sender implements Protocol {
         pw.flush();
     }
 
-    public void suicide(String s) {
+    public void suicide(String reason) {
         try {
-            owner.say("Sender: suicidal tendency caused by: " + s);
+            LOGGER.info("Closing: " + reason);
             sock.close();
             owner.connectionKilled();
         } catch (IOException ex) {
-            log.log(ex.getMessage());
+            LOGGER.error("Failed to do clean shutdown", ex);
         }
     }
 

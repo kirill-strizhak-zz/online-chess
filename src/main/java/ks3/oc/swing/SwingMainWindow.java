@@ -2,7 +2,6 @@ package ks3.oc.swing;
 
 import ks3.oc.ChatPanel;
 import ks3.oc.Figure;
-import ks3.oc.Logger;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
@@ -14,6 +13,7 @@ import ks3.oc.logic.Logic;
 import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.dialogs.SwingAboutWindow;
 import ks3.oc.swing.dialogs.SwingPreferencesWindow;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,12 +32,11 @@ import java.util.StringTokenizer;
 
 public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
-    private static final String ERR_BASE = "oc.MainFrame::";
+    private static final Logger LOGGER = Logger.getLogger(SwingMainWindow.class);
 
     private final AboutWindow aboutWindow;
     private final PreferencesWindow preferencesWindow;
 
-    private Logger log;
     private SwingMainWindow self = null;
     public String opponentName;
     public String myName;
@@ -50,10 +49,9 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
     private Logic logic = null;
     private JMenuItem shortXchng, longXchng;
 
-    public SwingMainWindow(Logger log, ResourceManager resourceManager, int type, int c, String addr, int port, String name) {
+    public SwingMainWindow(ResourceManager resourceManager, int type, int c, String addr, int port, String name) {
         super("Online Chess");
         self = this;
-        this.log = log;
         setSize(768, 531);
         setIgnoreRepaint(false);
         getContentPane().setLayout(new BorderLayout());
@@ -61,7 +59,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         setResizable(false);
 
         myName = name;
-        sender = new Sender(this, log, resourceManager, type, addr, port);
+        sender = new Sender(this, resourceManager, type, addr, port);
         if (type == SERVER) {
             setMyColor(c);
             if (getMyColor() == BLACK) {
@@ -71,8 +69,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             }
             try {
                 while (!sender.isFree()) {
-                    log.log(ERR_BASE + "(): waiting to send color");
-                    Thread.sleep(1000);
+                    LOGGER.info("Waiting to send color");
+                    Thread.sleep(10);
                 }
                 sender.send(COLOR);
                 if (getMyColor() == WHITE) {
@@ -82,21 +80,21 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
                     sender.send(WHITE);
                 }
                 sender.free();
-            } catch (Exception e) {
-                log.log(ERR_BASE + "(): exception while waiting to send color: " + e.getMessage());
+            } catch (IOException | InterruptedException ex) {
+                LOGGER.error("Failed to send color", ex);
             }
         }
 
         while (getMyColor() == -1) {
-            log.log(ERR_BASE + "(): waiting for color");
+            LOGGER.info("Waiting for color");
             try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                log.log(ERR_BASE + "(): exception while waiting to receive color: " + e.getMessage());
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                LOGGER.error("Failed to receive color", ex);
             }
         }
 
-        board = new Board(log, resourceManager, this, sender, chatPanel);
+        board = new Board(resourceManager, this, sender, chatPanel);
         getContentPane().add("Center", board);
 
         chatPanel = new ChatPanel(sender, this);
@@ -107,14 +105,14 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
         try {
             while (!sender.isFree()) {
-                log.log(ERR_BASE + "(): waiting to send name");
-                Thread.sleep(1000);
+                LOGGER.info("Waiting to send name");
+                Thread.sleep(10);
             }
             sender.send(NAME);
             sender.send(myName);
             sender.free();
-        } catch (Exception e) {
-            log.log(ERR_BASE + "(): exception while waiting to send name: " + e.getMessage());
+        } catch (IOException | InterruptedException ex) {
+            LOGGER.error("Failed to send name", ex);
         }
 
         JMenuBar menuBar = new JMenuBar();
@@ -132,9 +130,9 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             public void mousePressed(MouseEvent e) {
                 while (logic == null) {
                     try {
-                        Thread.sleep(1000);
-                    } catch (Exception ex) {
-                        self.log.log(ERR_BASE + "gamePressed(): " + ex.getMessage());
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                        //ignore
                     }
                     logic = board.getLogic();
                 }
@@ -171,9 +169,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             newGame.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     while (!sender.isFree()) {
-                        self.log.log(ERR_BASE + "newGame(): waiting to send RESET");
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(10);
                         } catch (InterruptedException ex) {
                             //ignore
                         }
@@ -181,7 +178,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
                     try {
                         sender.send(OFFER_RESET);
                     } catch (IOException ex) {
-                        log.log(ex.getMessage());
+                        LOGGER.error("Failed to send reset offer", ex);
                     }
                     sender.free();
                 }
@@ -211,9 +208,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             public void windowClosing(WindowEvent e) {
                 setVisible(false);
                 while (!sender.isFree()) {
-                    self.log.log(ERR_BASE + "windowClosing(): waiting to send CLOSE");
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(10);
                     } catch (InterruptedException ex) {
                         //ignore
                     }
@@ -221,7 +217,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
                 try {
                     sender.send(CLOSE);
                 } catch (IOException ex) {
-                    log.log(ex.getMessage());
+                    LOGGER.error("Failed to send close notification", ex);
                 }
                 sender.suicide("MF: client closed app");
                 System.exit(0);
@@ -273,8 +269,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             pw.println(t + ":" + board.hlight[0][0] + ":" + board.hlight[0][1] + ":" + board.hlight[1][0] + ":" + board.hlight[1][1]);
             pw.flush();
             pw.close();
-        } catch (IOException e) {
-            log.log(ERR_BASE + "save(): exception while saving: " + e.getMessage());
+        } catch (IOException ex) {
+            LOGGER.error("Failed to save", ex);
         }
         setMyTurn(t);
         if (!isMyTurn()) {
@@ -318,20 +314,14 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             board.hlight[1][0] = Integer.parseInt(breaker.nextToken());
             board.hlight[1][1] = Integer.parseInt(breaker.nextToken());
             br.close();
-            log.log(ERR_BASE + "load(): successful load");
-        } catch (Exception e) {
-            log.log(ERR_BASE + "load(): exception while loading");
+        } catch (IOException ex) {
+            LOGGER.error("Failed to load", ex);
         }
         if (!isMyTurn()) {
             board.giveTurn();
         }
         board.repaint();
         board.isLoading = false;
-    }
-
-    @Override
-    public void say(String s) {
-        log.log(s);
     }
 
     @Override

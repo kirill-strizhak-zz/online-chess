@@ -5,15 +5,17 @@ import ks3.oc.dialogs.NewGameConfirmation;
 import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.SwingMainWindow;
 import ks3.oc.swing.dialogs.SwingNewGameConfirmation;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 
 public class Receiver implements Runnable, Protocol {
 
+    private static final Logger LOGGER = Logger.getLogger(Receiver.class);
+
     private final ResourceManager resourceManager;
 
-    private Logger log = null;
     private boolean active = true;
     private BufferedReader br;
     private SwingMainWindow owner;
@@ -22,9 +24,8 @@ public class Receiver implements Runnable, Protocol {
     private Board board = null;
     private NewGameConfirmation newGameConfirmation;
 
-    public Receiver(SwingMainWindow own, Logger log, ResourceManager resourceManager, BufferedReader b, Sender send) {
+    public Receiver(SwingMainWindow own, ResourceManager resourceManager, BufferedReader b, Sender send) {
         this.resourceManager = resourceManager;
-        this.log = log;
         br = b;
         owner = own;
         sender = send;
@@ -32,13 +33,13 @@ public class Receiver implements Runnable, Protocol {
     }
 
     public void run() {
-        owner.say("Receiver: activated");
+        LOGGER.info("Receiver: activated");
         while (active) {
             try {
                 int b = br.read();
                 switch (b) {
                     case NAME:
-                        owner.say("R: got NameID");
+                        LOGGER.info("Got NameID");
                         String name = br.readLine();
                         owner.opponentName = name;
                         while (chat == null) {
@@ -49,7 +50,7 @@ public class Receiver implements Runnable, Protocol {
                             }
                             chat = owner.getChat();
                         }
-                        owner.say("R: name received");
+                        LOGGER.info("Name received");
                         chat.addChatLine("* " + name + " connected", "sys_&^_tem");
                         break;
                     case COORDINATES:
@@ -95,7 +96,7 @@ public class Receiver implements Runnable, Protocol {
                         }
                         break;
                     case OFFER_RESET:
-                        newGameConfirmation.open(log, resourceManager, sender, owner);
+                        newGameConfirmation.open(resourceManager, sender, owner);
                         break;
                     case ACCEPT_RESET:
                         owner.reset();
@@ -147,8 +148,8 @@ public class Receiver implements Runnable, Protocol {
                         chat.addChatLine("* You win! Check and mate", "sys_&^_tem");
                         break;
                 }
-            } catch (IOException e) {
-                owner.say("Receiver: can't reach opponent");
+            } catch (IOException ex) {
+                LOGGER.error("Can't reach opponent", ex);
                 active = false;
                 sender.suicide("Receiver: IOException");
             }
