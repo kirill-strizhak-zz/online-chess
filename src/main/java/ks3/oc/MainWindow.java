@@ -11,4 +11,6 @@ public interface MainWindow {
     boolean isMyTurn();
 
     void setMyTurn(boolean myTurn);
+
+    void refresh();
 }

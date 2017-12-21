@@ -6,17 +6,25 @@ import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.Sender;
 import ks3.oc.board.Board;
+import ks3.oc.board.BoardDisplay;
 import ks3.oc.board.start.ClassicStartingBoardInitializer;
 import ks3.oc.dialogs.AboutWindow;
 import ks3.oc.dialogs.PreferencesWindow;
 import ks3.oc.logic.Logic;
 import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.dialogs.SwingAboutWindow;
+import ks3.oc.swing.dialogs.SwingFigurePicker;
 import ks3.oc.swing.dialogs.SwingPreferencesWindow;
 import org.apache.log4j.Logger;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -34,15 +42,15 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
     private static final Logger LOGGER = Logger.getLogger(SwingMainWindow.class);
 
+    private final BoardDisplay boardDisplay;
     private final AboutWindow aboutWindow;
     private final PreferencesWindow preferencesWindow;
 
-    private SwingMainWindow self = null;
     public String opponentName;
     public String myName;
-    private ChatPanel chatPanel = null;
-    private Board board = null;
-    private Sender sender = null;
+    private ChatPanel chatPanel;
+    private Board board;
+    private Sender sender;
     private int oppColor;
     private int myColor = -1;
     private boolean myTurn = false;
@@ -51,7 +59,6 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
     public SwingMainWindow(ResourceManager resourceManager, int type, int c, String addr, int port, String name) {
         super("Online Chess");
-        self = this;
         setSize(768, 531);
         setIgnoreRepaint(false);
         getContentPane().setLayout(new BorderLayout());
@@ -95,13 +102,17 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         }
 
         board = new Board(resourceManager, this, sender, chatPanel);
-        getContentPane().add("Center", board);
+        logic = new Logic(board, this, new SwingFigurePicker());
+        board.setLogic(logic);
+
+        boardDisplay = new SwingBoardDisplay(resourceManager, this, board, logic);
+        getContentPane().add("Center", (Component)boardDisplay);
 
         chatPanel = new ChatPanel(sender, this);
         getContentPane().add("East", chatPanel);
 
         this.aboutWindow = new SwingAboutWindow();
-        this.preferencesWindow = new SwingPreferencesWindow(resourceManager, board);
+        this.preferencesWindow = new SwingPreferencesWindow(resourceManager, boardDisplay);
 
         try {
             while (!sender.isFree()) {
@@ -124,18 +135,10 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         JMenuItem preferences = new JMenuItem("Preferences");
         JMenuItem about = new JMenuItem("About");
         JMenuItem dump = new JMenuItem("Dump");
-        JCheckBoxMenuItem overlay = new JCheckBoxMenuItem("Overlay", board.isDebug());
+        JCheckBoxMenuItem overlay = new JCheckBoxMenuItem("Overlay", boardDisplay.isDebug());
         game.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                while (logic == null) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                        //ignore
-                    }
-                    logic = board.getLogic();
-                }
                 shortXchng.setEnabled(logic.kingSideCastlingAllowed());
                 longXchng.setEnabled(logic.queenSideCastlingAllowed());
             }
@@ -152,9 +155,9 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         });
         dump.addActionListener(event -> save());
         overlay.addActionListener(event -> {
-            board.setDebug(!board.isDebug());
-            overlay.setSelected(board.isDebug());
-            board.repaint();
+            boardDisplay.setDebug(!boardDisplay.isDebug());
+            overlay.setSelected(boardDisplay.isDebug());
+            boardDisplay.refresh();
         });
         if (type == SERVER) {
             JMenu file = new JMenu("File");
@@ -185,7 +188,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             });
             saveGame.addActionListener(event -> save());
             loadGame.addActionListener(event -> {
-                board.isLoading = true;
+                board.loading = true;
                 load();
             });
         }
@@ -233,7 +236,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         if (getMyColor() == WHITE) {
             setMyTurn(true);
         }
-        board.repaint();
+        boardDisplay.refresh();
         chatPanel.addChatLine("* Server starts new game", "sys_&^_tem");
     }
 
@@ -320,8 +323,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         if (!isMyTurn()) {
             board.giveTurn();
         }
-        board.repaint();
-        board.isLoading = false;
+        boardDisplay.refresh();
+        board.loading = false;
     }
 
     @Override
@@ -350,5 +353,10 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
     @Override
     public void setMyTurn(boolean myTurn) {
         this.myTurn = myTurn;
+    }
+
+    @Override
+    public void refresh() {
+        boardDisplay.refresh();
     }
 }

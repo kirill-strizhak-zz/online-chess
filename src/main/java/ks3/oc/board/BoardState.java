@@ -2,7 +2,29 @@ package ks3.oc.board;
 
 import ks3.oc.Figure;
 
+import java.awt.Image;
+
 public interface BoardState {
+
+    public static final int CELL_SIZE = 60;
+
+    void selectFigure(int col, int row);
+
+    void releaseFigure(int col, int row);
+
+    void dragFigure(int dragX, int dragY);
+
+    int[][] getHighlight();
+
+    boolean isCellEmpty(int col, int row);
+
+    boolean needToDrawHighlight();
+
+    Image getImageOfFigure(Figure figure);
+
+    Image getImageOfDraggedFigure();
+
+    Figure getDraggedFigure();
 
     void makeMove(int newX, int newY);
 
@@ -11,6 +33,8 @@ public interface BoardState {
     void giveTurn();
 
     boolean isDragging();
+
+    boolean isLoading();
 
     boolean isCheck();
 
@@ -29,6 +53,4 @@ public interface BoardState {
     int getKingRow(int color);
 
     void setHlPos(int hlPos);
-
-    void refresh();
 }

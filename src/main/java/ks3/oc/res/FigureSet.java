@@ -1,6 +1,6 @@
 package ks3.oc.res;
 
-import java.awt.*;
+import java.awt.Image;
 
 public class FigureSet {
 
