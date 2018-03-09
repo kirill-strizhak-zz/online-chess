@@ -92,7 +92,7 @@ public class Logic_DropTest extends LogicTester {
         logic.calculateAllowedMoves(col(), 1);
         logic.drop(col(), 0);
         verifyEmpty(col(), 1);
-        verify(figurePicker, times(1)).open(board, getMyColor(), col(), 0);
+        verify(figurePickerWindow, times(1)).open(getMyColor(), col(), 0);
         verify(board, times(1)).setCheck(false);
         verify(board, times(1)).makeMove(col(), 0);
     }

@@ -8,8 +8,8 @@ import ks3.oc.Sender;
 import ks3.oc.board.Board;
 import ks3.oc.board.BoardDisplay;
 import ks3.oc.board.start.ClassicStartingBoardInitializer;
-import ks3.oc.dialogs.AboutWindow;
-import ks3.oc.dialogs.PreferencesWindow;
+import ks3.oc.dialogs.DialogWindow;
+import ks3.oc.dialogs.FigurePickerWindow;
 import ks3.oc.logic.Logic;
 import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.dialogs.SwingAboutWindow;
@@ -43,8 +43,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
     private static final Logger LOGGER = Logger.getLogger(SwingMainWindow.class);
 
     private final BoardDisplay boardDisplay;
-    private final AboutWindow aboutWindow;
-    private final PreferencesWindow preferencesWindow;
+    private final DialogWindow aboutWindow;
+    private final DialogWindow preferencesWindow;
 
     public String opponentName;
     public String myName;
@@ -66,7 +66,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         setResizable(false);
 
         myName = name;
-        sender = new Sender(this, resourceManager, type, addr, port);
+        sender = new Sender(this, type, addr, port);
         if (type == SERVER) {
             setMyColor(c);
             if (getMyColor() == BLACK) {
@@ -102,7 +102,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         }
 
         board = new Board(resourceManager, this, sender, chatPanel);
-        logic = new Logic(board, this, new SwingFigurePicker());
+        FigurePickerWindow figurePickerWindow = new SwingFigurePicker(board, resourceManager);
+        logic = new Logic(board, this, figurePickerWindow);
         board.setLogic(logic);
 
         boardDisplay = new SwingBoardDisplay(resourceManager, this, board, logic);

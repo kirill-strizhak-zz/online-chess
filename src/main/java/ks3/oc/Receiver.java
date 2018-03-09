@@ -1,8 +1,7 @@
 package ks3.oc;
 
 import ks3.oc.board.Board;
-import ks3.oc.dialogs.NewGameConfirmation;
-import ks3.oc.res.ResourceManager;
+import ks3.oc.dialogs.DialogWindow;
 import ks3.oc.swing.SwingMainWindow;
 import ks3.oc.swing.dialogs.SwingNewGameConfirmation;
 import org.apache.log4j.Logger;
@@ -14,22 +13,19 @@ public class Receiver implements Runnable, Protocol {
 
     private static final Logger LOGGER = Logger.getLogger(Receiver.class);
 
-    private final ResourceManager resourceManager;
-
     private boolean active = true;
     private BufferedReader br;
     private SwingMainWindow owner;
     private Sender sender;
     private ChatPanel chat = null;
     private Board board = null;
-    private NewGameConfirmation newGameConfirmation;
+    private DialogWindow newGameConfirmation;
 
-    public Receiver(SwingMainWindow own, ResourceManager resourceManager, BufferedReader b, Sender send) {
-        this.resourceManager = resourceManager;
+    public Receiver(SwingMainWindow own, BufferedReader b, Sender send) {
         br = b;
         owner = own;
         sender = send;
-        newGameConfirmation = new SwingNewGameConfirmation();
+        newGameConfirmation = new SwingNewGameConfirmation(send, own);
     }
 
     public void run() {
@@ -96,7 +92,7 @@ public class Receiver implements Runnable, Protocol {
                         }
                         break;
                     case OFFER_RESET:
-                        newGameConfirmation.open(resourceManager, sender, owner);
+                        newGameConfirmation.open();
                         break;
                     case ACCEPT_RESET:
                         owner.reset();

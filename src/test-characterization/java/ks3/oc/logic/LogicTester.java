@@ -4,7 +4,7 @@ import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.BoardState;
-import ks3.oc.dialogs.FigurePicker;
+import ks3.oc.dialogs.FigurePickerWindow;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -23,7 +23,7 @@ public abstract class LogicTester {
     @Mock
     private MainWindow mainWindow;
     @Mock
-    protected FigurePicker figurePicker;
+    protected FigurePickerWindow figurePickerWindow;
 
     protected Logic logic;
 
@@ -60,7 +60,7 @@ public abstract class LogicTester {
         when(mainWindow.getMyColor()).thenAnswer((in) -> getMyColor());
         when(mainWindow.getOppColor()).thenAnswer((in) -> getOppColor());
         when(mainWindow.isMyTurn()).thenAnswer((in) -> isMyTurn());
-        logic = new Logic(board, mainWindow, figurePicker);
+        logic = new Logic(board, mainWindow, figurePickerWindow);
     }
 
     public void initFigure(int col, int row) {

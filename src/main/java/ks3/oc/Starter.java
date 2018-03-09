@@ -10,7 +10,7 @@ public class Starter {
 
     public Starter() {
         resourceManager = new ResourceManager("/img/figures/", "/img/boards/", "default", "default");
-        new SwingLauncherWindow().open(this);
+        new SwingLauncherWindow(this).open();
     }
 
     public void begin(int type, int color, String addr, int port, String name) {

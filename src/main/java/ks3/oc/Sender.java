@@ -1,6 +1,5 @@
 package ks3.oc;
 
-import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.SwingMainWindow;
 import org.apache.log4j.Logger;
 
@@ -23,7 +22,7 @@ public class Sender implements Protocol {
     private SwingMainWindow owner;
     private boolean free = true;
 
-    public Sender(SwingMainWindow own, ResourceManager resourceManager, int type, String host, int port) {
+    public Sender(SwingMainWindow own, int type, String host, int port) {
         owner = own;
         try {
             if (type == 0) {
@@ -57,7 +56,7 @@ public class Sender implements Protocol {
             OutputStreamWriter outw = new OutputStreamWriter(out);
             BufferedReader br = new BufferedReader(inr);
             pw = new PrintWriter(outw);
-            Receiver receiver = new Receiver(owner, resourceManager, br, this);
+            Receiver receiver = new Receiver(owner, br, this);
             new Thread(receiver).start();
             LOGGER.info("Initialization completed");
         } catch (IOException ex) {

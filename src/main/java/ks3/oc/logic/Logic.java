@@ -4,7 +4,7 @@ import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.BoardState;
-import ks3.oc.dialogs.FigurePicker;
+import ks3.oc.dialogs.FigurePickerWindow;
 
 public class Logic implements Protocol {
 
@@ -13,13 +13,13 @@ public class Logic implements Protocol {
     public boolean calculating = false;
     private BoardState board;
     private MainWindow owner;
-    private FigurePicker figurePicker;
+    private FigurePickerWindow figurePickerWindow;
     private int[] attacker = new int[2];
 
-    public Logic(BoardState board, MainWindow owner, FigurePicker figurePicker) {
+    public Logic(BoardState board, MainWindow owner, FigurePickerWindow figurePickerWindow) {
         this.board = board;
         this.owner = owner;
-        this.figurePicker = figurePicker;
+        this.figurePickerWindow = figurePickerWindow;
         allowed[0][0] = -1;
     }
 
@@ -243,7 +243,7 @@ public class Logic implements Protocol {
 
             } else if (kingSafeAt(board.getKingCol(colorId), board.getKingRow(colorId), owner.getOppColor())) {
                 if (sourceFigure.type == PAWN && row == 0) {
-                    figurePicker.open(board, owner.getMyColor(), col, row);
+                    figurePickerWindow.open(owner.getMyColor(), col, row);
                 }
                 board.setCheck(false);
                 board.makeMove(col, row);

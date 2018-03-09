@@ -1,7 +1,6 @@
 package ks3.oc.swing.dialogs;
 
 import ks3.oc.board.BoardDisplay;
-import ks3.oc.dialogs.PreferencesWindow;
 import ks3.oc.res.ResourceManager;
 
 import javax.swing.ImageIcon;
@@ -10,19 +9,20 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.util.Map;
 
-public class SwingPreferencesWindow extends JFrame implements PreferencesWindow {
+public class SwingPreferencesWindow extends SwingDialogWindow {
 
     public SwingPreferencesWindow(ResourceManager resourceManager, BoardDisplay boardDisplay) {
-        super("Preferences");
-        setSize(400, 300);
-        setResizable(false);
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        setLayout(new GridLayout(3, 1));
+        super(new JFrame("Preferences"));
+        frame.setSize(400, 300);
+        frame.setResizable(false);
+        frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        frame.setLayout(new GridLayout(3, 1));
 
         ImageIcon[] boardIcons = new ImageIcon[4];
         ImageIcon[] figureSetIcons = new ImageIcon[2];
@@ -65,23 +65,18 @@ public class SwingPreferencesWindow extends JFrame implements PreferencesWindow 
         figPanel.add("Center", figureCB);
         buttPanel.add(ok);
         buttPanel.add(cancel);
-        getContentPane().add(brdPanel);
-        getContentPane().add(figPanel);
-        getContentPane().add(buttPanel);
+        frame.getContentPane().add(brdPanel);
+        frame.getContentPane().add(figPanel);
+        frame.getContentPane().add(buttPanel);
         ok.addActionListener(event -> {
             String selectedBoard = ((ImageIcon) boardCB.getSelectedItem()).getDescription();
             resourceManager.selectBoard(selectedBoard);
             String selectedFigureSet = ((ImageIcon) figureCB.getSelectedItem()).getDescription();
             resourceManager.selectFigureSet(selectedFigureSet);
             boardDisplay.refresh();
-            setVisible(false);
+            frame.setVisible(false);
         });
-        cancel.addActionListener(event -> dispose());
-        pack();
-    }
-
-    @Override
-    public void open() {
-        setVisible(true);
+        cancel.addActionListener(event -> frame.setVisible(false));
+        frame.pack();
     }
 }
