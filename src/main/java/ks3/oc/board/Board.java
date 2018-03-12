@@ -4,7 +4,7 @@ import ks3.oc.ChatPanel;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
-import ks3.oc.Sender;
+import ks3.oc.conn.Sender;
 import ks3.oc.board.start.ClassicStartingBoardInitializer;
 import ks3.oc.board.start.StartingBoardInitializer;
 import ks3.oc.logic.Logic;

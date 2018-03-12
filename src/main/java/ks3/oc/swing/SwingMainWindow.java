@@ -4,10 +4,12 @@ import ks3.oc.ChatPanel;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
-import ks3.oc.Sender;
 import ks3.oc.board.Board;
 import ks3.oc.board.BoardDisplay;
 import ks3.oc.board.start.ClassicStartingBoardInitializer;
+import ks3.oc.conn.ClientSender;
+import ks3.oc.conn.Sender;
+import ks3.oc.conn.ServerSender;
 import ks3.oc.dialogs.DialogWindow;
 import ks3.oc.dialogs.FigurePickerWindow;
 import ks3.oc.logic.Logic;
@@ -66,8 +68,10 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         setResizable(false);
 
         myName = name;
-        sender = new Sender(this, type, addr, port);
-        if (type == SERVER) {
+        if (type == CLIENT) {
+            sender = new ClientSender(this, addr, port);
+        } else {
+            sender = new ServerSender(this, addr, port);
             setMyColor(c);
             if (getMyColor() == BLACK) {
                 setOppColor(WHITE);

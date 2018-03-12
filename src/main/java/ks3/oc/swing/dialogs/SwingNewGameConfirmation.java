@@ -1,7 +1,7 @@
 package ks3.oc.swing.dialogs;
 
 import ks3.oc.Protocol;
-import ks3.oc.Sender;
+import ks3.oc.conn.Sender;
 import ks3.oc.swing.SwingMainWindow;
 import org.apache.log4j.Logger;
 

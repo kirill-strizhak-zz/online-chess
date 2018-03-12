@@ -1,5 +1,6 @@
 package ks3.oc;
 
+import ks3.oc.conn.Sender;
 import ks3.oc.swing.SwingMainWindow;
 import org.apache.log4j.Logger;
 

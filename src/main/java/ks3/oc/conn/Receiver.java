@@ -1,5 +1,7 @@
-package ks3.oc;
+package ks3.oc.conn;
 
+import ks3.oc.ChatPanel;
+import ks3.oc.Protocol;
 import ks3.oc.board.Board;
 import ks3.oc.dialogs.DialogWindow;
 import ks3.oc.swing.SwingMainWindow;
@@ -32,8 +34,8 @@ public class Receiver implements Runnable, Protocol {
         LOGGER.info("Receiver: activated");
         while (active) {
             try {
-                int b = br.read();
-                switch (b) {
+                int header = br.read();
+                switch (header) {
                     case NAME:
                         LOGGER.info("Got NameID");
                         String name = br.readLine();
@@ -81,14 +83,13 @@ public class Receiver implements Runnable, Protocol {
                         sender.suicide("Receiver: client disconnected");
                         break;
                     case COLOR:
-                        owner.setMyColor(br.read());
-                        if (owner.getMyColor() == BLACK) {
-                            owner.setOppColor(WHITE);
-                        } else {
-                            owner.setOppColor(BLACK);
-                        }
-                        if (owner.getMyColor() == WHITE) {
+                        int myColor = br.read();
+                        owner.setMyColor(myColor);
+                        if (myColor == WHITE) {
                             owner.setMyTurn(true);
+                            owner.setOppColor(BLACK);
+                        } else {
+                            owner.setOppColor(WHITE);
                         }
                         break;
                     case OFFER_RESET:
