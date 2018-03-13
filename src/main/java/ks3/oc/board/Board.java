@@ -4,9 +4,8 @@ import ks3.oc.ChatPanel;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
-import ks3.oc.conn.Sender;
-import ks3.oc.board.start.ClassicStartingBoardInitializer;
 import ks3.oc.board.start.StartingBoardInitializer;
+import ks3.oc.conn.Sender;
 import ks3.oc.logic.Logic;
 import ks3.oc.res.ResourceManager;
 import org.apache.log4j.Logger;
@@ -34,15 +33,11 @@ public class Board implements Protocol, BoardState {
     private ChatPanel chat;
     private Logic logic;
 
-    public Board(ResourceManager resourceManager, MainWindow own, Sender send, ChatPanel ch) {
-        super();
+    public Board(ResourceManager resourceManager, MainWindow own, ChatPanel ch) {
         this.resourceManager = resourceManager;
         owner = own;
-        sender = send;
         chat = ch;
         hlight[0][0] = -1;
-        initFigures(new ClassicStartingBoardInitializer());
-        LOGGER.info("Initialization completed");
     }
 
     public void initFigures(StartingBoardInitializer startingBoardInitializer) {
@@ -462,5 +457,9 @@ public class Board implements Protocol, BoardState {
 
     public void setLogic(Logic logic) {
         this.logic = logic;
+    }
+
+    public void setSender(Sender sender) {
+        this.sender = sender;
     }
 }

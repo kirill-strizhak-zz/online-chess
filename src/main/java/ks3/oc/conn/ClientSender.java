@@ -1,5 +1,6 @@
 package ks3.oc.conn;
 
+import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.swing.SwingMainWindow;
 import org.apache.log4j.Logger;
@@ -11,8 +12,8 @@ public class ClientSender extends Sender {
 
     private static final Logger LOGGER = Logger.getLogger(ClientSender.class);
 
-    public ClientSender(SwingMainWindow own, String host, int port) {
-        super(own, host, port);
+    public ClientSender(MainWindow main, String host, int port) {
+        super(main, host, port);
     }
 
     @Override
@@ -20,8 +21,8 @@ public class ClientSender extends Sender {
         LOGGER.info("Connecting to server");
         Socket sock = getSocketFactory().createClient(host, port);
         sock.getOutputStream().write(Protocol.IDENT);
-        byte b = (byte) sock.getInputStream().read();
-        if (b != Protocol.IDENT) {
+        int header = sock.getInputStream().read();
+        if (header != Protocol.IDENT) {
             throw new IOException("Invalid identification token received");
         }
         return sock;

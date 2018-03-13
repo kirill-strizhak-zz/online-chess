@@ -1,6 +1,6 @@
 package ks3.oc.conn;
 
-import ks3.oc.swing.SwingMainWindow;
+import ks3.oc.MainWindow;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -15,19 +15,19 @@ public abstract class Sender {
     private static final Logger LOGGER = Logger.getLogger(Sender.class);
 
     private final SocketFactory socketFactory;
-    private final SwingMainWindow owner;
+    private final MainWindow main;
 
     private Socket sock;
     private PrintWriter pw;
     private boolean free = true;
 
-    public Sender(SwingMainWindow own, String host, int port) {
-        this(new SocketFactory(), own, host, port);
+    public Sender(MainWindow main, String host, int port) {
+        this(new SocketFactory(), main, host, port);
     }
 
-    protected Sender(SocketFactory socketFactory, SwingMainWindow owner, String host, int port) {
+    protected Sender(SocketFactory socketFactory, MainWindow main, String host, int port) {
         this.socketFactory = socketFactory;
-        this.owner = owner;
+        this.main = main;
         start(host, port);
     }
 
@@ -48,8 +48,8 @@ public abstract class Sender {
 
     protected abstract Socket openConnection(String host, int port) throws IOException;
 
-    protected void startReceiver(BufferedReader b) {
-        Receiver receiver = new Receiver(owner, b, this);
+    protected void startReceiver(BufferedReader reader) {
+        Receiver receiver = new Receiver(main, reader, this);
         new Thread(receiver).start();
     }
 
@@ -63,11 +63,11 @@ public abstract class Sender {
         pw.flush();
     }
 
-    public void suicide(String reason) {
+    public void deactivate(String reason) {
         try {
             LOGGER.info("Closing: " + reason);
             sock.close();
-            owner.connectionKilled();
+            main.connectionKilled();
         } catch (IOException ex) {
             LOGGER.error("Failed to do clean shutdown", ex);
         }

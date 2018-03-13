@@ -23,9 +23,8 @@ public class ChatPanel extends JPanel implements Protocol {
     private SwingMainWindow owner;
     private SimpleDateFormat time;
 
-    public ChatPanel(Sender send, SwingMainWindow own) {
+    public ChatPanel(SwingMainWindow own) {
         super(true);
-        sender = send;
         owner = own;
         this.setSize(320, 400);
         this.setLayout(new BorderLayout());
@@ -73,7 +72,7 @@ public class ChatPanel extends JPanel implements Protocol {
             addChatLine("* Cannot send chat: connection lost", "sys_&^_tem");
         }
         sender.free();
-        addChatLine(s, owner.myName);
+        addChatLine(s, owner.getMyName());
     }
 
     public void addChatLine(String s, String senderName) {
@@ -92,4 +91,7 @@ public class ChatPanel extends JPanel implements Protocol {
 
     }
 
+    public void setSender(Sender sender) {
+        this.sender = sender;
+    }
 }

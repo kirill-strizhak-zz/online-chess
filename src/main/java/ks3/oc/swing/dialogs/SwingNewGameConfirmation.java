@@ -1,8 +1,8 @@
 package ks3.oc.swing.dialogs;
 
+import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.conn.Sender;
-import ks3.oc.swing.SwingMainWindow;
 import org.apache.log4j.Logger;
 
 import javax.swing.JButton;
@@ -20,7 +20,7 @@ public class SwingNewGameConfirmation extends SwingDialogWindow {
 
     private static final Logger LOGGER = Logger.getLogger(SwingNewGameConfirmation.class);
 
-    public SwingNewGameConfirmation(Sender sender, SwingMainWindow owner) {
+    public SwingNewGameConfirmation(Sender sender, MainWindow owner) {
         super(new JFrame("Start new game?"));
         frame.setSize(250, 100);
         frame.setResizable(false);

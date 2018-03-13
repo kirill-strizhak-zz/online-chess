@@ -18,6 +18,6 @@ public class Board_InitialisationTest {
 
     @Test
     public void testInitCompletes() {
-        new Board(null, mainWindow, null, null);
+        new Board(null, mainWindow, null);
     }
 }

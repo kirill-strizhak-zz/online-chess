@@ -48,15 +48,15 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
     private final DialogWindow aboutWindow;
     private final DialogWindow preferencesWindow;
 
-    public String opponentName;
-    public String myName;
+    private String opponentName;
+    private String myName;
     private ChatPanel chatPanel;
     private Board board;
     private Sender sender;
     private int oppColor;
     private int myColor = -1;
     private boolean myTurn = false;
-    private Logic logic = null;
+    private Logic logic;
     private JMenuItem shortXchng, longXchng;
 
     public SwingMainWindow(ResourceManager resourceManager, int type, int c, String addr, int port, String name) {
@@ -67,7 +67,21 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         setBackground(Color.black);
         setResizable(false);
 
-        myName = name;
+        setMyName(name);
+        board = new Board(resourceManager, this, chatPanel);
+        FigurePickerWindow figurePickerWindow = new SwingFigurePicker(board, resourceManager);
+        logic = new Logic(board, this, figurePickerWindow);
+        board.setLogic(logic);
+
+        boardDisplay = new SwingBoardDisplay(resourceManager, this, board, logic);
+        getContentPane().add("Center", (Component)boardDisplay);
+
+        chatPanel = new ChatPanel(this);
+        getContentPane().add("East", chatPanel);
+
+        this.aboutWindow = new SwingAboutWindow();
+        this.preferencesWindow = new SwingPreferencesWindow(resourceManager, boardDisplay);
+
         if (type == CLIENT) {
             sender = new ClientSender(this, addr, port);
         } else {
@@ -105,31 +119,21 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             }
         }
 
-        board = new Board(resourceManager, this, sender, chatPanel);
-        FigurePickerWindow figurePickerWindow = new SwingFigurePicker(board, resourceManager);
-        logic = new Logic(board, this, figurePickerWindow);
-        board.setLogic(logic);
-
-        boardDisplay = new SwingBoardDisplay(resourceManager, this, board, logic);
-        getContentPane().add("Center", (Component)boardDisplay);
-
-        chatPanel = new ChatPanel(sender, this);
-        getContentPane().add("East", chatPanel);
-
-        this.aboutWindow = new SwingAboutWindow();
-        this.preferencesWindow = new SwingPreferencesWindow(resourceManager, boardDisplay);
-
         try {
             while (!sender.isFree()) {
                 LOGGER.info("Waiting to send name");
                 Thread.sleep(10);
             }
             sender.send(NAME);
-            sender.send(myName);
+            sender.send(getMyName());
             sender.free();
         } catch (IOException | InterruptedException ex) {
             LOGGER.error("Failed to send name", ex);
         }
+
+        board.setSender(sender);
+        board.initFigures(new ClassicStartingBoardInitializer());
+        chatPanel.setSender(sender);
 
         JMenuBar menuBar = new JMenuBar();
         JMenu help = new JMenu("Help");
@@ -227,13 +231,14 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
                 } catch (IOException ex) {
                     LOGGER.error("Failed to send close notification", ex);
                 }
-                sender.suicide("MF: client closed app");
+                sender.deactivate("MF: client closed app");
                 System.exit(0);
             }
         });
         this.setVisible(true);
     }
 
+    @Override
     public void reset() {
         setMyTurn(false);
         board.initFigures(new ClassicStartingBoardInitializer());
@@ -245,8 +250,9 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         chatPanel.addChatLine("* Server starts new game", "sys_&^_tem");
     }
 
+    @Override
     public void connectionKilled() {
-        chatPanel.addChatLine("* " + opponentName + " quits", "sys_&^_tem");
+        chatPanel.addChatLine("* " + getOpponentName() + " quits", "sys_&^_tem");
     }
 
     @Override
@@ -254,6 +260,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         return chatPanel;
     }
 
+    @Override
     public Board getBoard() {
         return board;
     }
@@ -337,6 +344,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         return oppColor;
     }
 
+    @Override
     public void setOppColor(int oppColor) {
         this.oppColor = oppColor;
     }
@@ -346,6 +354,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         return myColor;
     }
 
+    @Override
     public void setMyColor(int myColor) {
         this.myColor = myColor;
     }
@@ -363,5 +372,23 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
     @Override
     public void refresh() {
         boardDisplay.refresh();
+    }
+
+    @Override
+    public String getOpponentName() {
+        return opponentName;
+    }
+
+    @Override
+    public void setOpponentName(String opponentName) {
+        this.opponentName = opponentName;
+    }
+
+    public String getMyName() {
+        return myName;
+    }
+
+    public void setMyName(String myName) {
+        this.myName = myName;
     }
 }

@@ -40,7 +40,7 @@ public class ReceiverTest {
     public void testReadClose() throws Exception {
         when(reader.read()).thenReturn(Protocol.CLOSE);
         receiver.run();
-        verify(sender, times(1)).suicide("Receiver: client disconnected");
+        verify(sender, times(1)).deactivate("Receiver: client disconnected");
     }
 
     @Test(timeout = 1000L)
