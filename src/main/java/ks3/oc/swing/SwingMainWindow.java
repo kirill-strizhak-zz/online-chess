@@ -43,19 +43,19 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
     private static final Logger LOGGER = Logger.getLogger(SwingMainWindow.class);
 
+    private final Board board;
     private final BoardDisplay boardDisplay;
+    private final Logic logic;
+    private final SwingChatDisplay chat;
     private final DialogWindow aboutWindow;
     private final DialogWindow preferencesWindow;
 
     private String opponentName;
     private String myName;
-    private SwingChatDisplay chat;
-    private Board board;
     private Sender sender;
     private int oppColor;
     private int myColor = -1;
     private boolean myTurn = false;
-    private Logic logic;
     private JMenuItem shortXchng, longXchng;
 
     public SwingMainWindow(ResourceManager resourceManager, int type, int c, String addr, int port, String name) {
@@ -67,6 +67,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         setResizable(false);
 
         setMyName(name);
+        chat = new SwingChatDisplay(this);
         board = new Board(resourceManager, this, chat);
         FigurePickerWindow figurePickerWindow = new SwingFigurePicker(board, resourceManager);
         logic = new Logic(board, this, figurePickerWindow);
@@ -74,8 +75,6 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
         boardDisplay = new SwingBoardDisplay(resourceManager, this, board, logic);
         getContentPane().add("Center", (Component)boardDisplay);
-
-        chat = new SwingChatDisplay(this);
         getContentPane().add("East", chat);
 
         this.aboutWindow = new SwingAboutWindow();
