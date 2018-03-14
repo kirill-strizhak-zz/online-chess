@@ -2,9 +2,6 @@ package ks3.oc.conn.handlers;
 
 import ks3.oc.ChatPanel;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-
 public class ResetDeclineHandler implements MessageHandler {
 
     private final ChatPanel chat;
@@ -14,7 +11,7 @@ public class ResetDeclineHandler implements MessageHandler {
     }
 
     @Override
-    public void handle(BufferedReader reader) throws IOException {
+    public void handle() {
         chat.addChatLine("* Reset declined", "sys_&^_tem");
     }
 }

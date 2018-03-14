@@ -2,9 +2,6 @@ package ks3.oc.conn.handlers;
 
 import ks3.oc.dialogs.DialogWindow;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-
 public class ResetOfferHandler implements MessageHandler {
 
     private final DialogWindow newGameConfirmation;
@@ -14,7 +11,7 @@ public class ResetOfferHandler implements MessageHandler {
     }
 
     @Override
-    public void handle(BufferedReader reader) throws IOException {
+    public void handle() {
         newGameConfirmation.open();
     }
 }

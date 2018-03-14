@@ -9,13 +9,15 @@ import java.io.IOException;
 public class ColorHandler implements MessageHandler {
 
     private final MainWindow main;
+    private final BufferedReader reader;
 
-    public ColorHandler(MainWindow main) {
+    public ColorHandler(MainWindow main, BufferedReader reader) {
         this.main = main;
+        this.reader = reader;
     }
 
     @Override
-    public void handle(BufferedReader reader) throws IOException {
+    public void handle() throws IOException {
         int myColor = reader.read();
         main.setMyColor(myColor);
         if (myColor == Protocol.WHITE) {

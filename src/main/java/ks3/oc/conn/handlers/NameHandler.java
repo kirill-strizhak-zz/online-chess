@@ -13,14 +13,16 @@ public class NameHandler implements MessageHandler {
 
     private final MainWindow main;
     private final ChatPanel chat;
+    private final BufferedReader reader;
 
-    public NameHandler(MainWindow main, ChatPanel chat) {
+    public NameHandler(MainWindow main, ChatPanel chat, BufferedReader reader) {
         this.main = main;
         this.chat = chat;
+        this.reader = reader;
     }
 
     @Override
-    public void handle(BufferedReader reader) throws IOException {
+    public void handle() throws IOException {
         LOGGER.info("Got NameID");
         String name = reader.readLine();
         main.setOpponentName(name);

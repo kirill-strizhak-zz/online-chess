@@ -2,9 +2,6 @@ package ks3.oc.conn.handlers;
 
 import ks3.oc.MainWindow;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-
 public class GiveTurnHandler implements MessageHandler {
 
     private final MainWindow main;
@@ -14,7 +11,7 @@ public class GiveTurnHandler implements MessageHandler {
     }
 
     @Override
-    public void handle(BufferedReader reader) throws IOException {
+    public void handle() {
         main.setMyTurn(true);
     }
 }

@@ -10,14 +10,16 @@ public class ChatHandler implements MessageHandler {
 
     private final MainWindow main;
     private final ChatPanel chat;
+    private final BufferedReader reader;
 
-    public ChatHandler(MainWindow main, ChatPanel chat) {
+    public ChatHandler(MainWindow main, ChatPanel chat, BufferedReader reader) {
         this.main = main;
         this.chat = chat;
+        this.reader = reader;
     }
 
     @Override
-    public void handle(BufferedReader reader) throws IOException {
+    public void handle() throws IOException {
         chat.addChatLine(reader.readLine(), main.getOpponentName());
     }
 }

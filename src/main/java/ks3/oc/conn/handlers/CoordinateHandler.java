@@ -8,13 +8,15 @@ import java.io.IOException;
 public class CoordinateHandler implements MessageHandler {
 
     private final Board board;
+    private final BufferedReader reader;
 
-    public CoordinateHandler(Board board) {
+    public CoordinateHandler(Board board, BufferedReader reader) {
         this.board = board;
+        this.reader = reader;
     }
 
     @Override
-    public void handle(BufferedReader reader) throws IOException {
+    public void handle() throws IOException {
         int currX = reader.read();
         int currY = reader.read();
         int newX = reader.read();
