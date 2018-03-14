@@ -93,10 +93,6 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
                 setOppColor(BLACK);
             }
             try {
-                while (!sender.isFree()) {
-                    LOGGER.info("Waiting to send color");
-                    Thread.sleep(10);
-                }
                 sender.send(COLOR);
                 if (getMyColor() == WHITE) {
                     setMyTurn(true);
@@ -104,8 +100,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
                 } else {
                     sender.send(WHITE);
                 }
-                sender.free();
-            } catch (IOException | InterruptedException ex) {
+            } catch (IOException ex) {
                 LOGGER.error("Failed to send color", ex);
             }
         }
@@ -120,14 +115,9 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         }
 
         try {
-            while (!sender.isFree()) {
-                LOGGER.info("Waiting to send name");
-                Thread.sleep(10);
-            }
             sender.send(NAME);
             sender.send(getMyName());
-            sender.free();
-        } catch (IOException | InterruptedException ex) {
+        } catch (IOException ex) {
             LOGGER.error("Failed to send name", ex);
         }
 
@@ -180,19 +170,11 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             menuBar.add(file);
             newGame.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    while (!sender.isFree()) {
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException ex) {
-                            //ignore
-                        }
-                    }
                     try {
                         sender.send(OFFER_RESET);
                     } catch (IOException ex) {
                         LOGGER.error("Failed to send reset offer", ex);
                     }
-                    sender.free();
                 }
             });
             saveGame.addActionListener(event -> save());
@@ -219,13 +201,6 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             @Override
             public void windowClosing(WindowEvent e) {
                 setVisible(false);
-                while (!sender.isFree()) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException ex) {
-                        //ignore
-                    }
-                }
                 try {
                     sender.send(CLOSE);
                 } catch (IOException ex) {

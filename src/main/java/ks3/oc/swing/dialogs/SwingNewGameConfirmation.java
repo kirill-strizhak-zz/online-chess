@@ -37,12 +37,8 @@ public class SwingNewGameConfirmation extends SwingDialogWindow {
             public void actionPerformed(ActionEvent e) {
                 try {
                     LOGGER.info("Waiting to accept reset");
-                    while (!sender.isFree()) {
-                        Thread.sleep(10);
-                    }
                     sender.send(Protocol.ACCEPT_RESET);
-                    sender.free();
-                } catch (InterruptedException | IOException ex) {
+                } catch (IOException ex) {
                     LOGGER.error("Failed to accept reset", ex);
                 }
                 owner.reset();
@@ -53,12 +49,8 @@ public class SwingNewGameConfirmation extends SwingDialogWindow {
             public void actionPerformed(ActionEvent e) {
                 try {
                     LOGGER.info("Waiting to decline reset");
-                    while (!sender.isFree()) {
-                        Thread.sleep(10);
-                    }
                     sender.send(Protocol.DECLINE_RESET);
-                    sender.free();
-                } catch (InterruptedException | IOException ex) {
+                } catch (IOException ex) {
                     LOGGER.error("Failed to decline reset", ex);
                 }
                 frame.setVisible(false);

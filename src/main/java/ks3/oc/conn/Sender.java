@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.Semaphore;
 
 public abstract class Sender {
 
@@ -16,10 +17,10 @@ public abstract class Sender {
 
     private final SocketFactory socketFactory;
     private final MainWindow main;
+    private final Semaphore lock;
 
-    private Socket sock;
-    private PrintWriter pw;
-    private boolean free = true;
+    private Socket socket;
+    private PrintWriter writer;
 
     public Sender(MainWindow main, String host, int port) {
         this(new SocketFactory(), main, host, port);
@@ -29,17 +30,18 @@ public abstract class Sender {
         this.socketFactory = socketFactory;
         this.main = main;
         start(host, port);
+        lock = new Semaphore(1, true);
     }
 
     private void start(String host, int port) {
         try {
-            sock = openConnection(host, port);
+            socket = openConnection(host, port);
             LOGGER.info("Connection established, creating i/o streams");
-            InputStreamReader inr = new InputStreamReader(sock.getInputStream());
-            OutputStreamWriter outw = new OutputStreamWriter(sock.getOutputStream());
-            BufferedReader br = new BufferedReader(inr);
-            pw = new PrintWriter(outw);
-            startReceiver(br);
+            InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream());
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream());
+            BufferedReader reader = new BufferedReader(inputStreamReader);
+            writer = new PrintWriter(outputStreamWriter);
+            startReceiver(reader);
             LOGGER.info("Initialization completed");
         } catch (IOException ex) {
             LOGGER.error("Failed to establish connection", ex);
@@ -54,36 +56,33 @@ public abstract class Sender {
     }
 
     public void send(int i) throws IOException {
-        pw.write(i);
-        pw.flush();
+        try {
+            lock.acquireUninterruptibly();
+            writer.write(i);
+            writer.flush();
+        } finally {
+            lock.release();
+        }
     }
 
     public void send(String s) throws IOException {
-        pw.println(s);
-        pw.flush();
+        try {
+            lock.acquireUninterruptibly();
+            writer.println(s);
+            writer.flush();
+        } finally {
+            lock.release();
+        }
     }
 
     public void deactivate(String reason) {
         try {
             LOGGER.info("Closing: " + reason);
-            sock.close();
+            socket.close();
             main.connectionKilled();
         } catch (IOException ex) {
             LOGGER.error("Failed to do clean shutdown", ex);
         }
-    }
-
-    public boolean isFree() {
-        if (!free) {
-            return false;
-        } else {
-            free = false;
-            return true;
-        }
-    }
-
-    public void free() {
-        free = true;
     }
 
     protected SocketFactory getSocketFactory() {

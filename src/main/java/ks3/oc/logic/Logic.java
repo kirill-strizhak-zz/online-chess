@@ -10,7 +10,6 @@ public class Logic implements Protocol {
 
     private int[][] allowed = new int[100][2];
     private int arrPos = 0;
-    public boolean calculating = false;
     private BoardState board;
     private MainWindow owner;
     private FigurePickerWindow figurePickerWindow;
@@ -24,7 +23,6 @@ public class Logic implements Protocol {
     }
 
     public void calculateAllowedMoves(int col, int row) {
-        calculating = true;
         switch (board.figureAt(col, row).type) {
             case PAWN:
                 allowed[0][0] = -1;
@@ -57,7 +55,6 @@ public class Logic implements Protocol {
                 arrPos = 0;
                 break;
         }
-        calculating = false;
     }
 
     private void allowedMovesOfPawn(int col, int row) {

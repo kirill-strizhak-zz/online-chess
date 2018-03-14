@@ -41,14 +41,6 @@ public class Board implements Protocol, BoardState {
     }
 
     public void initFigures(StartingBoardInitializer startingBoardInitializer) {
-        while (owner.getMyColor() == -1) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                //ignore
-            }
-        }
-
         if (owner.getMyColor() == BLACK) {
             startingBoardInitializer.initFigureData(BoardSetup.PLAYING_BLACK, fig, king);
         } else {
@@ -83,13 +75,6 @@ public class Board implements Protocol, BoardState {
             fig[x][y].oX = dragX * CELL_SIZE;
             fig[x][y].oY = dragY * CELL_SIZE;
         } else {
-            while (logic.calculating) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException ex) {
-                    //ignore
-                }
-            }
             logic.drop(col, row);
         }
     }
@@ -166,22 +151,10 @@ public class Board implements Protocol, BoardState {
             if (logic.mate(king[z][0], king[z][1])) {
                 owner.setMyTurn(false);
                 try {
-                    LOGGER.info("Waiting to send coordinates");
-                    while (!sender.isFree()) {
-                        Thread.sleep(10);
-                    }
+                    LOGGER.info("Sending mate notification");
                     sender.send(MATE);
-                    sender.free();
-                } catch (IOException | InterruptedException ex) {
+                } catch (IOException ex) {
                     LOGGER.error("Failed to send mate notification", ex);
-                }
-                while (chat == null) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                        //ignore
-                    }
-                    chat = owner.getChat();
                 }
                 chat.addChatLine("* You lose! Check and mate.", "sys_&^_tem");
             }
@@ -203,42 +176,22 @@ public class Board implements Protocol, BoardState {
             invertedY = Math.abs(7 - dragY);
             newInvertedX = Math.abs(7 - newX);
             newInvertedY = Math.abs(7 - newY);
-            LOGGER.info("Waiting to send coordinates");
-            while (!sender.isFree()) {
-                Thread.sleep(10);
-            }
+            LOGGER.info("Sending coordinates");
             sender.send(COORDINATES);
             sender.send(invertedX);
             sender.send(invertedY);
             sender.send(newInvertedX);
             sender.send(newInvertedY);
-            sender.free();
             check = !logic.kingSafeAt(king[z][0], king[z][1], owner.getOppColor());
             if (!isLoading()) {
                 if (logic.mate(king[z][0], king[z][1])) {
                     owner.setMyTurn(false);
-                    LOGGER.info("Waiting to send coordinates");
-                    while (!sender.isFree()) {
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException ex) {
-                            //ignore
-                        }
-                    }
+                    LOGGER.info("Sending mate notification");
                     sender.send(MATE);
-                    sender.free();
-                    while (chat == null) {
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException ex) {
-                            //ignore
-                        }
-                        chat = owner.getChat();
-                    }
                     chat.addChatLine("* You lose! Check and mate.", "sys_&^_tem");
                 }
             }
-        } catch (IOException | InterruptedException ex) {
+        } catch (IOException ex) {
             LOGGER.error("Failed to send move", ex);
         }
         owner.refresh();
@@ -316,13 +269,6 @@ public class Board implements Protocol, BoardState {
     public void shortXchng() {
         owner.setMyTurn(false);
         LOGGER.info("Waiting to send coordinates");
-        while (!sender.isFree()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ex) {
-                //ignore
-            }
-        }
         if (owner.getMyColor() == WHITE) {
             globalSetFigure(7, 7, NULL, NULL, true, false);
             globalSetFigure(4, 7, NULL, NULL, true, false);
@@ -335,20 +281,12 @@ public class Board implements Protocol, BoardState {
             globalSetFigure(1, 7, owner.getMyColor(), KING, false, false);
         }
         giveTurn();
-        sender.free();
         owner.refresh();
     }
 
     public void longXchng() {
         owner.setMyTurn(false);
         LOGGER.info("Waiting to send coordinates");
-        while (!sender.isFree()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ex) {
-                //ignore
-            }
-        }
         if (owner.getMyColor() == WHITE) {
             globalSetFigure(0, 7, NULL, NULL, true, false);
             globalSetFigure(4, 7, NULL, NULL, true, false);
@@ -361,26 +299,17 @@ public class Board implements Protocol, BoardState {
             globalSetFigure(5, 7, owner.getMyColor(), KING, false, false);
         }
         giveTurn();
-        sender.free();
         owner.refresh();
     }
 
     public void globalClear() {
         localClear();
         LOGGER.info("Waiting to send clear notification");
-        while (!sender.isFree()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ex) {
-                //ignore
-            }
-        }
         try {
             sender.send(CLEAR);
         } catch (IOException ex) {
             LOGGER.error("Failed to send clear notification", ex);
         }
-        sender.free();
     }
 
     public void localClear() {

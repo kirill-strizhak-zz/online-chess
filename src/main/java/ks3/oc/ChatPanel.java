@@ -57,13 +57,6 @@ public class ChatPanel extends JPanel implements Protocol {
 
     public void sendChat(String s) {
         LOGGER.info("Waiting to send chat");
-        while (!sender.isFree()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ex) {
-                //ignore
-            }
-        }
         try {
             sender.send(CHAT);
             sender.send(s);
@@ -71,7 +64,6 @@ public class ChatPanel extends JPanel implements Protocol {
             LOGGER.error("Failed to send chat", ex);
             addChatLine("* Cannot send chat: connection lost", "sys_&^_tem");
         }
-        sender.free();
         addChatLine(s, owner.getMyName());
     }
 
