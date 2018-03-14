@@ -2,7 +2,7 @@ package ks3.oc.conn;
 
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
-import ks3.oc.swing.SwingMainWindow;
+import ks3.oc.board.BoardState;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -12,8 +12,8 @@ public class ServerSender extends Sender {
 
     private static final Logger LOGGER = Logger.getLogger(ServerSender.class);
 
-    public ServerSender(MainWindow main, String host, int port) {
-        super(main, host, port);
+    public ServerSender(MainWindow main, BoardState board, String host, int port) {
+        super(main, board, host, port);
     }
 
     @Override

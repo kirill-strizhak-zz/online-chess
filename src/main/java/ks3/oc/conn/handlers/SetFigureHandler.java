@@ -1,16 +1,16 @@
 package ks3.oc.conn.handlers;
 
-import ks3.oc.board.Board;
+import ks3.oc.board.BoardState;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 
 public class SetFigureHandler implements MessageHandler {
 
-    private final Board board;
+    private final BoardState board;
     private final BufferedReader reader;
 
-    public SetFigureHandler(Board board, BufferedReader reader) {
+    public SetFigureHandler(BoardState board, BufferedReader reader) {
         this.board = board;
         this.reader = reader;
     }

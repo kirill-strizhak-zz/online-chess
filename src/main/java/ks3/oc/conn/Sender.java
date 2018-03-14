@@ -1,6 +1,7 @@
 package ks3.oc.conn;
 
 import ks3.oc.MainWindow;
+import ks3.oc.board.BoardState;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -17,18 +18,20 @@ public abstract class Sender {
 
     private final SocketFactory socketFactory;
     private final MainWindow main;
+    private final BoardState board;
     private final Semaphore lock;
 
     private Socket socket;
     private PrintWriter writer;
 
-    public Sender(MainWindow main, String host, int port) {
-        this(new SocketFactory(), main, host, port);
+    public Sender(MainWindow main, BoardState board, String host, int port) {
+        this(new SocketFactory(), main, board, host, port);
     }
 
-    protected Sender(SocketFactory socketFactory, MainWindow main, String host, int port) {
+    protected Sender(SocketFactory socketFactory, MainWindow main, BoardState board, String host, int port) {
         this.socketFactory = socketFactory;
         this.main = main;
+        this.board = board;
         start(host, port);
         lock = new Semaphore(1, true);
     }
@@ -51,7 +54,7 @@ public abstract class Sender {
     protected abstract Socket openConnection(String host, int port) throws IOException;
 
     protected void startReceiver(BufferedReader reader) {
-        Receiver receiver = new Receiver(main, reader, this);
+        Receiver receiver = new Receiver(main, board, reader, this);
         new Thread(receiver).start();
     }
 

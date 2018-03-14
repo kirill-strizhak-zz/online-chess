@@ -1,6 +1,7 @@
 package ks3.oc.conn;
 
 import ks3.oc.Protocol;
+import ks3.oc.board.BoardState;
 import ks3.oc.swing.SwingMainWindow;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,12 +14,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 public class SenderTest {
 
     @Mock
     private SwingMainWindow main;
+    @Mock
+    private BoardState board;
     @Mock
     private Socket socket;
     @Mock
@@ -36,7 +39,7 @@ public class SenderTest {
     @Test
     public void testStartServerWhenSuccessfullyConnected() throws Exception {
         when(inputStream.read()).thenReturn(Protocol.IDENT);
-        Sender sender = new Sender(main, "host", 1234) {
+        Sender sender = new Sender(main, board, "host", 1234) {
             @Override
             protected Socket openConnection(String host, int port) throws IOException {
                 return socket;

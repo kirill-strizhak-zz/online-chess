@@ -26,9 +26,13 @@ public interface BoardState {
 
     Figure getDraggedFigure();
 
+    void makeMove(int currX, int currY, int newX, int newY);
+
     void makeMove(int newX, int newY);
 
     void globalSetFigure(int x, int y, int color, int type, boolean isEmpty, boolean firstStep);
+
+    void localSetFigure(int x, int y, int color, int type, boolean isEmpty, boolean firstStep);
 
     void giveTurn();
 

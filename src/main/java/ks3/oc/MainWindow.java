@@ -1,7 +1,5 @@
 package ks3.oc;
 
-import ks3.oc.board.Board;
-
 public interface MainWindow {
 
     void reset();
@@ -9,8 +7,6 @@ public interface MainWindow {
     void connectionKilled();
 
     ChatPanel getChat();
-
-    Board getBoard();
 
     int getOppColor();
 

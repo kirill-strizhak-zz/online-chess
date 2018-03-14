@@ -1,16 +1,16 @@
 package ks3.oc.conn.handlers;
 
-import ks3.oc.board.Board;
+import ks3.oc.board.BoardState;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 
 public class CoordinateHandler implements MessageHandler {
 
-    private final Board board;
+    private final BoardState board;
     private final BufferedReader reader;
 
-    public CoordinateHandler(Board board, BufferedReader reader) {
+    public CoordinateHandler(BoardState board, BufferedReader reader) {
         this.board = board;
         this.reader = reader;
     }

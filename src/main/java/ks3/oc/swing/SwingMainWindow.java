@@ -83,9 +83,9 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         this.preferencesWindow = new SwingPreferencesWindow(resourceManager, boardDisplay);
 
         if (type == CLIENT) {
-            sender = new ClientSender(this, addr, port);
+            sender = new ClientSender(this, board, addr, port);
         } else {
-            sender = new ServerSender(this, addr, port);
+            sender = new ServerSender(this, board, addr, port);
             setMyColor(c);
             if (getMyColor() == BLACK) {
                 setOppColor(WHITE);
@@ -217,7 +217,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
     public void reset() {
         setMyTurn(false);
         board.initFigures(new ClassicStartingBoardInitializer());
-        board.hlight[0][0] = -1;
+        board.highlight[0][0] = -1;
         if (getMyColor() == WHITE) {
             setMyTurn(true);
         }
@@ -233,11 +233,6 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
     @Override
     public ChatPanel getChat() {
         return chatPanel;
-    }
-
-    @Override
-    public Board getBoard() {
-        return board;
     }
 
     private void save() {
@@ -256,7 +251,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
                     pw.println(cat);
                 }
             }
-            pw.println(t + ":" + board.hlight[0][0] + ":" + board.hlight[0][1] + ":" + board.hlight[1][0] + ":" + board.hlight[1][1]);
+            pw.println(t + ":" + board.highlight[0][0] + ":" + board.highlight[0][1] + ":" + board.highlight[1][0] + ":" + board.highlight[1][1]);
             pw.flush();
             pw.close();
         } catch (IOException ex) {
@@ -299,10 +294,10 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             str = br.readLine();
             breaker = new StringTokenizer(str, ":");
             setMyTurn(Boolean.parseBoolean(breaker.nextToken()));
-            board.hlight[0][0] = Integer.parseInt(breaker.nextToken());
-            board.hlight[0][1] = Integer.parseInt(breaker.nextToken());
-            board.hlight[1][0] = Integer.parseInt(breaker.nextToken());
-            board.hlight[1][1] = Integer.parseInt(breaker.nextToken());
+            board.highlight[0][0] = Integer.parseInt(breaker.nextToken());
+            board.highlight[0][1] = Integer.parseInt(breaker.nextToken());
+            board.highlight[1][0] = Integer.parseInt(breaker.nextToken());
+            board.highlight[1][1] = Integer.parseInt(breaker.nextToken());
             br.close();
         } catch (IOException ex) {
             LOGGER.error("Failed to load", ex);
