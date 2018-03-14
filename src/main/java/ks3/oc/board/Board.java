@@ -1,6 +1,6 @@
 package ks3.oc.board;
 
-import ks3.oc.ChatPanel;
+import ks3.oc.ChatDisplay;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
@@ -19,7 +19,7 @@ public class Board implements Protocol, BoardState {
 
     private final ResourceManager resourceManager;
     private final MainWindow main;
-    private final ChatPanel chat;
+    private final ChatDisplay chat;
 
     private boolean dragging = false;
     public boolean loading = false;
@@ -33,7 +33,7 @@ public class Board implements Protocol, BoardState {
     private Sender sender;
     private Logic logic;
 
-    public Board(ResourceManager resourceManager, MainWindow main, ChatPanel chat) {
+    public Board(ResourceManager resourceManager, MainWindow main, ChatDisplay chat) {
         this.resourceManager = resourceManager;
         this.main = main;
         this.chat = chat;

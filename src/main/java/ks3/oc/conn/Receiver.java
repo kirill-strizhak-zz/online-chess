@@ -1,5 +1,6 @@
 package ks3.oc.conn;
 
+import ks3.oc.ChatDisplay;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.BoardState;
@@ -26,43 +27,39 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Receiver implements Runnable, Protocol {
+public class Receiver implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(Receiver.class);
 
     private final Map<Integer, MessageHandler> handlers = new HashMap<>();
     private final MessageHandler defaultHandler = new UnrecognizedMessageHandler();
 
-    private final MainWindow main;
-    private final BoardState board;
     private final BufferedReader reader;
     private final Sender sender;
 
     private boolean active = true;
     private DialogWindow newGameConfirmation;
 
-    public Receiver(MainWindow main, BoardState board, BufferedReader reader, Sender sender) {
-        this.board = board;
+    public Receiver(MainWindow main, BoardState board, ChatDisplay chat, BufferedReader reader, Sender sender) {
         this.reader = reader;
-        this.main = main;
         this.sender = sender;
         newGameConfirmation = new SwingNewGameConfirmation(sender, main);
-        registerHandlers();
+        registerHandlers(main, board, chat, reader);
     }
 
-    private void registerHandlers() {
-        handlers.put(Protocol.NAME, new NameHandler(main, main.getChat(), reader));
+    private void registerHandlers(MainWindow main, BoardState board, ChatDisplay chat, BufferedReader reader) {
+        handlers.put(Protocol.NAME, new NameHandler(main, chat, reader));
         handlers.put(Protocol.COORDINATES, new CoordinateHandler(board, reader));
-        handlers.put(Protocol.CHAT, new ChatHandler(main, main.getChat(), reader));
+        handlers.put(Protocol.CHAT, new ChatHandler(main, chat, reader));
         handlers.put(Protocol.CLOSE, new CloseHandler(this, sender, reader));
         handlers.put(Protocol.COLOR, new ColorHandler(main, reader));
         handlers.put(Protocol.OFFER_RESET, new ResetOfferHandler(newGameConfirmation));
         handlers.put(Protocol.ACCEPT_RESET, new ResetAcceptHandler(main));
-        handlers.put(Protocol.DECLINE_RESET, new ResetDeclineHandler(main.getChat()));
+        handlers.put(Protocol.DECLINE_RESET, new ResetDeclineHandler(chat));
         handlers.put(Protocol.SET, new SetFigureHandler(board, reader));
         handlers.put(Protocol.GIVE_TURN, new GiveTurnHandler(main));
         handlers.put(Protocol.REAVE_TURN, new ReaveTurnHandler(main));
-        handlers.put(Protocol.MATE, new MateHandler(main, main.getChat()));
+        handlers.put(Protocol.MATE, new MateHandler(main, chat));
     }
 
     public void run() {

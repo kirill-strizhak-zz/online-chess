@@ -1,12 +1,12 @@
 package ks3.oc.conn.handlers;
 
-import ks3.oc.ChatPanel;
+import ks3.oc.ChatDisplay;
 
 public class ResetDeclineHandler implements MessageHandler {
 
-    private final ChatPanel chat;
+    private final ChatDisplay chat;
 
-    public ResetDeclineHandler(ChatPanel chat) {
+    public ResetDeclineHandler(ChatDisplay chat) {
         this.chat = chat;
     }
 

@@ -1,6 +1,6 @@
 package ks3.oc.conn.handlers;
 
-import ks3.oc.ChatPanel;
+import ks3.oc.ChatDisplay;
 import ks3.oc.MainWindow;
 import org.apache.log4j.Logger;
 
@@ -12,10 +12,10 @@ public class NameHandler implements MessageHandler {
     private static final Logger LOGGER = Logger.getLogger(NameHandler.class);
 
     private final MainWindow main;
-    private final ChatPanel chat;
+    private final ChatDisplay chat;
     private final BufferedReader reader;
 
-    public NameHandler(MainWindow main, ChatPanel chat, BufferedReader reader) {
+    public NameHandler(MainWindow main, ChatDisplay chat, BufferedReader reader) {
         this.main = main;
         this.chat = chat;
         this.reader = reader;

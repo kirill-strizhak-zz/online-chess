@@ -1,5 +1,6 @@
 package ks3.oc.conn;
 
+import ks3.oc.ChatDisplay;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.BoardState;
@@ -12,8 +13,8 @@ public class ServerSender extends Sender {
 
     private static final Logger LOGGER = Logger.getLogger(ServerSender.class);
 
-    public ServerSender(MainWindow main, BoardState board, String host, int port) {
-        super(main, board, host, port);
+    public ServerSender(MainWindow main, BoardState board, ChatDisplay chat, String host, int port) {
+        super(main, board, chat, host, port);
     }
 
     @Override

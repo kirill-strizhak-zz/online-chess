@@ -6,8 +6,6 @@ public interface MainWindow {
 
     void connectionKilled();
 
-    ChatPanel getChat();
-
     int getOppColor();
 
     void setOppColor(int oppColor);

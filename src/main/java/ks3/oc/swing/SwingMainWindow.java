@@ -1,6 +1,5 @@
 package ks3.oc.swing;
 
-import ks3.oc.ChatPanel;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
@@ -50,7 +49,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
     private String opponentName;
     private String myName;
-    private ChatPanel chatPanel;
+    private SwingChatDisplay chat;
     private Board board;
     private Sender sender;
     private int oppColor;
@@ -68,7 +67,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         setResizable(false);
 
         setMyName(name);
-        board = new Board(resourceManager, this, chatPanel);
+        board = new Board(resourceManager, this, chat);
         FigurePickerWindow figurePickerWindow = new SwingFigurePicker(board, resourceManager);
         logic = new Logic(board, this, figurePickerWindow);
         board.setLogic(logic);
@@ -76,16 +75,16 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         boardDisplay = new SwingBoardDisplay(resourceManager, this, board, logic);
         getContentPane().add("Center", (Component)boardDisplay);
 
-        chatPanel = new ChatPanel(this);
-        getContentPane().add("East", chatPanel);
+        chat = new SwingChatDisplay(this);
+        getContentPane().add("East", chat);
 
         this.aboutWindow = new SwingAboutWindow();
         this.preferencesWindow = new SwingPreferencesWindow(resourceManager, boardDisplay);
 
         if (type == CLIENT) {
-            sender = new ClientSender(this, board, addr, port);
+            sender = new ClientSender(this, board, chat, addr, port);
         } else {
-            sender = new ServerSender(this, board, addr, port);
+            sender = new ServerSender(this, board, chat, addr, port);
             setMyColor(c);
             if (getMyColor() == BLACK) {
                 setOppColor(WHITE);
@@ -123,7 +122,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
         board.setSender(sender);
         board.initFigures(new ClassicStartingBoardInitializer());
-        chatPanel.setSender(sender);
+        chat.setSender(sender);
 
         JMenuBar menuBar = new JMenuBar();
         JMenu help = new JMenu("Help");
@@ -222,17 +221,12 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             setMyTurn(true);
         }
         boardDisplay.refresh();
-        chatPanel.addChatLine("* Server starts new game", "sys_&^_tem");
+        chat.addChatLine("* Server starts new game", "sys_&^_tem");
     }
 
     @Override
     public void connectionKilled() {
-        chatPanel.addChatLine("* " + getOpponentName() + " quits", "sys_&^_tem");
-    }
-
-    @Override
-    public ChatPanel getChat() {
-        return chatPanel;
+        chat.addChatLine("* " + getOpponentName() + " quits", "sys_&^_tem");
     }
 
     private void save() {

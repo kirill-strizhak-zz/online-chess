@@ -1,7 +1,7 @@
-package ks3.oc;
+package ks3.oc.swing;
 
+import ks3.oc.Protocol;
 import ks3.oc.conn.Sender;
-import ks3.oc.swing.SwingMainWindow;
 import org.apache.log4j.Logger;
 
 import javax.swing.*;
@@ -13,9 +13,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.StringTokenizer;
 
-public class ChatPanel extends JPanel implements Protocol {
+public class SwingChatDisplay extends JPanel implements Protocol, ks3.oc.ChatDisplay {
 
-    private static final Logger LOGGER = Logger.getLogger(ChatPanel.class);
+    private static final Logger LOGGER = Logger.getLogger(SwingChatDisplay.class);
 
     private JTextArea chat;
     private JTextField txt;
@@ -23,7 +23,7 @@ public class ChatPanel extends JPanel implements Protocol {
     private SwingMainWindow owner;
     private SimpleDateFormat time;
 
-    public ChatPanel(SwingMainWindow own) {
+    public SwingChatDisplay(SwingMainWindow own) {
         super(true);
         owner = own;
         this.setSize(320, 400);
@@ -67,6 +67,7 @@ public class ChatPanel extends JPanel implements Protocol {
         addChatLine(s, owner.getMyName());
     }
 
+    @Override
     public void addChatLine(String s, String senderName) {
         StringTokenizer getParam = new StringTokenizer(s, " ", false);
         String param = getParam.nextToken();

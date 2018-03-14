@@ -1,5 +1,6 @@
 package ks3.oc.conn;
 
+import ks3.oc.ChatDisplay;
 import ks3.oc.MainWindow;
 import ks3.oc.board.BoardState;
 import org.apache.log4j.Logger;
@@ -19,21 +20,23 @@ public abstract class Sender {
     private final SocketFactory socketFactory;
     private final MainWindow main;
     private final BoardState board;
+    private final ChatDisplay chat;
     private final Semaphore lock;
 
     private Socket socket;
     private PrintWriter writer;
 
-    public Sender(MainWindow main, BoardState board, String host, int port) {
-        this(new SocketFactory(), main, board, host, port);
+    public Sender(MainWindow main, BoardState board, ChatDisplay chat, String host, int port) {
+        this(new SocketFactory(), main, board, chat, host, port);
     }
 
-    protected Sender(SocketFactory socketFactory, MainWindow main, BoardState board, String host, int port) {
+    protected Sender(SocketFactory socketFactory, MainWindow main, BoardState board, ChatDisplay chat, String host, int port) {
         this.socketFactory = socketFactory;
         this.main = main;
         this.board = board;
-        start(host, port);
+        this.chat = chat;
         lock = new Semaphore(1, true);
+        start(host, port);
     }
 
     private void start(String host, int port) {
@@ -54,7 +57,7 @@ public abstract class Sender {
     protected abstract Socket openConnection(String host, int port) throws IOException;
 
     protected void startReceiver(BufferedReader reader) {
-        Receiver receiver = new Receiver(main, board, reader, this);
+        Receiver receiver = new Receiver(main, board, chat, reader, this);
         new Thread(receiver).start();
     }
 
