@@ -31,7 +31,7 @@ public class Receiver implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(Receiver.class);
 
-    private final Map<Integer, MessageHandler> handlers = new HashMap<>();
+    private final Map<Integer, MessageHandler> handlers;
     private final MessageHandler defaultHandler = new UnrecognizedMessageHandler();
 
     private final BufferedReader reader;
@@ -44,10 +44,11 @@ public class Receiver implements Runnable {
         this.reader = reader;
         this.sender = sender;
         newGameConfirmation = new SwingNewGameConfirmation(sender, main);
-        registerHandlers(main, board, chat, reader);
+        handlers = registerHandlers(main, board, chat, reader);
     }
 
-    private void registerHandlers(MainWindow main, BoardState board, ChatDisplay chat, BufferedReader reader) {
+    protected Map<Integer, MessageHandler> registerHandlers(MainWindow main, BoardState board, ChatDisplay chat, BufferedReader reader) {
+        Map<Integer, MessageHandler> handlers = new HashMap<>();
         handlers.put(Protocol.NAME, new NameHandler(main, chat, reader));
         handlers.put(Protocol.COORDINATES, new CoordinateHandler(board, reader));
         handlers.put(Protocol.CHAT, new ChatHandler(main, chat, reader));
@@ -60,6 +61,7 @@ public class Receiver implements Runnable {
         handlers.put(Protocol.GIVE_TURN, new GiveTurnHandler(main));
         handlers.put(Protocol.REAVE_TURN, new ReaveTurnHandler(main));
         handlers.put(Protocol.MATE, new MateHandler(main, chat));
+        return handlers;
     }
 
     public void run() {
