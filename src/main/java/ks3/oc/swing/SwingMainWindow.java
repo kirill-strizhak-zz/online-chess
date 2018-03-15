@@ -67,7 +67,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         setResizable(false);
 
         setMyName(name);
-        chat = new SwingChatDisplay(this);
+        chat = new SwingChatDisplay(getMyName());
         board = new Board(resourceManager, this, chat);
         FigurePickerWindow figurePickerWindow = new SwingFigurePicker(board, resourceManager);
         logic = new Logic(board, this, figurePickerWindow);
@@ -75,7 +75,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
         boardDisplay = new SwingBoardDisplay(resourceManager, this, board, logic);
         getContentPane().add("Center", (Component)boardDisplay);
-        getContentPane().add("East", chat);
+        getContentPane().add("East", chat.getComponent());
 
         this.aboutWindow = new SwingAboutWindow();
         this.preferencesWindow = new SwingPreferencesWindow(resourceManager, boardDisplay);
@@ -220,12 +220,12 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             setMyTurn(true);
         }
         boardDisplay.refresh();
-        chat.addChatLine("* Server starts new game", "sys_&^_tem");
+        chat.addChatLine("* Server starts new game", Protocol.SYSTEM);
     }
 
     @Override
     public void connectionKilled() {
-        chat.addChatLine("* " + getOpponentName() + " quits", "sys_&^_tem");
+        chat.addChatLine("* " + getOpponentName() + " quits", Protocol.SYSTEM);
     }
 
     private void save() {

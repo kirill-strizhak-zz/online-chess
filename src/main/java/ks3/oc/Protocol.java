@@ -19,7 +19,7 @@ public interface Protocol {
     static final int SERVER = 0;
     static final int CLIENT = 1;
 
-    static final String DATE_FORMAT = "[HH:mm]";
+    static final String SYSTEM = "sys_&^_tem";
 
     static final int WHITE = 2;
     static final int BLACK = 0;

@@ -1,6 +1,6 @@
 package ks3.oc.board;
 
-import ks3.oc.ChatDisplay;
+import ks3.oc.chat.ChatDisplay;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
@@ -157,7 +157,7 @@ public class Board implements Protocol, BoardState {
                 } catch (IOException ex) {
                     LOGGER.error("Failed to send mate notification", ex);
                 }
-                chat.addChatLine("* You lose! Check and mate.", "sys_&^_tem");
+                chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
             }
         }
         highlight[0][0] = newX * CELL_SIZE;
@@ -189,7 +189,7 @@ public class Board implements Protocol, BoardState {
                     main.setMyTurn(false);
                     LOGGER.info("Sending mate notification");
                     sender.send(MATE);
-                    chat.addChatLine("* You lose! Check and mate.", "sys_&^_tem");
+                    chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
                 }
             }
         } catch (IOException ex) {

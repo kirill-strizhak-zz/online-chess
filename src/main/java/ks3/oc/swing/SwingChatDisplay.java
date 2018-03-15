@@ -1,90 +1,70 @@
 package ks3.oc.swing;
 
-import ks3.oc.Protocol;
-import ks3.oc.conn.Sender;
-import org.apache.log4j.Logger;
+import ks3.oc.chat.Chat;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.StringTokenizer;
 
-public class SwingChatDisplay extends JPanel implements Protocol, ks3.oc.ChatDisplay {
+public class SwingChatDisplay extends Chat {
 
-    private static final Logger LOGGER = Logger.getLogger(SwingChatDisplay.class);
+    private final JPanel component;
+    private final JTextArea textArea;
 
-    private JTextArea chat;
-    private JTextField txt;
-    private Sender sender;
-    private SwingMainWindow owner;
-    private SimpleDateFormat time;
+    public SwingChatDisplay(String playerName) {
+        super(playerName);
+        component = new JPanel(true);
+        component.setSize(320, 400);
+        component.setLayout(new BorderLayout());
+        textArea = createTextArea();
+        component.add("Center", wrapInScrollPane(textArea));
+        component.add("South", createTextInput());
+    }
 
-    public SwingChatDisplay(SwingMainWindow own) {
-        super(true);
-        owner = own;
-        this.setSize(320, 400);
-        this.setLayout(new BorderLayout());
-        chat = new JTextArea();
-        chat.setEditable(false);
-        chat.setLineWrap(true);
-        chat.setColumns(25);
-        chat.setRows(7);
-        JScrollPane sp = new JScrollPane(chat);
-        sp.setWheelScrollingEnabled(true);
-        add("Center", sp);
+    private JTextArea createTextArea() {
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setColumns(25);
+        textArea.setRows(7);
+        return textArea;
+    }
 
-        txt = new JTextField();
-        txt.setEditable(true);
-        txt.addKeyListener(new KeyAdapter() {
+    private JScrollPane wrapInScrollPane(Component component) {
+        JScrollPane scrollPane = new JScrollPane(component);
+        scrollPane.setWheelScrollingEnabled(true);
+        return scrollPane;
+    }
+
+    private JTextField createTextInput() {
+        JTextField textInput = new JTextField();
+        textInput.setEditable(true);
+        textInput.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (!txt.getText().equals("")) {
-                        sendChat(txt.getText());
-                        txt.setText("");
+            public void keyPressed(KeyEvent event) {
+                if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (!textInput.getText().equals("")) {
+                        sendChat(textInput.getText());
+                        textInput.setText("");
                     }
                 }
             }
         });
-        add("South", txt);
-        time = new SimpleDateFormat(DATE_FORMAT);
-        LOGGER.info("Initialization completed");
-    }
-
-    public void sendChat(String s) {
-        LOGGER.info("Waiting to send chat");
-        try {
-            sender.send(CHAT);
-            sender.send(s);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to send chat", ex);
-            addChatLine("* Cannot send chat: connection lost", "sys_&^_tem");
-        }
-        addChatLine(s, owner.getMyName());
+        return textInput;
     }
 
     @Override
-    public void addChatLine(String s, String senderName) {
-        StringTokenizer getParam = new StringTokenizer(s, " ", false);
-        String param = getParam.nextToken();
-        if (param.equals("*") && senderName.equals("sys_&^_tem")) {
-            chat.append(time.format(new Date()) + s + "\n");
-        } else {
-            if (param.equals("/me")) {
-                chat.append(time.format(new Date()) + " * " + senderName + " " + s.substring(4) + "\n");
-            } else {
-                chat.append(time.format(new Date()) + " <" + senderName + "> " + s + "\n");
-            }
-        }
-        chat.setCaretPosition(chat.getText().length());
-
+    protected void appendLine(String line) {
+        textArea.append(line + "\n");
+        textArea.setCaretPosition(textArea.getText().length());
     }
 
-    public void setSender(Sender sender) {
-        this.sender = sender;
+    public Component getComponent() {
+        return component;
     }
 }

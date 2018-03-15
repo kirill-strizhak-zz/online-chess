@@ -1,6 +1,6 @@
 package ks3.oc.conn;
 
-import ks3.oc.ChatDisplay;
+import ks3.oc.chat.ChatDisplay;
 import ks3.oc.MainWindow;
 import ks3.oc.board.BoardState;
 import ks3.oc.conn.handlers.MessageHandler;

@@ -1,6 +1,6 @@
 package ks3.oc.conn.handlers;
 
-import ks3.oc.ChatDisplay;
+import ks3.oc.chat.ChatDisplay;
 import ks3.oc.MainWindow;
 
 import java.io.BufferedReader;

@@ -1,6 +1,7 @@
 package ks3.oc.conn.handlers;
 
-import ks3.oc.ChatDisplay;
+import ks3.oc.Protocol;
+import ks3.oc.chat.ChatDisplay;
 import ks3.oc.MainWindow;
 import org.apache.log4j.Logger;
 
@@ -27,6 +28,6 @@ public class NameHandler implements MessageHandler {
         String name = reader.readLine();
         main.setOpponentName(name);
         LOGGER.info("Name received");
-        chat.addChatLine("* " + name + " connected", "sys_&^_tem");
+        chat.addChatLine("* " + name + " connected", Protocol.SYSTEM);
     }
 }

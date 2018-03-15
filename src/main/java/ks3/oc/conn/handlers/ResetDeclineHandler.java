@@ -1,6 +1,7 @@
 package ks3.oc.conn.handlers;
 
-import ks3.oc.ChatDisplay;
+import ks3.oc.Protocol;
+import ks3.oc.chat.ChatDisplay;
 
 public class ResetDeclineHandler implements MessageHandler {
 
@@ -12,6 +13,6 @@ public class ResetDeclineHandler implements MessageHandler {
 
     @Override
     public void handle() {
-        chat.addChatLine("* Reset declined", "sys_&^_tem");
+        chat.addChatLine("* Reset declined", Protocol.SYSTEM);
     }
 }
