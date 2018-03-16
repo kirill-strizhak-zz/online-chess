@@ -57,4 +57,10 @@ public interface BoardState {
     int getKingRow(int color);
 
     void setHlPos(int hlPos);
+
+    boolean isDebug();
+
+    void setDebug(boolean enabled);
+
+    void refresh();
 }

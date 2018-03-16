@@ -1,9 +1,8 @@
 package ks3.oc.board.start;
 
 import ks3.oc.Figure;
-import ks3.oc.board.Board;
+import ks3.oc.Protocol;
 import ks3.oc.board.BoardSetup;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,8 +14,8 @@ public class ClassicStartingBoardInitializerTest {
     private Figure[][] figures;
     private int[][] kings;
 
-    private final Figure[] whiteFigureSet = generateFigureSet(Board.WHITE);
-    private final Figure[] blackFigureSet = generateFigureSet(Board.BLACK);
+    private final Figure[] whiteFigureSet = generateFigureSet(Protocol.WHITE);
+    private final Figure[] blackFigureSet = generateFigureSet(Protocol.BLACK);
 
     @Before
     public void setUp() {
@@ -37,8 +36,8 @@ public class ClassicStartingBoardInitializerTest {
     private void testInitFigures(BoardSetup setup) {
         new ClassicStartingBoardInitializer().initFigureData(setup, figures, kings);
         testMiddleIsEmpty();
-        testPawnMatch(blackFigureSet[Board.PAWN], setup.getBlackPawnRow());
-        testPawnMatch(whiteFigureSet[Board.PAWN], setup.getWhitePawnRow());
+        testPawnMatch(blackFigureSet[Protocol.PAWN], setup.getBlackPawnRow());
+        testPawnMatch(whiteFigureSet[Protocol.PAWN], setup.getWhitePawnRow());
         testFigureMatch(blackFigureSet, setup.getBlackFigureRow(), setup.getQueenCol(), setup.getKingCol());
         testFigureMatch(whiteFigureSet, setup.getWhiteFigureRow(), setup.getQueenCol(), setup.getKingCol());
         testFigureCoordinates(0, 2);
@@ -55,7 +54,7 @@ public class ClassicStartingBoardInitializerTest {
     }
 
     private void testPawnMatch(Figure pawn, int row) {
-        String color = pawn.color == Board.BLACK ? "black" : "white";
+        String color = pawn.color == Protocol.BLACK ? "black" : "white";
         String errMsg = String.format("Row %d should have all %s pawns", row, color);
         for (int col = 0; col < 7; col++) {
             assertTrue(errMsg, figuresAreEqual(figures[col][row], pawn));
@@ -64,14 +63,14 @@ public class ClassicStartingBoardInitializerTest {
 
     private void testFigureMatch(Figure[] figureSet, int row, int queenRow, int kingRow) {
         String errMsg = "Figures should be in their expected places";
-        assertTrue(errMsg + " : RL", figuresAreEqual(figures[0][row], figureSet[Board.ROOK]));
-        assertTrue(errMsg + " : RR", figuresAreEqual(figures[7][row], figureSet[Board.ROOK]));
-        assertTrue(errMsg + " : KL", figuresAreEqual(figures[1][row], figureSet[Board.KNIGHT]));
-        assertTrue(errMsg + " : KR", figuresAreEqual(figures[6][row], figureSet[Board.KNIGHT]));
-        assertTrue(errMsg + " : BL", figuresAreEqual(figures[2][row], figureSet[Board.BISHOP]));
-        assertTrue(errMsg + " : BR", figuresAreEqual(figures[5][row], figureSet[Board.BISHOP]));
-        assertTrue(errMsg + " : Q", figuresAreEqual(figures[queenRow][row], figureSet[Board.QUEEN]));
-        assertTrue(errMsg + " : K", figuresAreEqual(figures[kingRow][row], figureSet[Board.KING]));
+        assertTrue(errMsg + " : RL", figuresAreEqual(figures[0][row], figureSet[Protocol.ROOK]));
+        assertTrue(errMsg + " : RR", figuresAreEqual(figures[7][row], figureSet[Protocol.ROOK]));
+        assertTrue(errMsg + " : KL", figuresAreEqual(figures[1][row], figureSet[Protocol.KNIGHT]));
+        assertTrue(errMsg + " : KR", figuresAreEqual(figures[6][row], figureSet[Protocol.KNIGHT]));
+        assertTrue(errMsg + " : BL", figuresAreEqual(figures[2][row], figureSet[Protocol.BISHOP]));
+        assertTrue(errMsg + " : BR", figuresAreEqual(figures[5][row], figureSet[Protocol.BISHOP]));
+        assertTrue(errMsg + " : Q", figuresAreEqual(figures[queenRow][row], figureSet[Protocol.QUEEN]));
+        assertTrue(errMsg + " : K", figuresAreEqual(figures[kingRow][row], figureSet[Protocol.KING]));
     }
 
     private void testFigureCoordinates(int fromRow, int toRow) {

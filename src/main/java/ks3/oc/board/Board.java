@@ -1,10 +1,10 @@
 package ks3.oc.board;
 
-import ks3.oc.chat.ChatDisplay;
 import ks3.oc.Figure;
 import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.start.StartingBoardInitializer;
+import ks3.oc.chat.ChatDisplay;
 import ks3.oc.conn.Sender;
 import ks3.oc.logic.Logic;
 import ks3.oc.res.ResourceManager;
@@ -13,13 +13,13 @@ import org.apache.log4j.Logger;
 import java.awt.Image;
 import java.io.IOException;
 
-public class Board implements Protocol, BoardState {
+public abstract class Board implements BoardState {
 
     private static final Logger LOGGER = Logger.getLogger(Board.class);
 
-    private final ResourceManager resourceManager;
-    private final MainWindow main;
-    private final ChatDisplay chat;
+    protected final ResourceManager resourceManager;
+    protected final MainWindow main;
+    protected final ChatDisplay chat;
 
     private boolean dragging = false;
     public boolean loading = false;
@@ -31,7 +31,7 @@ public class Board implements Protocol, BoardState {
     public int hlPos = 0;
     public int dragX, dragY, x, y;
     private Sender sender;
-    private Logic logic;
+    protected Logic logic;
 
     public Board(ResourceManager resourceManager, MainWindow main, ChatDisplay chat) {
         this.resourceManager = resourceManager;
@@ -41,7 +41,7 @@ public class Board implements Protocol, BoardState {
     }
 
     public void initFigures(StartingBoardInitializer startingBoardInitializer) {
-        if (main.getMyColor() == BLACK) {
+        if (main.getMyColor() == Protocol.BLACK) {
             startingBoardInitializer.initFigureData(BoardSetup.PLAYING_BLACK, figures, king);
         } else {
             startingBoardInitializer.initFigureData(BoardSetup.PLAYING_WHITE, figures, king);
@@ -138,9 +138,9 @@ public class Board implements Protocol, BoardState {
         figures[newX][newY].color = figures[currX][currY].color;
         figures[currX][currY].empty = true;
         figures[currX][currY].firstStep = false;
-        figures[currX][currY].color = NULL;
-        figures[currX][currY].type = NULL;
-        if (figures[newX][newY].type == KING) {
+        figures[currX][currY].color = Protocol.NULL;
+        figures[currX][currY].type = Protocol.NULL;
+        if (figures[newX][newY].type == Protocol.KING) {
             int colorId = main.getOppColor() / 2;
             king[colorId][0] = newX;
             king[colorId][1] = newY;
@@ -153,7 +153,7 @@ public class Board implements Protocol, BoardState {
                 main.setMyTurn(false);
                 try {
                     LOGGER.info("Sending mate notification");
-                    sender.send(MATE);
+                    sender.send(Protocol.MATE);
                 } catch (IOException ex) {
                     LOGGER.error("Failed to send mate notification", ex);
                 }
@@ -178,7 +178,7 @@ public class Board implements Protocol, BoardState {
             newInvertedX = Math.abs(7 - newX);
             newInvertedY = Math.abs(7 - newY);
             LOGGER.info("Sending coordinates");
-            sender.send(COORDINATES);
+            sender.send(Protocol.COORDINATES);
             sender.send(invertedX);
             sender.send(invertedY);
             sender.send(newInvertedX);
@@ -188,7 +188,7 @@ public class Board implements Protocol, BoardState {
                 if (logic.mate(king[z][0], king[z][1])) {
                     main.setMyTurn(false);
                     LOGGER.info("Sending mate notification");
-                    sender.send(MATE);
+                    sender.send(Protocol.MATE);
                     chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
                 }
             }
@@ -217,7 +217,7 @@ public class Board implements Protocol, BoardState {
             int invertedX, invertedY;
             invertedX = Math.abs(7 - x);
             invertedY = Math.abs(7 - y);
-            sender.send(SET);
+            sender.send(Protocol.SET);
             sender.send(invertedX);
             sender.send(invertedY);
             sender.send(color);
@@ -250,7 +250,7 @@ public class Board implements Protocol, BoardState {
     @Override
     public void giveTurn() {
         try {
-            sender.send(GIVE_TURN);
+            sender.send(Protocol.GIVE_TURN);
         } catch (IOException ex) {
             LOGGER.error("Failed to give turn", ex);
         }
@@ -258,7 +258,7 @@ public class Board implements Protocol, BoardState {
 
     public void reaveTurn() {
         try {
-            sender.send(REAVE_TURN);
+            sender.send(Protocol.REAVE_TURN);
         } catch (IOException ex) {
             LOGGER.error("Failed to reave turn", ex);
         }
@@ -271,16 +271,16 @@ public class Board implements Protocol, BoardState {
     public void shortXchng() {
         main.setMyTurn(false);
         LOGGER.info("Waiting to send coordinates");
-        if (main.getMyColor() == WHITE) {
-            globalSetFigure(7, 7, NULL, NULL, true, false);
-            globalSetFigure(4, 7, NULL, NULL, true, false);
-            globalSetFigure(5, 7, main.getMyColor(), ROOK, false, false);
-            globalSetFigure(6, 7, main.getMyColor(), KING, false, false);
+        if (main.getMyColor() == Protocol.WHITE) {
+            globalSetFigure(7, 7, Protocol.NULL, Protocol.NULL, true, false);
+            globalSetFigure(4, 7, Protocol.NULL, Protocol.NULL, true, false);
+            globalSetFigure(5, 7, main.getMyColor(), Protocol.ROOK, false, false);
+            globalSetFigure(6, 7, main.getMyColor(), Protocol.KING, false, false);
         } else {
-            globalSetFigure(0, 7, NULL, NULL, true, false);
-            globalSetFigure(3, 7, NULL, NULL, true, false);
-            globalSetFigure(2, 7, main.getMyColor(), ROOK, false, false);
-            globalSetFigure(1, 7, main.getMyColor(), KING, false, false);
+            globalSetFigure(0, 7, Protocol.NULL, Protocol.NULL, true, false);
+            globalSetFigure(3, 7, Protocol.NULL, Protocol.NULL, true, false);
+            globalSetFigure(2, 7, main.getMyColor(), Protocol.ROOK, false, false);
+            globalSetFigure(1, 7, main.getMyColor(), Protocol.KING, false, false);
         }
         giveTurn();
         main.refresh();
@@ -289,16 +289,16 @@ public class Board implements Protocol, BoardState {
     public void longXchng() {
         main.setMyTurn(false);
         LOGGER.info("Waiting to send coordinates");
-        if (main.getMyColor() == WHITE) {
-            globalSetFigure(0, 7, NULL, NULL, true, false);
-            globalSetFigure(4, 7, NULL, NULL, true, false);
-            globalSetFigure(3, 7, main.getMyColor(), ROOK, false, false);
-            globalSetFigure(2, 7, main.getMyColor(), KING, false, false);
+        if (main.getMyColor() == Protocol.WHITE) {
+            globalSetFigure(0, 7, Protocol.NULL, Protocol.NULL, true, false);
+            globalSetFigure(4, 7, Protocol.NULL, Protocol.NULL, true, false);
+            globalSetFigure(3, 7, main.getMyColor(), Protocol.ROOK, false, false);
+            globalSetFigure(2, 7, main.getMyColor(), Protocol.KING, false, false);
         } else {
-            globalSetFigure(7, 7, NULL, NULL, true, false);
-            globalSetFigure(3, 7, NULL, NULL, true, false);
-            globalSetFigure(4, 7, main.getMyColor(), ROOK, false, false);
-            globalSetFigure(5, 7, main.getMyColor(), KING, false, false);
+            globalSetFigure(7, 7, Protocol.NULL, Protocol.NULL, true, false);
+            globalSetFigure(3, 7, Protocol.NULL, Protocol.NULL, true, false);
+            globalSetFigure(4, 7, main.getMyColor(), Protocol.ROOK, false, false);
+            globalSetFigure(5, 7, main.getMyColor(), Protocol.KING, false, false);
         }
         giveTurn();
         main.refresh();
@@ -308,7 +308,7 @@ public class Board implements Protocol, BoardState {
         localClear();
         LOGGER.info("Sending clear notification");
         try {
-            sender.send(CLEAR);
+            sender.send(Protocol.CLEAR);
         } catch (IOException ex) {
             LOGGER.error("Failed to send clear notification", ex);
         }

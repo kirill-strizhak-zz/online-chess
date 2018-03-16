@@ -18,12 +18,8 @@ public class SwingChatDisplay extends Chat {
 
     public SwingChatDisplay(String playerName) {
         super(playerName);
-        component = new JPanel(true);
-        component.setSize(320, 400);
-        component.setLayout(new BorderLayout());
         textArea = createTextArea();
-        component.add("Center", wrapInScrollPane(textArea));
-        component.add("South", createTextInput());
+        component = createComponent();
     }
 
     private JTextArea createTextArea() {
@@ -33,6 +29,15 @@ public class SwingChatDisplay extends Chat {
         textArea.setColumns(25);
         textArea.setRows(7);
         return textArea;
+    }
+
+    private JPanel createComponent() {
+        JPanel component = new JPanel(true);
+        component.setSize(320, 400);
+        component.setLayout(new BorderLayout());
+        component.add("Center", wrapInScrollPane(textArea));
+        component.add("South", createTextInput());
+        return component;
     }
 
     private JScrollPane wrapInScrollPane(Component component) {

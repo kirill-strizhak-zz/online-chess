@@ -1,6 +1,6 @@
 package ks3.oc.swing.dialogs;
 
-import ks3.oc.board.BoardDisplay;
+import ks3.oc.board.BoardState;
 import ks3.oc.res.ResourceManager;
 
 import javax.swing.ImageIcon;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class SwingPreferencesWindow extends SwingDialogWindow {
 
-    public SwingPreferencesWindow(ResourceManager resourceManager, BoardDisplay boardDisplay) {
+    public SwingPreferencesWindow(ResourceManager resourceManager, BoardState boardDisplay) {
         super(new JFrame("Preferences"));
         frame.setSize(400, 300);
         frame.setResizable(false);
