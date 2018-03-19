@@ -64,7 +64,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
 
         setMyName(name);
         chat = new SwingChatDisplay(getMyName());
-        board = new SwingBoardDisplay(resourceManager, this, chat);
+        SwingDebugOverlay debugOverlay = new SwingDebugOverlay();
+        board = new SwingBoardDisplay(resourceManager, this, chat, debugOverlay);
         FigurePickerWindow figurePickerWindow = new SwingFigurePicker(board, resourceManager);
         logic = new Logic(board, this, figurePickerWindow);
         board.setLogic(logic);

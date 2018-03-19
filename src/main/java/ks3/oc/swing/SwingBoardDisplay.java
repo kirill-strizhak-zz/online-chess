@@ -21,17 +21,9 @@ public class SwingBoardDisplay extends Board {
     private final SwingDebugOverlay debugOverlay;
     private final Color myRed = new Color(220, 0, 0);
 
-    /**
-     * @deprecated For mocks only, do not use
-     */
-    @Deprecated
-    SwingBoardDisplay() {
-        this(null, null, null);
-    }
-
-    public SwingBoardDisplay(ResourceManager resourceManager, MainWindow main, ChatDisplay chat) {
+    public SwingBoardDisplay(ResourceManager resourceManager, MainWindow main, ChatDisplay chat, SwingDebugOverlay debugOverlay) {
         super(resourceManager, main, chat);
-        this.debugOverlay = new SwingDebugOverlay();
+        this.debugOverlay = debugOverlay;
         this.component = createComponent();
     }
 
