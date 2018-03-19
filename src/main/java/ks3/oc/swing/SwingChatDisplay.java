@@ -13,13 +13,15 @@ import java.awt.event.KeyEvent;
 
 public class SwingChatDisplay extends Chat {
 
-    private final JPanel component;
     private final JTextArea textArea;
+    private final JTextField textInput;
+    private final JPanel component;
 
     public SwingChatDisplay(String playerName) {
         super(playerName);
         textArea = createTextArea();
-        component = createComponent();
+        textInput = createTextInput();
+        component = createComponent(textArea, textInput);
     }
 
     private JTextArea createTextArea() {
@@ -31,12 +33,12 @@ public class SwingChatDisplay extends Chat {
         return textArea;
     }
 
-    private JPanel createComponent() {
+    private JPanel createComponent(JTextArea textArea, JTextField textInput) {
         JPanel component = new JPanel(true);
         component.setSize(320, 400);
         component.setLayout(new BorderLayout());
         component.add("Center", wrapInScrollPane(textArea));
-        component.add("South", createTextInput());
+        component.add("South", textInput);
         return component;
     }
 
@@ -71,5 +73,9 @@ public class SwingChatDisplay extends Chat {
 
     public Component getComponent() {
         return component;
+    }
+
+    protected JTextField getTextInput() {
+        return textInput;
     }
 }
