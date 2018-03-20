@@ -4,7 +4,6 @@ import ks3.oc.Protocol;
 import ks3.oc.conn.Sender;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.StringTokenizer;
 
@@ -32,14 +31,9 @@ public abstract class Chat implements ChatDisplay {
 
     public void sendChat(String message) {
         LOGGER.info("Waiting to send chat");
-        try {
-            sender.send(Protocol.CHAT);
-            sender.send(message);
-            addChatLine(message, playerName);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to send chat", ex);
-            addChatLine("* Cannot send chat: connection lost", Protocol.SYSTEM);
-        }
+        sender.send(Protocol.CHAT);
+        sender.send(message);
+        addChatLine(message, playerName);
     }
 
     @Override

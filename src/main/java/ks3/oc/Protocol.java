@@ -13,8 +13,6 @@ public interface Protocol {
     static final int MATE = 9;
     static final int ACCEPT_RESET = 10;
     static final int DECLINE_RESET = 11;
-    static final int REAVE_TURN = 12;
-    static final int CLEAR = 13;
 
     static final int SERVER = 0;
     static final int CLIENT = 1;

@@ -1,17 +1,16 @@
 package ks3.oc.board;
 
 import ks3.oc.Figure;
-import ks3.oc.main.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.start.StartingBoardInitializer;
 import ks3.oc.chat.ChatDisplay;
 import ks3.oc.conn.Sender;
 import ks3.oc.logic.Logic;
+import ks3.oc.main.MainWindow;
 import ks3.oc.res.ResourceManager;
 import org.apache.log4j.Logger;
 
 import java.awt.Image;
-import java.io.IOException;
 
 public abstract class Board implements BoardState {
 
@@ -152,12 +151,8 @@ public abstract class Board implements BoardState {
         if (!isLoading()) {
             if (logic.mate(king[z][0], king[z][1])) {
                 main.setMyTurn(false);
-                try {
-                    LOGGER.info("Sending mate notification");
-                    sender.send(Protocol.MATE);
-                } catch (IOException ex) {
-                    LOGGER.error("Failed to send mate notification", ex);
-                }
+                LOGGER.info("Sending mate notification");
+                sender.send(Protocol.MATE);
                 chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
             }
         }
@@ -171,30 +166,26 @@ public abstract class Board implements BoardState {
     @Override
     public void makeMove(int newX, int newY) {
         main.setMyTurn(false);
-        try {
-            int z = main.getMyColor() / 2;
-            int invertedX, invertedY, newInvertedX, newInvertedY;
-            invertedX = Math.abs(7 - dragX);
-            invertedY = Math.abs(7 - dragY);
-            newInvertedX = Math.abs(7 - newX);
-            newInvertedY = Math.abs(7 - newY);
-            LOGGER.info("Sending coordinates");
-            sender.send(Protocol.COORDINATES);
-            sender.send(invertedX);
-            sender.send(invertedY);
-            sender.send(newInvertedX);
-            sender.send(newInvertedY);
-            check = !logic.kingSafeAt(king[z][0], king[z][1], main.getOppColor());
-            if (!isLoading()) {
-                if (logic.mate(king[z][0], king[z][1])) {
-                    main.setMyTurn(false);
-                    LOGGER.info("Sending mate notification");
-                    sender.send(Protocol.MATE);
-                    chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
-                }
+        int z = main.getMyColor() / 2;
+        int invertedX, invertedY, newInvertedX, newInvertedY;
+        invertedX = Math.abs(7 - dragX);
+        invertedY = Math.abs(7 - dragY);
+        newInvertedX = Math.abs(7 - newX);
+        newInvertedY = Math.abs(7 - newY);
+        LOGGER.info("Sending coordinates");
+        sender.send(Protocol.COORDINATES);
+        sender.send(invertedX);
+        sender.send(invertedY);
+        sender.send(newInvertedX);
+        sender.send(newInvertedY);
+        check = !logic.kingSafeAt(king[z][0], king[z][1], main.getOppColor());
+        if (!isLoading()) {
+            if (logic.mate(king[z][0], king[z][1])) {
+                main.setMyTurn(false);
+                LOGGER.info("Sending mate notification");
+                sender.send(Protocol.MATE);
+                chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
             }
-        } catch (IOException ex) {
-            LOGGER.error("Failed to send move", ex);
         }
         main.refresh();
     }
@@ -214,20 +205,16 @@ public abstract class Board implements BoardState {
         } else {
             iFirstStep = 0;
         }
-        try {
-            int invertedX, invertedY;
-            invertedX = Math.abs(7 - x);
-            invertedY = Math.abs(7 - y);
-            sender.send(Protocol.SET);
-            sender.send(invertedX);
-            sender.send(invertedY);
-            sender.send(color);
-            sender.send(type);
-            sender.send(iIsEmpty);
-            sender.send(iFirstStep);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to set figure", ex);
-        }
+        int invertedX, invertedY;
+        invertedX = Math.abs(7 - x);
+        invertedY = Math.abs(7 - y);
+        sender.send(Protocol.SET);
+        sender.send(invertedX);
+        sender.send(invertedY);
+        sender.send(color);
+        sender.send(type);
+        sender.send(iIsEmpty);
+        sender.send(iFirstStep);
     }
 
     @Override
@@ -250,19 +237,7 @@ public abstract class Board implements BoardState {
 
     @Override
     public void giveTurn() {
-        try {
-            sender.send(Protocol.GIVE_TURN);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to give turn", ex);
-        }
-    }
-
-    public void reaveTurn() {
-        try {
-            sender.send(Protocol.REAVE_TURN);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to reave turn", ex);
-        }
+        sender.send(Protocol.GIVE_TURN);
     }
 
     public Logic getLogic() {
@@ -305,29 +280,6 @@ public abstract class Board implements BoardState {
         }
         giveTurn();
         main.refresh();
-    }
-
-    public void globalClear() {
-        localClear();
-        LOGGER.info("Sending clear notification");
-        try {
-            sender.send(Protocol.CLEAR);
-        } catch (IOException ex) {
-            LOGGER.error("Failed to send clear notification", ex);
-        }
-    }
-
-    public void localClear() {
-        for (int i = 0; i <= 7; i++) {
-            for (int j = 0; j <= 7; j++) {
-                figures[i][j].empty = true;
-                figures[i][j].firstStep = true;
-                figures[i][j].type = 6;
-                figures[i][j].color = 6;
-                figures[i][j].oX = -1;
-                figures[i][j].oY = -1;
-            }
-        }
     }
 
     @Override

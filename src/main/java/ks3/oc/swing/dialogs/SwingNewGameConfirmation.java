@@ -1,8 +1,8 @@
 package ks3.oc.swing.dialogs;
 
-import ks3.oc.main.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.conn.Sender;
+import ks3.oc.main.MainWindow;
 import org.apache.log4j.Logger;
 
 import javax.swing.JButton;
@@ -14,7 +14,6 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 public class SwingNewGameConfirmation extends SwingDialogWindow {
 
@@ -35,24 +34,16 @@ public class SwingNewGameConfirmation extends SwingDialogWindow {
         JButton no = new JButton("No");
         yes.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                try {
-                    LOGGER.info("Waiting to accept reset");
-                    sender.send(Protocol.ACCEPT_RESET);
-                } catch (IOException ex) {
-                    LOGGER.error("Failed to accept reset", ex);
-                }
+                LOGGER.info("Waiting to accept reset");
+                sender.send(Protocol.ACCEPT_RESET);
                 owner.reset();
                 frame.setVisible(false);
             }
         });
         no.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                try {
-                    LOGGER.info("Waiting to decline reset");
-                    sender.send(Protocol.DECLINE_RESET);
-                } catch (IOException ex) {
-                    LOGGER.error("Failed to decline reset", ex);
-                }
+                LOGGER.info("Waiting to decline reset");
+                sender.send(Protocol.DECLINE_RESET);
                 frame.setVisible(false);
             }
         });

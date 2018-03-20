@@ -61,7 +61,7 @@ public abstract class Sender {
         new Thread(receiver).start();
     }
 
-    public void send(int i) throws IOException {
+    public void send(int i) {
         try {
             lock.acquireUninterruptibly();
             writer.write(i);
@@ -71,7 +71,7 @@ public abstract class Sender {
         }
     }
 
-    public void send(String s) throws IOException {
+    public void send(String s) {
         try {
             lock.acquireUninterruptibly();
             writer.println(s);

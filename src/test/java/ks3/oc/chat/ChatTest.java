@@ -8,8 +8,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.IOException;
-
 import static org.mockito.Mockito.*;
 
 public class ChatTest {
@@ -39,15 +37,6 @@ public class ChatTest {
         inOrder.verify(sender, times(1)).send(Protocol.CHAT);
         inOrder.verify(sender, times(1)).send(message);
         inOrder.verify(chat, times(1)).addChatLine(message, PLAYER_NAME);
-    }
-
-    @Test
-    public void testSendChatWhenConnectionException() throws Exception {
-        doThrow(new IOException()).when(sender).send(anyString());
-        doNothing().when(chat).addChatLine(anyString(), anyString());
-        chat.sendChat("");
-        verify(chat, times(1)).addChatLine(anyString(), anyString());
-        verify(chat, times(1)).addChatLine("* Cannot send chat: connection lost", Protocol.SYSTEM);
     }
 
     @Test
