@@ -29,7 +29,12 @@ public class SwingMainWindow extends Main {
 
     public SwingMainWindow(ResourceManager resourceManager, int type, int color, String address, int port, String name) {
         super(resourceManager, type, color, address, port, name);
-        component = new JFrame("Online Chess");
+        component = createComponent(resourceManager, type);
+        component.setVisible(true);
+    }
+
+    private JFrame createComponent(ResourceManager resourceManager, int type) {
+        JFrame component = new JFrame("Online Chess");
         component.setSize(768, 531);
         component.setIgnoreRepaint(false);
         component.getContentPane().setLayout(new BorderLayout());
@@ -37,84 +42,80 @@ public class SwingMainWindow extends Main {
         component.setResizable(false);
         component.getContentPane().add("Center", board.getComponent());
         component.getContentPane().add("East", chat.getComponent());
+        component.setJMenuBar(createMenuBar(resourceManager, type));
+        component.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                component.setVisible(false);
+                sender.send(Protocol.CLOSE);
+                sender.deactivate("Client closed app");
+                System.exit(0);
+            }
+        });
+        return component;
+    }
 
+    private JMenuBar createMenuBar(ResourceManager resourceManager, int type) {
         JMenuBar menuBar = new JMenuBar();
-        JMenu help = new JMenu("Help");
-        JMenu game = new JMenu("Game");
-        JMenu debug = new JMenu("Debug");
-        JMenuItem castleKingSide = new JMenuItem("Castle king side");
-        JMenuItem castleQueenSide = new JMenuItem("Castle queen side");
-        JMenuItem preferences = new JMenuItem("Preferences");
-        JMenuItem about = new JMenuItem("About");
-        JMenuItem dump = new JMenuItem("Dump");
-        JCheckBoxMenuItem overlay = new JCheckBoxMenuItem("Overlay", board.isDebug());
-        game.addMouseListener(new MouseAdapter() {
+        menuBar.add(createGameMenu(resourceManager, type));
+        menuBar.add(createHelpMenu());
+        menuBar.add(createDebugMenu());
+        return menuBar;
+    }
+
+    private JMenu createGameMenu(ResourceManager resourceManager, int type) {
+        JMenu menu = new JMenu("Game");
+        if (type == Protocol.SERVER) {
+            menu.add(createActionMenuItem("New game", () -> sender.send(Protocol.OFFER_RESET)));
+        }
+        addCastlingMenuItems(menu);
+        menu.addSeparator();
+        menu.add(createDialogMenuItem("Preferences", new SwingPreferencesWindow(resourceManager, board)));
+        return menu;
+    }
+
+    private void addCastlingMenuItems(JMenu menu) {
+        JMenuItem castleKingSide = createActionMenuItem("Castle king side", board::castleKingSide);
+        JMenuItem castleQueenSide = createActionMenuItem("Castle queen side", board::castleQueenSide);
+        menu.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 castleKingSide.setEnabled(logic.kingSideCastlingAllowed());
                 castleQueenSide.setEnabled(logic.queenSideCastlingAllowed());
             }
         });
-        castleKingSide.addActionListener(event -> {
-            if (castleKingSide.isEnabled()) {
-                board.castleKingSide();
-            }
-        });
-        castleQueenSide.addActionListener(event -> {
-            if (castleQueenSide.isEnabled()) {
-                board.castleQueenSide();
-            }
-        });
-        dump.addActionListener(event -> save());
+        menu.add(castleKingSide);
+        menu.add(castleQueenSide);
+    }
+
+    private JMenu createHelpMenu() {
+        JMenu menu = new JMenu("Help");
+        menu.add(createDialogMenuItem("About", new SwingAboutWindow()));
+        return menu;
+    }
+
+    private JMenu createDebugMenu() {
+        JMenu menu = new JMenu("Debug");
+        JCheckBoxMenuItem overlay = new JCheckBoxMenuItem("Overlay", board.isDebug());
         overlay.addActionListener(event -> {
             board.setDebug(!board.isDebug());
             overlay.setSelected(board.isDebug());
             board.refresh();
         });
-        if (type == Protocol.SERVER) {
-            JMenu file = new JMenu("File");
-            JMenuItem newGame = new JMenuItem("New game");
-            JMenuItem saveGame = new JMenuItem("Save game");
-            JMenuItem loadGame = new JMenuItem("Load game");
-            game.add(newGame);
-            game.addSeparator();
-            file.add(saveGame);
-            file.add(loadGame);
-            menuBar.add(file);
-            newGame.addActionListener(e -> sender.send(Protocol.OFFER_RESET));
-            saveGame.addActionListener(event -> save());
-            loadGame.addActionListener(event -> load());
-            saveGame.setEnabled(false);
-            loadGame.setEnabled(false);
-        }
+        menu.add(overlay);
+        return menu;
+    }
 
-        DialogWindow aboutWindow = new SwingAboutWindow();
-        about.addActionListener(event -> aboutWindow.open());
+    private JMenuItem createActionMenuItem(String text, Runnable action) {
+        JMenuItem menuItem = new JMenuItem(text);
+        menuItem.addActionListener(event -> action.run());
+        return menuItem;
+    }
 
-        DialogWindow preferencesWindow = new SwingPreferencesWindow(resourceManager, board);
-        preferences.addActionListener(event -> preferencesWindow.open());
-        game.add(castleKingSide);
-        game.add(castleQueenSide);
-        game.addSeparator();
-        game.add(preferences);
-        help.add(about);
-        debug.add(dump);
-        debug.add(overlay);
-        menuBar.add(game);
-        menuBar.add(help);
-        menuBar.add(debug);
-        component.setJMenuBar(menuBar);
-
-        component.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                component.setVisible(false);
-                sender.send(Protocol.CLOSE);
-                sender.deactivate("MF: client closed app");
-                System.exit(0);
-            }
-        });
-        component.setVisible(true);
+    private JMenuItem createDialogMenuItem(String text, DialogWindow dialogWindow) {
+        JMenuItem menuItem = new JMenuItem(text);
+        menuItem.addActionListener(event -> dialogWindow.open());
+        return menuItem;
     }
 
     @Override
