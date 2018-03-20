@@ -19,8 +19,7 @@ public abstract class Main implements MainWindow {
     protected final BoardState board;
     protected final ChatDisplay chat;
     protected final Logic logic;
-
-    protected Sender sender;
+    protected final Sender sender;
 
     private String opponentName;
     private String myName;
@@ -28,7 +27,7 @@ public abstract class Main implements MainWindow {
     private int myColor = -1;
     private boolean myTurn = false;
 
-    public Main(ResourceManager resourceManager, int type, int color, String address, int port, String name) {
+    protected Main(ResourceManager resourceManager, int type, int color, String address, int port, String name) {
         this.myName = name;
         chat = createChat();
         board = createBoard(resourceManager);
@@ -95,14 +94,6 @@ public abstract class Main implements MainWindow {
         chat.addChatLine("* " + getOpponentName() + " quits", Protocol.SYSTEM);
     }
 
-    protected void save() {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-    protected void load() {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
     @Override
     public int getOppColor() {
         return oppColor;
@@ -148,7 +139,7 @@ public abstract class Main implements MainWindow {
         this.opponentName = opponentName;
     }
 
-    public String getMyName() {
+    protected String getMyName() {
         return myName;
     }
 }

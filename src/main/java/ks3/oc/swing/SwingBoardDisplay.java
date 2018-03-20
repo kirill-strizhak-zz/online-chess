@@ -68,25 +68,23 @@ public class SwingBoardDisplay extends Board {
 
     protected void drawBoard(Graphics g) {
         g.drawImage(resourceManager.getBoard(), 0, 0, component);
-        if (!isLoading()) {
-            Figure figure;
-            for (int col = 0; col <= 7; col++) {
-                for (int row = 0; row <= 7; row++) {
-                    if (!isCellEmpty(col, row)) {
-                        figure = figureAt(col, row);
-                        g.drawImage(getImageOfFigure(figure), figure.oX, figure.oY, component);
-                    }
+        Figure figure;
+        for (int col = 0; col <= 7; col++) {
+            for (int row = 0; row <= 7; row++) {
+                if (!isCellEmpty(col, row)) {
+                    figure = figureAt(col, row);
+                    g.drawImage(getImageOfFigure(figure), figure.oX, figure.oY, component);
                 }
             }
-            if (needToDrawHighlight()) {
-                drawHighlight(g);
-            }
-            if (isDragging()) {
-                figure = getDraggedFigure();
-                g.drawImage(getImageOfDraggedFigure(), figure.oX, figure.oY, component);
-            }
-            debugOverlay.draw(g, this, logic, main.getMyColor(), main.getOppColor());
         }
+        if (needToDrawHighlight()) {
+            drawHighlight(g);
+        }
+        if (isDragging()) {
+            figure = getDraggedFigure();
+            g.drawImage(getImageOfDraggedFigure(), figure.oX, figure.oY, component);
+        }
+        debugOverlay.draw(g, this, logic, main.getMyColor(), main.getOppColor());
     }
 
     private void drawHighlight(Graphics g) {

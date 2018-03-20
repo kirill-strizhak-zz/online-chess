@@ -8,12 +8,13 @@ import ks3.oc.dialogs.FigurePickerWindow;
 
 public class Logic implements Protocol {
 
-    private int[][] allowed = new int[100][2];
+    private final BoardState board;
+    private final MainWindow owner;
+    private final FigurePickerWindow figurePickerWindow;
+
+    private final int[][] allowed = new int[100][2];
     private int arrPos = 0;
-    private BoardState board;
-    private MainWindow owner;
-    private FigurePickerWindow figurePickerWindow;
-    private int[] attacker = new int[2];
+    private final int[] attacker = new int[2];
 
     public Logic(BoardState board, MainWindow owner, FigurePickerWindow figurePickerWindow) {
         this.board = board;

@@ -6,7 +6,6 @@ import ks3.oc.conn.Sender;
 import ks3.oc.logic.Logic;
 
 import java.awt.Component;
-import java.awt.Image;
 
 public interface BoardState {
 
@@ -14,23 +13,7 @@ public interface BoardState {
 
     void initFigures(StartingBoardInitializer startingBoardInitializer);
 
-    void selectFigure(int col, int row);
-
-    void releaseFigure(int col, int row);
-
-    void dragFigure(int dragX, int dragY);
-
     int[][] getHighlight();
-
-    boolean isCellEmpty(int col, int row);
-
-    boolean needToDrawHighlight();
-
-    Image getImageOfFigure(Figure figure);
-
-    Image getImageOfDraggedFigure();
-
-    Figure getDraggedFigure();
 
     void makeMove(int currX, int currY, int newX, int newY);
 
@@ -47,8 +30,6 @@ public interface BoardState {
     void castleQueenSide();
 
     boolean isDragging();
-
-    boolean isLoading();
 
     boolean isCheck();
 

@@ -17,7 +17,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 
 public class SwingBoardDisplayTest {
@@ -108,7 +107,6 @@ public class SwingBoardDisplayTest {
 
     @Test
     public void testDrawBoard_WhenOnlyOneFigure() {
-        when(board.isLoading()).thenReturn(false);
         doReturn(false).when(board).needToDrawHighlight();
         when(board.isDragging()).thenReturn(false);
         Figure pawn = createPawn();
@@ -119,7 +117,6 @@ public class SwingBoardDisplayTest {
         board.drawBoard(graphics);
 
         verify(graphics, times(1)).drawImage(boardImage, 0, 0, board.getComponent());
-        verify(board, times(1)).isLoading();
         verify(board, times(1)).needToDrawHighlight();
         verify(board, times(1)).isDragging();
         verify(board, times(64)).isCellEmpty(anyInt(), anyInt());
@@ -129,7 +126,6 @@ public class SwingBoardDisplayTest {
 
     @Test
     public void testDrawBoard_WhenHasHighlight() {
-        when(board.isLoading()).thenReturn(false);
         doReturn(true).when(board).needToDrawHighlight();
         doReturn(true).when(board).isCellEmpty(anyInt(), anyInt());
         doReturn(new int[][] { {100, 200}, {300, 400} }).when(board).getHighlight();
@@ -146,7 +142,6 @@ public class SwingBoardDisplayTest {
 
     @Test
     public void testDrawBoard_WhenDragging() {
-        when(board.isLoading()).thenReturn(false);
         doReturn(false).when(board).needToDrawHighlight();
         doReturn(true).when(board).isCellEmpty(anyInt(), anyInt());
         Figure pawn = createPawn();

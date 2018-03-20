@@ -18,21 +18,21 @@ public abstract class Board implements BoardState {
 
     protected final ResourceManager resourceManager;
     protected final MainWindow main;
-    protected final ChatDisplay chat;
+    private final ChatDisplay chat;
 
     private boolean dragging = false;
-    public boolean loading = false;
     private boolean check = false;
     private Figure[][] figures = new Figure[8][8]; // figures on board
-    public int[][] king = new int[2][2]; // i = (0 - black; 1 - white;)
-    public int[] bckKing = new int[2];
-    public int[][] highlight = new int[2][2];
-    public int hlPos = 0;
-    public int dragX, dragY, x, y;
+    private int[][] king = new int[2][2]; // i = (0 - black; 1 - white;)
+    private int[] bckKing = new int[2];
+    private int[][] highlight = new int[2][2];
+    private int hlPos = 0;
+    private int dragX, dragY, x, y;
+
     private Sender sender;
     protected Logic logic;
 
-    public Board(ResourceManager resourceManager, MainWindow main, ChatDisplay chat) {
+    protected Board(ResourceManager resourceManager, MainWindow main, ChatDisplay chat) {
         this.resourceManager = resourceManager;
         this.main = main;
         this.chat = chat;
@@ -48,7 +48,6 @@ public abstract class Board implements BoardState {
         }
     }
 
-    @Override
     public void selectFigure(int col, int row) {
         x = col;
         y = row;
@@ -64,7 +63,6 @@ public abstract class Board implements BoardState {
         }
     }
 
-    @Override
     public void releaseFigure(int col, int row) {
         dragging = false;
         if (col > 7) col = 7;
@@ -79,7 +77,6 @@ public abstract class Board implements BoardState {
         }
     }
 
-    @Override
     public void dragFigure(int dragX, int dragY) {
         figures[x][y].oX = dragX - (CELL_SIZE / 2);
         if (figures[x][y].oX > 420) {
@@ -104,27 +101,22 @@ public abstract class Board implements BoardState {
         return highlight;
     }
 
-    @Override
     public boolean isCellEmpty(int col, int row) {
         return figures[col][row].empty;
     }
 
-    @Override
     public boolean needToDrawHighlight() {
         return main.isMyTurn() && highlight[0][0] != -1;
     }
 
-    @Override
     public Image getImageOfFigure(Figure figure) {
         return resourceManager.getFigureSet().getImage(figure.color, figure.type);
     }
 
-    @Override
     public Image getImageOfDraggedFigure() {
         return resourceManager.getFigureSet().getImage(figures[x][y].color + 1, figures[x][y].type);
     }
 
-    @Override
     public Figure getDraggedFigure() {
         return figures[x][y];
     }
@@ -148,13 +140,11 @@ public abstract class Board implements BoardState {
         main.setMyTurn(true);
         int z = main.getMyColor() / 2;
         check = !logic.kingSafeAt(king[z][0], king[z][1], main.getOppColor());
-        if (!isLoading()) {
-            if (logic.mate(king[z][0], king[z][1])) {
-                main.setMyTurn(false);
-                LOGGER.info("Sending mate notification");
-                sender.send(Protocol.MATE);
-                chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
-            }
+        if (logic.mate(king[z][0], king[z][1])) {
+            main.setMyTurn(false);
+            LOGGER.info("Sending mate notification");
+            sender.send(Protocol.MATE);
+            chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
         }
         highlight[0][0] = newX * CELL_SIZE;
         highlight[0][1] = newY * CELL_SIZE;
@@ -179,13 +169,11 @@ public abstract class Board implements BoardState {
         sender.send(newInvertedX);
         sender.send(newInvertedY);
         check = !logic.kingSafeAt(king[z][0], king[z][1], main.getOppColor());
-        if (!isLoading()) {
-            if (logic.mate(king[z][0], king[z][1])) {
-                main.setMyTurn(false);
-                LOGGER.info("Sending mate notification");
-                sender.send(Protocol.MATE);
-                chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
-            }
+        if (logic.mate(king[z][0], king[z][1])) {
+            main.setMyTurn(false);
+            LOGGER.info("Sending mate notification");
+            sender.send(Protocol.MATE);
+            chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
         }
         main.refresh();
     }
@@ -240,10 +228,6 @@ public abstract class Board implements BoardState {
         sender.send(Protocol.GIVE_TURN);
     }
 
-    public Logic getLogic() {
-        return logic;
-    }
-
     @Override
     public void castleKingSide() {
         main.setMyTurn(false);
@@ -285,11 +269,6 @@ public abstract class Board implements BoardState {
     @Override
     public boolean isDragging() {
         return dragging;
-    }
-
-    @Override
-    public boolean isLoading() {
-        return loading;
     }
 
     @Override

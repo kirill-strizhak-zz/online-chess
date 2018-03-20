@@ -8,7 +8,7 @@ public class Starter {
 
     private final ResourceManager resourceManager;
 
-    public Starter() {
+    private Starter() {
         resourceManager = new ResourceManager("/img/figures/", "/img/boards/", "default", "default");
         new SwingLauncherWindow(this).open();
     }

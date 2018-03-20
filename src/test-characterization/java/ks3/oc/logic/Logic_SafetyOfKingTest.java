@@ -2,7 +2,6 @@ package ks3.oc.logic;
 
 import ks3.oc.Protocol;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;

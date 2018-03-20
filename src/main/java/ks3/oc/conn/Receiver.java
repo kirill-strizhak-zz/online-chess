@@ -37,7 +37,7 @@ public class Receiver implements Runnable {
     private final Sender sender;
 
     private boolean active = true;
-    private DialogWindow newGameConfirmation;
+    private final DialogWindow newGameConfirmation;
 
     public Receiver(MainWindow main, BoardState board, ChatDisplay chat, BufferedReader reader, Sender sender) {
         this.reader = reader;
@@ -51,7 +51,7 @@ public class Receiver implements Runnable {
         handlers.put(Protocol.NAME, new NameHandler(main, chat, reader));
         handlers.put(Protocol.COORDINATES, new CoordinateHandler(board, reader));
         handlers.put(Protocol.CHAT, new ChatHandler(main, chat, reader));
-        handlers.put(Protocol.CLOSE, new CloseHandler(this, sender, reader));
+        handlers.put(Protocol.CLOSE, new CloseHandler(this, sender));
         handlers.put(Protocol.COLOR, new ColorHandler(main, reader));
         handlers.put(Protocol.OFFER_RESET, new ResetOfferHandler(newGameConfirmation));
         handlers.put(Protocol.ACCEPT_RESET, new ResetAcceptHandler(main));

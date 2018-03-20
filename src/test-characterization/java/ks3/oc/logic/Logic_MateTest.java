@@ -7,8 +7,6 @@ import ks3.oc.Protocol;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Ignore;
-
 public class Logic_MateTest extends LogicTester {
 
     // ~ ~ ~ ~ ~
