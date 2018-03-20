@@ -2,7 +2,7 @@ package ks3.oc.conn.handlers;
 
 import ks3.oc.Protocol;
 import ks3.oc.chat.ChatDisplay;
-import ks3.oc.MainWindow;
+import ks3.oc.main.MainWindow;
 
 public class MateHandler implements MessageHandler {
 

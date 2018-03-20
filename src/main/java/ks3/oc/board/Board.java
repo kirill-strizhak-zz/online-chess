@@ -1,7 +1,7 @@
 package ks3.oc.board;
 
 import ks3.oc.Figure;
-import ks3.oc.MainWindow;
+import ks3.oc.main.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.start.StartingBoardInitializer;
 import ks3.oc.chat.ChatDisplay;
@@ -40,6 +40,7 @@ public abstract class Board implements BoardState {
         highlight[0][0] = -1;
     }
 
+    @Override
     public void initFigures(StartingBoardInitializer startingBoardInitializer) {
         if (main.getMyColor() == Protocol.BLACK) {
             startingBoardInitializer.initFigureData(BoardSetup.PLAYING_BLACK, figures, king);
@@ -268,7 +269,8 @@ public abstract class Board implements BoardState {
         return logic;
     }
 
-    public void shortXchng() {
+    @Override
+    public void castleKingSide() {
         main.setMyTurn(false);
         LOGGER.info("Waiting to send coordinates");
         if (main.getMyColor() == Protocol.WHITE) {
@@ -286,7 +288,8 @@ public abstract class Board implements BoardState {
         main.refresh();
     }
 
-    public void longXchng() {
+    @Override
+    public void castleQueenSide() {
         main.setMyTurn(false);
         LOGGER.info("Waiting to send coordinates");
         if (main.getMyColor() == Protocol.WHITE) {
@@ -386,10 +389,12 @@ public abstract class Board implements BoardState {
         this.hlPos = hlPos;
     }
 
+    @Override
     public void setLogic(Logic logic) {
         this.logic = logic;
     }
 
+    @Override
     public void setSender(Sender sender) {
         this.sender = sender;
     }

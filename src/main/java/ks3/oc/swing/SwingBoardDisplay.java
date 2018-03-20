@@ -1,7 +1,7 @@
 package ks3.oc.swing;
 
 import ks3.oc.Figure;
-import ks3.oc.MainWindow;
+import ks3.oc.main.MainWindow;
 import ks3.oc.board.Board;
 import ks3.oc.board.BoardState;
 import ks3.oc.chat.ChatDisplay;
@@ -113,6 +113,7 @@ public class SwingBoardDisplay extends Board {
         component.repaint();
     }
 
+    @Override
     public Component getComponent() {
         return component;
     }

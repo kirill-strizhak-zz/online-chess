@@ -1,7 +1,7 @@
 package ks3.oc.conn;
 
 import ks3.oc.chat.ChatDisplay;
-import ks3.oc.MainWindow;
+import ks3.oc.main.MainWindow;
 import ks3.oc.board.BoardState;
 import org.apache.log4j.Logger;
 

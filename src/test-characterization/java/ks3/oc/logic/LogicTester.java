@@ -1,7 +1,7 @@
 package ks3.oc.logic;
 
 import ks3.oc.Figure;
-import ks3.oc.MainWindow;
+import ks3.oc.main.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.BoardState;
 import ks3.oc.dialogs.FigurePickerWindow;

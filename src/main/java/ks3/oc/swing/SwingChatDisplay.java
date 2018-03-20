@@ -71,6 +71,7 @@ public class SwingChatDisplay extends Chat {
         textArea.setCaretPosition(textArea.getText().length());
     }
 
+    @Override
     public Component getComponent() {
         return component;
     }

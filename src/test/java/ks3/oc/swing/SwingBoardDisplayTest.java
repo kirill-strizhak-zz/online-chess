@@ -1,7 +1,7 @@
 package ks3.oc.swing;
 
 import ks3.oc.Figure;
-import ks3.oc.MainWindow;
+import ks3.oc.main.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.Board;
 import ks3.oc.res.ResourceManager;

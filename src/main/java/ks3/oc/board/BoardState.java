@@ -1,12 +1,18 @@
 package ks3.oc.board;
 
 import ks3.oc.Figure;
+import ks3.oc.board.start.StartingBoardInitializer;
+import ks3.oc.conn.Sender;
+import ks3.oc.logic.Logic;
 
+import java.awt.Component;
 import java.awt.Image;
 
 public interface BoardState {
 
     public static final int CELL_SIZE = 60;
+
+    void initFigures(StartingBoardInitializer startingBoardInitializer);
 
     void selectFigure(int col, int row);
 
@@ -36,6 +42,10 @@ public interface BoardState {
 
     void giveTurn();
 
+    void castleKingSide();
+
+    void castleQueenSide();
+
     boolean isDragging();
 
     boolean isLoading();
@@ -63,4 +73,10 @@ public interface BoardState {
     void setDebug(boolean enabled);
 
     void refresh();
+
+    void setLogic(Logic logic);
+
+    void setSender(Sender sender);
+
+    Component getComponent();
 }

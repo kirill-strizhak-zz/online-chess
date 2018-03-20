@@ -25,6 +25,7 @@ public abstract class Chat implements ChatDisplay {
         this.playerName = playerName;
     }
 
+    @Override
     public void setSender(Sender sender) {
         this.sender = sender;
     }

@@ -1,4 +1,4 @@
-package ks3.oc;
+package ks3.oc.main;
 
 public interface MainWindow {
 

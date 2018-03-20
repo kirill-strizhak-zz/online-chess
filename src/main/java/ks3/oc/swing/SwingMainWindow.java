@@ -1,15 +1,13 @@
 package ks3.oc.swing;
 
-import ks3.oc.Figure;
-import ks3.oc.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.board.start.ClassicStartingBoardInitializer;
 import ks3.oc.conn.ClientSender;
-import ks3.oc.conn.Sender;
 import ks3.oc.conn.ServerSender;
 import ks3.oc.dialogs.DialogWindow;
 import ks3.oc.dialogs.FigurePickerWindow;
 import ks3.oc.logic.Logic;
+import ks3.oc.main.Main;
 import ks3.oc.res.ResourceManager;
 import ks3.oc.swing.dialogs.SwingAboutWindow;
 import ks3.oc.swing.dialogs.SwingFigurePicker;
@@ -29,38 +27,25 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.StringTokenizer;
 
-public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
+public class SwingMainWindow extends Main {
 
     private static final Logger LOGGER = Logger.getLogger(SwingMainWindow.class);
 
-    private final SwingBoardDisplay board;
+    private final JFrame component;
     private final Logic logic;
-    private final SwingChatDisplay chat;
     private final DialogWindow aboutWindow;
     private final DialogWindow preferencesWindow;
+    private JMenuItem castleKingSide, castleQueenSide;
 
-    private String opponentName;
-    private String myName;
-    private Sender sender;
-    private int oppColor;
-    private int myColor = -1;
-    private boolean myTurn = false;
-    private JMenuItem shortXchng, longXchng;
-
-    public SwingMainWindow(ResourceManager resourceManager, int type, int c, String addr, int port, String name) {
-        super("Online Chess");
-        setSize(768, 531);
-        setIgnoreRepaint(false);
-        getContentPane().setLayout(new BorderLayout());
-        setBackground(Color.black);
-        setResizable(false);
+    public SwingMainWindow(ResourceManager resourceManager, int type, int color, String address, int port, String name) {
+        component = new JFrame("Online Chess");
+        component.setSize(768, 531);
+        component.setIgnoreRepaint(false);
+        component.getContentPane().setLayout(new BorderLayout());
+        component.setBackground(Color.black);
+        component.setResizable(false);
 
         setMyName(name);
         chat = new SwingChatDisplay(getMyName());
@@ -70,29 +55,29 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         logic = new Logic(board, this, figurePickerWindow);
         board.setLogic(logic);
 
-        getContentPane().add("Center", board.getComponent());
-        getContentPane().add("East", chat.getComponent());
+        component.getContentPane().add("Center", board.getComponent());
+        component.getContentPane().add("East", chat.getComponent());
 
         this.aboutWindow = new SwingAboutWindow();
         this.preferencesWindow = new SwingPreferencesWindow(resourceManager, board);
 
-        if (type == CLIENT) {
-            sender = new ClientSender(this, board, chat, addr, port);
+        if (type == Protocol.CLIENT) {
+            sender = new ClientSender(this, board, chat, address, port);
         } else {
-            sender = new ServerSender(this, board, chat, addr, port);
-            setMyColor(c);
-            if (getMyColor() == BLACK) {
-                setOppColor(WHITE);
+            sender = new ServerSender(this, board, chat, address, port);
+            setMyColor(color);
+            if (getMyColor() == Protocol.BLACK) {
+                setOppColor(Protocol.WHITE);
             } else {
-                setOppColor(BLACK);
+                setOppColor(Protocol.BLACK);
             }
             try {
-                sender.send(COLOR);
-                if (getMyColor() == WHITE) {
+                sender.send(Protocol.COLOR);
+                if (getMyColor() == Protocol.WHITE) {
                     setMyTurn(true);
-                    sender.send(BLACK);
+                    sender.send(Protocol.BLACK);
                 } else {
-                    sender.send(WHITE);
+                    sender.send(Protocol.WHITE);
                 }
             } catch (IOException ex) {
                 LOGGER.error("Failed to send color", ex);
@@ -109,7 +94,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         }
 
         try {
-            sender.send(NAME);
+            sender.send(Protocol.NAME);
             sender.send(getMyName());
         } catch (IOException ex) {
             LOGGER.error("Failed to send name", ex);
@@ -123,8 +108,8 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         JMenu help = new JMenu("Help");
         JMenu game = new JMenu("Game");
         JMenu debug = new JMenu("Debug");
-        shortXchng = new JMenuItem("Castle king side");
-        longXchng = new JMenuItem("Castle queen side");
+        castleKingSide = new JMenuItem("Castle king side");
+        castleQueenSide = new JMenuItem("Castle queen side");
         JMenuItem preferences = new JMenuItem("Preferences");
         JMenuItem about = new JMenuItem("About");
         JMenuItem dump = new JMenuItem("Dump");
@@ -132,18 +117,18 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         game.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                shortXchng.setEnabled(logic.kingSideCastlingAllowed());
-                longXchng.setEnabled(logic.queenSideCastlingAllowed());
+                castleKingSide.setEnabled(logic.kingSideCastlingAllowed());
+                castleQueenSide.setEnabled(logic.queenSideCastlingAllowed());
             }
         });
-        shortXchng.addActionListener(event -> {
-            if (shortXchng.isEnabled()) {
-                board.shortXchng();
+        castleKingSide.addActionListener(event -> {
+            if (castleKingSide.isEnabled()) {
+                board.castleKingSide();
             }
         });
-        longXchng.addActionListener(event -> {
-            if (longXchng.isEnabled()) {
-                board.longXchng();
+        castleQueenSide.addActionListener(event -> {
+            if (castleQueenSide.isEnabled()) {
+                board.castleQueenSide();
             }
         });
         dump.addActionListener(event -> save());
@@ -152,7 +137,7 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             overlay.setSelected(board.isDebug());
             board.refresh();
         });
-        if (type == SERVER) {
+        if (type == Protocol.SERVER) {
             JMenu file = new JMenu("File");
             JMenuItem newGame = new JMenuItem("New game");
             JMenuItem saveGame = new JMenuItem("Save game");
@@ -165,22 +150,21 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
             newGame.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        sender.send(OFFER_RESET);
+                        sender.send(Protocol.OFFER_RESET);
                     } catch (IOException ex) {
                         LOGGER.error("Failed to send reset offer", ex);
                     }
                 }
             });
             saveGame.addActionListener(event -> save());
-            loadGame.addActionListener(event -> {
-                board.loading = true;
-                load();
-            });
+            loadGame.addActionListener(event -> load());
+            saveGame.setEnabled(false);
+            loadGame.setEnabled(false);
         }
         about.addActionListener(event -> aboutWindow.open());
         preferences.addActionListener(event -> preferencesWindow.open());
-        game.add(shortXchng);
-        game.add(longXchng);
+        game.add(castleKingSide);
+        game.add(castleQueenSide);
         game.addSeparator();
         game.add(preferences);
         help.add(about);
@@ -189,14 +173,14 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
         menuBar.add(game);
         menuBar.add(help);
         menuBar.add(debug);
-        setJMenuBar(menuBar);
+        component.setJMenuBar(menuBar);
 
-        addWindowListener(new WindowAdapter() {
+        component.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                setVisible(false);
+                component.setVisible(false);
                 try {
-                    sender.send(CLOSE);
+                    sender.send(Protocol.CLOSE);
                 } catch (IOException ex) {
                     LOGGER.error("Failed to send close notification", ex);
                 }
@@ -204,150 +188,6 @@ public class SwingMainWindow extends JFrame implements Protocol, MainWindow {
                 System.exit(0);
             }
         });
-        this.setVisible(true);
-    }
-
-    @Override
-    public void reset() {
-        setMyTurn(false);
-        board.initFigures(new ClassicStartingBoardInitializer());
-        board.highlight[0][0] = -1;
-        if (getMyColor() == WHITE) {
-            setMyTurn(true);
-        }
-        board.refresh();
-        chat.addChatLine("* Server starts new game", Protocol.SYSTEM);
-    }
-
-    @Override
-    public void connectionKilled() {
-        chat.addChatLine("* " + getOpponentName() + " quits", Protocol.SYSTEM);
-    }
-
-    private void save() {
-        int i, j;
-        boolean t = isMyTurn();
-        String cat;
-        setMyTurn(false);
-        board.reaveTurn();
-        try {
-            Figure fig;
-            PrintWriter pw = new PrintWriter(new FileOutputStream("save.txt"));
-            for (i = 0; i <= 7; i++) {
-                for (j = 0; j <= 7; j++) {
-                    fig = board.figureAt(i, j);
-                    cat = fig.empty + ":" + fig.firstStep + ":" + fig.type + ":" + fig.color + ":" + fig.oX + ":" + fig.oY;
-                    pw.println(cat);
-                }
-            }
-            pw.println(t + ":" + board.highlight[0][0] + ":" + board.highlight[0][1] + ":" + board.highlight[1][0] + ":" + board.highlight[1][1]);
-            pw.flush();
-            pw.close();
-        } catch (IOException ex) {
-            LOGGER.error("Failed to save", ex);
-        }
-        setMyTurn(t);
-        if (!isMyTurn()) {
-            board.giveTurn();
-        }
-    }
-
-    private void load() {
-        int i, j, type, color, oX, oY;
-        boolean firstStep, empty;
-        String str;
-        setMyTurn(false);
-        board.reaveTurn();
-        StringTokenizer breaker;
-        try {
-            board.globalClear();
-            BufferedReader br = new BufferedReader(new FileReader("save.txt"));
-
-            for (i = 0; i <= 7; i++) {
-                for (j = 0; j <= 7; j++) {
-                    str = br.readLine();
-                    breaker = new StringTokenizer(str, ":");
-                    empty = Boolean.parseBoolean(breaker.nextToken());
-                    firstStep = Boolean.parseBoolean(breaker.nextToken());
-                    type = Integer.parseInt(breaker.nextToken());
-                    color = Integer.parseInt(breaker.nextToken());
-                    oX = Integer.parseInt(breaker.nextToken());
-                    oY = Integer.parseInt(breaker.nextToken());
-                    board.globalSetFigure(oX / 60, oY / 60, color, type, empty, firstStep);
-                    if (i == 0 && j == 0) {
-                        System.out.println("MF: " + empty + ":" + firstStep + ":" + type);
-                    }
-                }
-            }
-
-            str = br.readLine();
-            breaker = new StringTokenizer(str, ":");
-            setMyTurn(Boolean.parseBoolean(breaker.nextToken()));
-            board.highlight[0][0] = Integer.parseInt(breaker.nextToken());
-            board.highlight[0][1] = Integer.parseInt(breaker.nextToken());
-            board.highlight[1][0] = Integer.parseInt(breaker.nextToken());
-            board.highlight[1][1] = Integer.parseInt(breaker.nextToken());
-            br.close();
-        } catch (IOException ex) {
-            LOGGER.error("Failed to load", ex);
-        }
-        if (!isMyTurn()) {
-            board.giveTurn();
-        }
-        board.refresh();
-        board.loading = false;
-    }
-
-    @Override
-    public int getOppColor() {
-        return oppColor;
-    }
-
-    @Override
-    public void setOppColor(int oppColor) {
-        this.oppColor = oppColor;
-    }
-
-    @Override
-    public int getMyColor() {
-        return myColor;
-    }
-
-    @Override
-    public void setMyColor(int myColor) {
-        this.myColor = myColor;
-    }
-
-    @Override
-    public boolean isMyTurn() {
-        return myTurn;
-    }
-
-    @Override
-    public void setMyTurn(boolean myTurn) {
-        this.myTurn = myTurn;
-    }
-
-    @Override
-    public void refresh() {
-        board.refresh();
-    }
-
-    @Override
-    public String getOpponentName() {
-        return opponentName;
-    }
-
-    @Override
-    public void setOpponentName(String opponentName) {
-        this.opponentName = opponentName;
-    }
-
-    public String getMyName() {
-        return myName;
-    }
-
-    public void setMyName(String myName) {
-        this.myName = myName;
+        component.setVisible(true);
     }
 }

@@ -1,6 +1,6 @@
 package ks3.oc.swing.dialogs;
 
-import ks3.oc.MainWindow;
+import ks3.oc.main.MainWindow;
 import ks3.oc.Protocol;
 import ks3.oc.conn.Sender;
 import org.apache.log4j.Logger;

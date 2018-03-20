@@ -24,10 +24,9 @@ public class ChatTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        chat = spy(new Chat(PLAYER_NAME) {
-            @Override
-            protected void appendLine(String line) {}
-        });
+        chat = mock(Chat.class, withSettings()
+                .useConstructor(PLAYER_NAME)
+                .defaultAnswer(CALLS_REAL_METHODS));
         chat.setSender(sender);
     }
 
