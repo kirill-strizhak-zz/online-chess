@@ -60,7 +60,7 @@ public abstract class Board implements BoardState {
         dragging = false;
         int boundCol = clipToCellBounds(col);
         int boundRow = clipToCellBounds(row);
-        if ((figures[boundCol][boundRow].color == draggedFigure().color) && (!figures[boundCol][boundRow].empty)) {
+        if ((figureAt(boundCol, boundRow).color == draggedFigure().color) && (!isCellEmpty(boundCol, boundRow))) {
             draggedFigure().oX = draggedCol * CELL_SIZE;
             draggedFigure().oY = draggedRow * CELL_SIZE;
         } else {
@@ -111,79 +111,48 @@ public abstract class Board implements BoardState {
     }
 
     @Override
-    public void makeMove(int currX, int currY, int newX, int newY) {
-        moveAndClear(figureAt(currX, currY), newX, newY);
-        if (figures[newX][newY].type == Protocol.KING) {
+    public void makeMove(int col, int row, int newCol, int newRow) {
+        moveAndClear(figureAt(col, row), newCol, newRow);
+        if (figureAt(newCol, newRow).type == Protocol.KING) {
             int colorId = main.getOppColor() / 2;
-            king[colorId][0] = newX;
-            king[colorId][1] = newY;
+            king[colorId][0] = newCol;
+            king[colorId][1] = newRow;
         }
+        setHighlight(col, row, newCol, newRow);
+        checkMate();
         main.setMyTurn(true);
-        int z = main.getMyColor() / 2;
-        check = !logic.kingSafeAt(king[z][0], king[z][1], main.getOppColor());
-        if (logic.mate(king[z][0], king[z][1])) {
-            main.setMyTurn(false);
-            sender.send(Protocol.MATE);
-            chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
-        }
-        highlight[0][0] = newX * CELL_SIZE;
-        highlight[0][1] = newY * CELL_SIZE;
-        highlight[1][0] = currX * CELL_SIZE;
-        highlight[1][1] = currY * CELL_SIZE;
         main.refresh();
     }
 
     @Override
-    public void makeMove(int newX, int newY) {
+    public void makeMove(int newCol, int newRow) {
+        sender.sendMove(draggedCol, draggedRow, newCol, newRow);
+        checkMate();
         main.setMyTurn(false);
-        int z = main.getMyColor() / 2;
-        int invertedX, invertedY, newInvertedX, newInvertedY;
-        invertedX = Math.abs(7 - draggedCol);
-        invertedY = Math.abs(7 - draggedRow);
-        newInvertedX = Math.abs(7 - newX);
-        newInvertedY = Math.abs(7 - newY);
-        sender.send(Protocol.COORDINATES);
-        sender.send(invertedX);
-        sender.send(invertedY);
-        sender.send(newInvertedX);
-        sender.send(newInvertedY);
-        check = !logic.kingSafeAt(king[z][0], king[z][1], main.getOppColor());
-        if (logic.mate(king[z][0], king[z][1])) {
+        main.refresh();
+    }
+
+    private void checkMate() {
+        int kingIndex = main.getMyColor() / 2;
+        check = !logic.kingSafeAt(king[kingIndex][0], king[kingIndex][1], main.getOppColor());
+        if (logic.mate(king[kingIndex][0], king[kingIndex][1])) {
             main.setMyTurn(false);
             sender.send(Protocol.MATE);
             chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
         }
-        main.refresh();
     }
 
     @Override
-    public void globalSetFigure(int x, int y, int color, int type, boolean isEmpty, boolean firstStep) {
+    public void globalSetFigure(int col, int row, int color, int type, boolean isEmpty, boolean firstStep) {
         main.setMyTurn(false);
-        localSetFigure(x, y, color, type, isEmpty, firstStep);
-        sender.send(Protocol.SET);
-        sender.send(Math.abs(7 - x));
-        sender.send(Math.abs(7 - y));
-        sender.send(color);
-        sender.send(type);
-        sender.send(isEmpty ? 1 : 0);
-        sender.send(firstStep ? 1 : 0);
+        localSetFigure(col, row, color, type, isEmpty, firstStep);
+        sender.sendSet(col, row, color, type, isEmpty, firstStep);
     }
 
     @Override
-    public void localSetFigure(int x, int y, int color, int type, boolean isEmpty, boolean firstStep) {
-        figures[x][y].empty = isEmpty;
-        figures[x][y].firstStep = firstStep;
-        figures[x][y].oX = x * CELL_SIZE;
-        figures[x][y].oY = y * CELL_SIZE;
-        figures[x][y].color = color;
-        figures[x][y].type = type;
-        highlight[hlPos][0] = x * CELL_SIZE;
-        highlight[hlPos][1] = y * CELL_SIZE;
-        if (hlPos == 1) {
-            hlPos = 0;
-        } else {
-            ++hlPos;
-        }
+    public void localSetFigure(int col, int row, int color, int type, boolean isEmpty, boolean firstStep) {
+        setFigure(col, row, color, type, isEmpty, firstStep);
+        setHighlight(col, row);
         main.refresh();
     }
 
@@ -256,13 +225,7 @@ public abstract class Board implements BoardState {
 
     @Override
     public void moveAndClear(Figure figure, int col, int row) {
-        figureAt(col, row).oX = col * CELL_SIZE;
-        figureAt(col, row).oY = row * CELL_SIZE;
-        figureAt(col, row).empty = false;
-        figureAt(col, row).firstStep = false;
-        figureAt(col, row).type = figure.type;
-        figureAt(col, row).color = figure.color;
-
+        setFigure(col, row, figure.color, figure.type, false, false);
         figure.empty = true;
         figure.firstStep = false;
         figure.type = Protocol.NULL;
@@ -298,5 +261,31 @@ public abstract class Board implements BoardState {
     @Override
     public void setSender(Sender sender) {
         this.sender = sender;
+    }
+
+    private void setFigure(int col, int row, int color, int type, boolean isEmpty, boolean firstStep) {
+        figureAt(col, row).empty = isEmpty;
+        figureAt(col, row).firstStep = firstStep;
+        figureAt(col, row).oX = col * CELL_SIZE;
+        figureAt(col, row).oY = row * CELL_SIZE;
+        figureAt(col, row).color = color;
+        figureAt(col, row).type = type;
+    }
+
+    private void setHighlight(int col, int row, int newCol, int newRow) {
+        highlight[0][0] = col * CELL_SIZE;
+        highlight[0][1] = row * CELL_SIZE;
+        highlight[1][0] = newCol * CELL_SIZE;
+        highlight[1][1] = newRow * CELL_SIZE;
+    }
+
+    private void setHighlight(int col, int row) {
+        highlight[hlPos][0] = col * CELL_SIZE;
+        highlight[hlPos][1] = row * CELL_SIZE;
+        if (hlPos == 1) {
+            hlPos = 0;
+        } else {
+            ++hlPos;
+        }
     }
 }

@@ -1,5 +1,7 @@
 package ks3.oc.conn;
 
+import ks3.oc.Protocol;
+import ks3.oc.board.Board;
 import ks3.oc.chat.ChatDisplay;
 import ks3.oc.main.MainWindow;
 import ks3.oc.board.BoardState;
@@ -89,6 +91,24 @@ public abstract class Sender {
         } catch (IOException ex) {
             LOGGER.error("Failed to do clean shutdown", ex);
         }
+    }
+
+    public void sendMove(int col, int row, int newCol, int newRow) {
+        send(Protocol.COORDINATES);
+        send(Math.abs(7 - col));
+        send(Math.abs(7 - row));
+        send(Math.abs(7 - newCol));
+        send(Math.abs(7 - newRow));
+    }
+
+    public void sendSet(int col, int row, int color, int type, boolean isEmpty, boolean firstStep) {
+        send(Protocol.SET);
+        send(Math.abs(7 - col));
+        send(Math.abs(7 - row));
+        send(color);
+        send(type);
+        send(isEmpty ? 1 : 0);
+        send(firstStep ? 1 : 0);
     }
 
     protected SocketFactory getSocketFactory() {
