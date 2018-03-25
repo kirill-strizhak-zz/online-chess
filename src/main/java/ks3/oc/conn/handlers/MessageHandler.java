@@ -4,5 +4,5 @@ import java.io.IOException;
 
 public interface MessageHandler {
 
-    public void handle() throws IOException;
+    void handle() throws IOException;
 }

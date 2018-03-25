@@ -1,16 +1,15 @@
 package ks3.oc.board;
 
 import ks3.oc.Figure;
-import ks3.oc.Protocol;
 import ks3.oc.board.start.StartingBoardInitializer;
 import ks3.oc.conn.Sender;
 import ks3.oc.logic.Logic;
 
-import java.awt.Component;
+import java.awt.*;
 
 public interface BoardState {
 
-    public static final int CELL_SIZE = 60;
+    int CELL_SIZE = 60;
 
     void initFigures(StartingBoardInitializer startingBoardInitializer);
 

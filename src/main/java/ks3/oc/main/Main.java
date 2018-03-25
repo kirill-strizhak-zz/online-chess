@@ -10,12 +10,11 @@ import ks3.oc.conn.ServerSender;
 import ks3.oc.dialogs.FigurePickerWindow;
 import ks3.oc.logic.Logic;
 import ks3.oc.res.ResourceManager;
-import org.apache.log4j.Logger;
 
 public abstract class Main implements MainWindow {
 
-    private static final Logger LOGGER = Logger.getLogger(MainWindow.class);
-
+    protected final ResourceManager resourceManager;
+    protected final int type;
     protected final BoardState board;
     protected final ChatDisplay chat;
     protected final Logic logic;
@@ -28,6 +27,8 @@ public abstract class Main implements MainWindow {
     private boolean myTurn = false;
 
     protected Main(ResourceManager resourceManager, int type, int color, String address, int port, String name) {
+        this.resourceManager = resourceManager;
+        this.type = type;
         this.myName = name;
         chat = createChat();
         board = createBoard(resourceManager);
@@ -38,32 +39,18 @@ public abstract class Main implements MainWindow {
         if (type == Protocol.CLIENT) {
             sender = new ClientSender(this, board, chat, address, port);
         } else {
-            sender = new ServerSender(this, board, chat, address, port);
             setMyColor(color);
             if (color == Protocol.WHITE) {
                 setMyTurn(true);
                 setOppColor(Protocol.BLACK);
-                sender.sendColor(Protocol.BLACK);
             } else {
                 setOppColor(Protocol.WHITE);
-                sender.sendColor(Protocol.WHITE);
             }
+            sender = new ServerSender(this, board, chat, address, port);
         }
-
-        while (getMyColor() == -1) {
-            LOGGER.info("Waiting for color");
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                LOGGER.error("Failed to receive color", ex);
-            }
-        }
-
-        sender.sendName(getMyName());
 
         chat.setSender(sender);
         board.setSender(sender);
-        board.initFigures(new ClassicStartingBoardInitializer());
     }
 
     protected abstract BoardState createBoard(ResourceManager resourceManager);
@@ -134,7 +121,8 @@ public abstract class Main implements MainWindow {
         this.opponentName = opponentName;
     }
 
-    protected String getMyName() {
+    @Override
+    public String getMyName() {
         return myName;
     }
 }

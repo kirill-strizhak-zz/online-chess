@@ -12,7 +12,7 @@ public enum BoardSetup {
     private final int queenCol;
     private final int kingCol;
 
-    private BoardSetup(int blackFigureRow, int whiteFigureRow, int blackPawnRow, int whitePawnRow, int queenCol, int kingCol) {
+    BoardSetup(int blackFigureRow, int whiteFigureRow, int blackPawnRow, int whitePawnRow, int queenCol, int kingCol) {
         this.blackFigureRow = blackFigureRow;
         this.whiteFigureRow = whiteFigureRow;
         this.blackPawnRow = blackPawnRow;

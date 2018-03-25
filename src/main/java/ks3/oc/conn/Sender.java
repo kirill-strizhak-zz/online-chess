@@ -1,6 +1,5 @@
 package ks3.oc.conn;
 
-import ks3.oc.Protocol;
 import ks3.oc.board.BoardState;
 import ks3.oc.chat.ChatDisplay;
 import ks3.oc.main.MainWindow;
@@ -15,9 +14,9 @@ public abstract class Sender {
     private static final Logger LOGGER = Logger.getLogger(Sender.class);
 
     private final SocketFactory socketFactory;
-    private final MainWindow main;
-    private final BoardState board;
-    private final ChatDisplay chat;
+    protected final MainWindow main;
+    protected final BoardState board;
+    protected final ChatDisplay chat;
     private final Semaphore lock;
 
     private Socket socket;
@@ -39,23 +38,23 @@ public abstract class Sender {
     private void start(String host, int port) {
         try {
             socket = openConnection(host, port);
-            LOGGER.info("Connection established, creating i/o streams");
-            InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream());
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream());
-            BufferedReader reader = new BufferedReader(inputStreamReader);
-            writer = new PrintWriter(outputStreamWriter);
-            startReceiver(reader);
+            writer = createWriter(socket);
+            sendHandshake(writer);
+            startReceiver(createReader(socket));
             LOGGER.info("Initialization completed");
         } catch (IOException ex) {
             LOGGER.error("Failed to establish connection", ex);
         }
     }
 
-    protected abstract Socket openConnection(String host, int port) throws IOException;
+    private PrintWriter createWriter(Socket socket) throws IOException {
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream());
+        return new PrintWriter(outputStreamWriter);
+    }
 
-    protected void startReceiver(BufferedReader reader) {
-        Receiver receiver = new Receiver(main, board, chat, reader, this);
-        new Thread(receiver).start();
+    private BufferedReader createReader(Socket socket) throws IOException {
+        InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream());
+        return new BufferedReader(inputStreamReader);
     }
 
     private void send(int i) {
@@ -106,16 +105,6 @@ public abstract class Sender {
         send(firstStep ? 1 : 0);
     }
 
-    public void sendColor(int color) {
-        send(Headers.COLOR);
-        send(color);
-    }
-
-    public void sendName(String name) {
-        send(Headers.NAME);
-        send(name);
-    }
-
     public void sendChat(String message) {
         send(Headers.CHAT);
         send(message);
@@ -149,4 +138,10 @@ public abstract class Sender {
     protected SocketFactory getSocketFactory() {
         return socketFactory;
     }
+
+    protected abstract Socket openConnection(String host, int port) throws IOException;
+
+    protected abstract void sendHandshake(PrintWriter writer);
+
+    protected abstract void startReceiver(BufferedReader reader);
 }

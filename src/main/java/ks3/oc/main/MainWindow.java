@@ -2,6 +2,8 @@ package ks3.oc.main;
 
 public interface MainWindow {
 
+    void opponentConnected();
+
     void reset();
 
     void connectionKilled();
@@ -23,4 +25,6 @@ public interface MainWindow {
     String getOpponentName();
 
     void setOpponentName(String opponentName);
+
+    String getMyName();
 }

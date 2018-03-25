@@ -38,6 +38,11 @@ public class ReceiverTest {
                 handlers.put(666, () -> { throw new IOException(); });
                 return handlers;
             }
+
+            @Override
+            protected MessageHandler createHandshakeHandler(MainWindow main, ChatDisplay chat, BufferedReader reader) {
+                return null;
+            }
         };
     }
 

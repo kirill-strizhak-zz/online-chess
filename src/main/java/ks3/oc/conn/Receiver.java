@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Receiver implements Runnable {
+public abstract class Receiver implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(Receiver.class);
 
@@ -35,11 +35,10 @@ public class Receiver implements Runnable {
 
     protected Map<Integer, MessageHandler> registerHandlers(MainWindow main, BoardState board, ChatDisplay chat, BufferedReader reader) {
         Map<Integer, MessageHandler> handlers = new HashMap<>();
-        handlers.put(Headers.NAME, new NameHandler(main, chat, reader));
+        handlers.put(Headers.HANDSHAKE, createHandshakeHandler(main, chat, reader));
         handlers.put(Headers.COORDINATES, new CoordinateHandler(board, reader));
         handlers.put(Headers.CHAT, new ChatHandler(main, chat, reader));
         handlers.put(Headers.CLOSE, new CloseHandler(this, sender));
-        handlers.put(Headers.COLOR, new ColorHandler(main, reader));
         handlers.put(Headers.OFFER_RESET, new ResetOfferHandler(newGameConfirmation));
         handlers.put(Headers.ACCEPT_RESET, new ResetAcceptHandler(main));
         handlers.put(Headers.DECLINE_RESET, new ResetDeclineHandler(chat));
@@ -67,4 +66,6 @@ public class Receiver implements Runnable {
     public void deactivate() {
         active = false;
     }
+
+    protected abstract MessageHandler createHandshakeHandler(MainWindow main, ChatDisplay chat, BufferedReader reader);
 }

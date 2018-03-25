@@ -2,6 +2,7 @@ package ks3.oc.swing;
 
 import ks3.oc.Protocol;
 import ks3.oc.board.BoardState;
+import ks3.oc.board.start.ClassicStartingBoardInitializer;
 import ks3.oc.chat.ChatDisplay;
 import ks3.oc.dialogs.DialogWindow;
 import ks3.oc.dialogs.FigurePickerWindow;
@@ -25,11 +26,14 @@ import java.awt.event.WindowEvent;
 
 public class SwingMainWindow extends Main {
 
-    private final JFrame component;
-
     public SwingMainWindow(ResourceManager resourceManager, int type, int color, String address, int port, String name) {
         super(resourceManager, type, color, address, port, name);
-        component = createComponent(resourceManager, type);
+    }
+
+    @Override
+    public void opponentConnected() {
+        board.initFigures(new ClassicStartingBoardInitializer());
+        JFrame component = createComponent(resourceManager, type);
         component.setVisible(true);
     }
 
