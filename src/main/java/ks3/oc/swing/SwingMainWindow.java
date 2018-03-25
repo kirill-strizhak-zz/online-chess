@@ -47,8 +47,7 @@ public class SwingMainWindow extends Main {
             @Override
             public void windowClosing(WindowEvent e) {
                 component.setVisible(false);
-                sender.send(Protocol.CLOSE);
-                sender.deactivate("Client closed app");
+                sender.sendClose();
                 System.exit(0);
             }
         });
@@ -66,7 +65,7 @@ public class SwingMainWindow extends Main {
     private JMenu createGameMenu(ResourceManager resourceManager, int type) {
         JMenu menu = new JMenu("Game");
         if (type == Protocol.SERVER) {
-            menu.add(createActionMenuItem("New game", () -> sender.send(Protocol.OFFER_RESET)));
+            menu.add(createActionMenuItem("New game", sender::sendOfferReset));
         }
         addCastlingMenuItems(menu);
         menu.addSeparator();

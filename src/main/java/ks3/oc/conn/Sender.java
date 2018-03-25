@@ -1,17 +1,12 @@
 package ks3.oc.conn;
 
 import ks3.oc.Protocol;
-import ks3.oc.board.Board;
+import ks3.oc.board.BoardState;
 import ks3.oc.chat.ChatDisplay;
 import ks3.oc.main.MainWindow;
-import ks3.oc.board.BoardState;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
@@ -63,7 +58,7 @@ public abstract class Sender {
         new Thread(receiver).start();
     }
 
-    public void send(int i) {
+    private void send(int i) {
         try {
             lock.acquireUninterruptibly();
             writer.write(i);
@@ -73,7 +68,7 @@ public abstract class Sender {
         }
     }
 
-    public void send(String s) {
+    private void send(String s) {
         try {
             lock.acquireUninterruptibly();
             writer.println(s);
@@ -94,7 +89,7 @@ public abstract class Sender {
     }
 
     public void sendMove(int col, int row, int newCol, int newRow) {
-        send(Protocol.COORDINATES);
+        send(Headers.COORDINATES);
         send(Math.abs(7 - col));
         send(Math.abs(7 - row));
         send(Math.abs(7 - newCol));
@@ -102,13 +97,53 @@ public abstract class Sender {
     }
 
     public void sendSet(int col, int row, int color, int type, boolean isEmpty, boolean firstStep) {
-        send(Protocol.SET);
+        send(Headers.SET);
         send(Math.abs(7 - col));
         send(Math.abs(7 - row));
         send(color);
         send(type);
         send(isEmpty ? 1 : 0);
         send(firstStep ? 1 : 0);
+    }
+
+    public void sendColor(int color) {
+        send(Headers.COLOR);
+        send(color);
+    }
+
+    public void sendName(String name) {
+        send(Headers.NAME);
+        send(name);
+    }
+
+    public void sendChat(String message) {
+        send(Headers.CHAT);
+        send(message);
+    }
+
+    public void sendMate() {
+        send(Headers.MATE);
+    }
+
+    public void sendGiveTurn() {
+        send(Headers.GIVE_TURN);
+    }
+
+    public void sendOfferReset() {
+        send(Headers.OFFER_RESET);
+    }
+
+    public void sendAcceptReset() {
+        send(Headers.ACCEPT_RESET);
+    }
+
+    public void sendDeclineReset() {
+        send(Headers.DECLINE_RESET);
+    }
+
+    public void sendClose() {
+        send(Headers.CLOSE);
+        deactivate("Client closed app");
     }
 
     protected SocketFactory getSocketFactory() {

@@ -42,10 +42,10 @@ public class ClientSenderTest {
 
     @Test
     public void testOpenConnection() throws Exception {
-        when(inputStream.read()).thenReturn(Protocol.IDENT);
+        when(inputStream.read()).thenReturn(Headers.IDENT);
         sender.openConnection("host", 1234);
         InOrder inOrder = inOrder(outputStream, inputStream);
-        inOrder.verify(outputStream, times(1)).write(Protocol.IDENT);
+        inOrder.verify(outputStream, times(1)).write(Headers.IDENT);
         inOrder.verify(inputStream, times(1)).read();
         verify(socket, never()).close();
     }

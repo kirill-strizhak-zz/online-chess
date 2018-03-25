@@ -22,11 +22,11 @@ public class ServerSender extends Sender {
         LOGGER.info("Waiting for connection...");
         Socket socket = getSocketFactory().createServer(port);
         int header = socket.getInputStream().read();
-        if (header != Protocol.IDENT) {
+        if (header != Headers.IDENT) {
             socket.close();
             throw new IOException("Invalid identification token received");
         }
-        socket.getOutputStream().write(Protocol.IDENT);
+        socket.getOutputStream().write(Headers.IDENT);
         return socket;
     }
 }

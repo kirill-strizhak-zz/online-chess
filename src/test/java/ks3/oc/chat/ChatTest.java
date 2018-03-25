@@ -34,8 +34,7 @@ public class ChatTest {
         String message = "Hello!";
         chat.sendChat(message);
         InOrder inOrder = inOrder(sender, chat);
-        inOrder.verify(sender, times(1)).send(Protocol.CHAT);
-        inOrder.verify(sender, times(1)).send(message);
+        inOrder.verify(sender, times(1)).sendChat(message);
         inOrder.verify(chat, times(1)).addChatLine(message, PLAYER_NAME);
     }
 

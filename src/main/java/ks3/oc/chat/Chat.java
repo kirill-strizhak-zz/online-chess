@@ -31,8 +31,7 @@ public abstract class Chat implements ChatDisplay {
 
     public void sendChat(String message) {
         LOGGER.info("Waiting to send chat");
-        sender.send(Protocol.CHAT);
-        sender.send(message);
+        sender.sendChat(message);
         addChatLine(message, playerName);
     }
 

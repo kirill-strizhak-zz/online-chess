@@ -1,19 +1,11 @@
 package ks3.oc.swing.dialogs;
 
-import ks3.oc.Protocol;
 import ks3.oc.conn.Sender;
 import ks3.oc.main.MainWindow;
 import org.apache.log4j.Logger;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
+import java.awt.*;
 
 public class SwingNewGameConfirmation extends SwingDialogWindow {
 
@@ -32,20 +24,16 @@ public class SwingNewGameConfirmation extends SwingDialogWindow {
         JLabel str = new JLabel("Server offered to start new game. Accept?");
         JButton yes = new JButton("Yes");
         JButton no = new JButton("No");
-        yes.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                LOGGER.info("Waiting to accept reset");
-                sender.send(Protocol.ACCEPT_RESET);
-                owner.reset();
-                frame.setVisible(false);
-            }
+        yes.addActionListener(event -> {
+            LOGGER.info("Waiting to accept reset");
+            sender.sendAcceptReset();
+            owner.reset();
+            frame.setVisible(false);
         });
-        no.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                LOGGER.info("Waiting to decline reset");
-                sender.send(Protocol.DECLINE_RESET);
-                frame.setVisible(false);
-            }
+        no.addActionListener(event -> {
+            LOGGER.info("Waiting to decline reset");
+            sender.sendDeclineReset();
+            frame.setVisible(false);
         });
         top.add("Center", str);
         JPanel butt = new JPanel();

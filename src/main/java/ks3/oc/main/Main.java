@@ -40,17 +40,13 @@ public abstract class Main implements MainWindow {
         } else {
             sender = new ServerSender(this, board, chat, address, port);
             setMyColor(color);
-            if (getMyColor() == Protocol.BLACK) {
-                setOppColor(Protocol.WHITE);
-            } else {
-                setOppColor(Protocol.BLACK);
-            }
-            sender.send(Protocol.COLOR);
-            if (getMyColor() == Protocol.WHITE) {
+            if (color == Protocol.WHITE) {
                 setMyTurn(true);
-                sender.send(Protocol.BLACK);
+                setOppColor(Protocol.BLACK);
+                sender.sendColor(Protocol.BLACK);
             } else {
-                sender.send(Protocol.WHITE);
+                setOppColor(Protocol.WHITE);
+                sender.sendColor(Protocol.WHITE);
             }
         }
 
@@ -63,8 +59,7 @@ public abstract class Main implements MainWindow {
             }
         }
 
-        sender.send(Protocol.NAME);
-        sender.send(getMyName());
+        sender.sendName(getMyName());
 
         chat.setSender(sender);
         board.setSender(sender);

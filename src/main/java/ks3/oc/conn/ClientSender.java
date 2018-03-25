@@ -21,9 +21,9 @@ public class ClientSender extends Sender {
     protected Socket openConnection(String host, int port) throws IOException {
         LOGGER.info("Connecting to server");
         Socket sock = getSocketFactory().createClient(host, port);
-        sock.getOutputStream().write(Protocol.IDENT);
+        sock.getOutputStream().write(Headers.IDENT);
         int header = sock.getInputStream().read();
-        if (header != Protocol.IDENT) {
+        if (header != Headers.IDENT) {
             throw new IOException("Invalid identification token received");
         }
         return sock;

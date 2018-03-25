@@ -137,7 +137,7 @@ public abstract class Board implements BoardState {
         check = !logic.kingSafeAt(king[kingIndex][0], king[kingIndex][1], main.getOppColor());
         if (logic.mate(king[kingIndex][0], king[kingIndex][1])) {
             main.setMyTurn(false);
-            sender.send(Protocol.MATE);
+            sender.sendMate();
             chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
         }
     }
@@ -158,7 +158,7 @@ public abstract class Board implements BoardState {
 
     @Override
     public void giveTurn() {
-        sender.send(Protocol.GIVE_TURN);
+        sender.sendGiveTurn();
     }
 
     @Override

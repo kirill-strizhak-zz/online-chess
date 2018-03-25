@@ -41,7 +41,7 @@ public class SenderTest {
 
     @Test
     public void testStartServerWhenSuccessfullyConnected() throws Exception {
-        when(inputStream.read()).thenReturn(Protocol.IDENT);
+        when(inputStream.read()).thenReturn(Headers.IDENT);
         Sender sender = new Sender(main, board, chat, "host", 1234) {
             @Override
             protected Socket openConnection(String host, int port) throws IOException {
