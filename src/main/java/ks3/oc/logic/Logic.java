@@ -233,7 +233,7 @@ public class Logic implements Protocol {
         if (isAllowed(col, row)) {
             copy(board.figureAt(col, row), targetFigure);
             copy(board.draggedFigure(), sourceFigure);
-            moveAndClear(board.draggedFigure(), col, row);
+            board.moveAndClear(board.draggedFigure(), col, row);
             if (sourceFigure.type == KING) {
                 board.moveKing(colorId, col, row);
                 board.setCheck(false);
@@ -263,19 +263,6 @@ public class Logic implements Protocol {
         to.color = from.color;
         to.oX = from.oX;
         to.oY = from.oY;
-    }
-
-    private void moveAndClear(Figure figure, int col, int row) {
-        board.figureAt(col, row).oX = col * 60;
-        board.figureAt(col, row).oY = row * 60;
-        board.figureAt(col, row).empty = false;
-        board.figureAt(col, row).firstStep = false;
-        board.figureAt(col, row).type = figure.type;
-        board.figureAt(col, row).color = figure.color;
-
-        figure.empty = true;
-        figure.type = NULL;
-        figure.color = NULL;
     }
 
     public boolean kingSideCastlingAllowed() {
@@ -335,7 +322,7 @@ public class Logic implements Protocol {
                         targetRow = allowed[idx][1];
                         copy(currentFigure, sourceFigure);
                         copy(board.figureAt(targetCol, targetRow), targetFigure);
-                        moveAndClear(currentFigure, targetCol, targetRow);
+                        board.moveAndClear(currentFigure, targetCol, targetRow);
                         if (kingSafeAt(kingCol, kingRow, owner.getOppColor())) {
                             copy(sourceFigure, currentFigure);
                             copy(targetFigure, board.figureAt(targetCol, targetRow));

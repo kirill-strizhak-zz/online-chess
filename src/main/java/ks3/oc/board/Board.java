@@ -8,26 +8,23 @@ import ks3.oc.conn.Sender;
 import ks3.oc.logic.Logic;
 import ks3.oc.main.MainWindow;
 import ks3.oc.res.ResourceManager;
-import org.apache.log4j.Logger;
 
 import java.awt.Image;
 
 public abstract class Board implements BoardState {
 
-    private static final Logger LOGGER = Logger.getLogger(Board.class);
-
     protected final ResourceManager resourceManager;
     protected final MainWindow main;
+
     private final ChatDisplay chat;
 
     private boolean dragging = false;
     private boolean check = false;
-    private Figure[][] figures = new Figure[8][8]; // figures on board
+    private Figure[][] figures = new Figure[8][8];
     private int[][] king = new int[2][2]; // i = (0 - black; 1 - white;)
-    private int[] bckKing = new int[2];
     private int[][] highlight = new int[2][2];
     private int hlPos = 0;
-    private int dragX, dragY, x, y;
+    private int draggedCol, draggedRow, selectedCol, selectedRow;
 
     private Sender sender;
     protected Logic logic;
@@ -49,51 +46,43 @@ public abstract class Board implements BoardState {
     }
 
     public void selectFigure(int col, int row) {
-        x = col;
-        y = row;
-        if (col > 7) col = 7;
-        else if (col < 0) col = 0;
-        if (row > 7) row = 7;
-        else if (row < 0) row = 0;
-        if ((figures[col][row].color == main.getMyColor()) && (main.isMyTurn())) {
-            dragX = col;
-            dragY = row;
-            logic.calculateAllowedMoves(col, row);
+        selectedCol = clipToCellBounds(col);
+        selectedRow = clipToCellBounds(row);
+        if ((draggedFigure().color == main.getMyColor()) && (main.isMyTurn())) {
+            draggedCol = selectedCol;
+            draggedRow = selectedRow;
+            logic.calculateAllowedMoves(selectedCol, selectedRow);
             dragging = true;
         }
     }
 
     public void releaseFigure(int col, int row) {
         dragging = false;
-        if (col > 7) col = 7;
-        else if (col < 0) col = 0;
-        if (row > 7) row = 7;
-        else if (row < 0) row = 0;
-        if ((figures[col][row].color == figures[x][y].color) && (!figures[col][row].empty)) {
-            figures[x][y].oX = dragX * CELL_SIZE;
-            figures[x][y].oY = dragY * CELL_SIZE;
+        int boundCol = clipToCellBounds(col);
+        int boundRow = clipToCellBounds(row);
+        if ((figures[boundCol][boundRow].color == draggedFigure().color) && (!figures[boundCol][boundRow].empty)) {
+            draggedFigure().oX = draggedCol * CELL_SIZE;
+            draggedFigure().oY = draggedRow * CELL_SIZE;
         } else {
-            logic.drop(col, row);
+            logic.drop(boundCol, boundRow);
         }
     }
 
+    private int clipToCellBounds(int cell) {
+        if (cell > 7) return 7;
+        else if (cell < 0) return 0;
+        else return cell;
+    }
+
     public void dragFigure(int dragX, int dragY) {
-        figures[x][y].oX = dragX - (CELL_SIZE / 2);
-        if (figures[x][y].oX > 420) {
-            figures[x][y].oX = 420;
-        } else {
-            if (figures[x][y].oX < 0) {
-                figures[x][y].oX = 0;
-            }
-        }
-        figures[x][y].oY = dragY - (CELL_SIZE / 2);
-        if (figures[x][y].oY > 420) {
-            figures[x][y].oY = 420;
-        } else {
-            if (figures[x][y].oY < 0) {
-                figures[x][y].oY = 0;
-            }
-        }
+        draggedFigure().oX = clipToCoordinateBounds(dragX - (CELL_SIZE / 2));
+        draggedFigure().oY = clipToCoordinateBounds(dragY - (CELL_SIZE / 2));
+    }
+
+    private int clipToCoordinateBounds(int coordinate) {
+        if (coordinate > 420) return 420;
+        else if (coordinate < 0) return 0;
+        else return coordinate;
     }
 
     @Override
@@ -114,24 +103,16 @@ public abstract class Board implements BoardState {
     }
 
     public Image getImageOfDraggedFigure() {
-        return resourceManager.getFigureSet().getImage(figures[x][y].color + 1, figures[x][y].type);
+        return resourceManager.getFigureSet().getImage(draggedFigure().color + 1, draggedFigure().type);
     }
 
     public Figure getDraggedFigure() {
-        return figures[x][y];
+        return draggedFigure();
     }
 
     @Override
     public void makeMove(int currX, int currY, int newX, int newY) {
-        figures[newX][newY].oX = newX * CELL_SIZE;
-        figures[newX][newY].oY = newY * CELL_SIZE;
-        figures[newX][newY].empty = false;
-        figures[newX][newY].type = figures[currX][currY].type;
-        figures[newX][newY].color = figures[currX][currY].color;
-        figures[currX][currY].empty = true;
-        figures[currX][currY].firstStep = false;
-        figures[currX][currY].color = Protocol.NULL;
-        figures[currX][currY].type = Protocol.NULL;
+        moveAndClear(figureAt(currX, currY), newX, newY);
         if (figures[newX][newY].type == Protocol.KING) {
             int colorId = main.getOppColor() / 2;
             king[colorId][0] = newX;
@@ -142,7 +123,6 @@ public abstract class Board implements BoardState {
         check = !logic.kingSafeAt(king[z][0], king[z][1], main.getOppColor());
         if (logic.mate(king[z][0], king[z][1])) {
             main.setMyTurn(false);
-            LOGGER.info("Sending mate notification");
             sender.send(Protocol.MATE);
             chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
         }
@@ -158,11 +138,10 @@ public abstract class Board implements BoardState {
         main.setMyTurn(false);
         int z = main.getMyColor() / 2;
         int invertedX, invertedY, newInvertedX, newInvertedY;
-        invertedX = Math.abs(7 - dragX);
-        invertedY = Math.abs(7 - dragY);
+        invertedX = Math.abs(7 - draggedCol);
+        invertedY = Math.abs(7 - draggedRow);
         newInvertedX = Math.abs(7 - newX);
         newInvertedY = Math.abs(7 - newY);
-        LOGGER.info("Sending coordinates");
         sender.send(Protocol.COORDINATES);
         sender.send(invertedX);
         sender.send(invertedY);
@@ -171,7 +150,6 @@ public abstract class Board implements BoardState {
         check = !logic.kingSafeAt(king[z][0], king[z][1], main.getOppColor());
         if (logic.mate(king[z][0], king[z][1])) {
             main.setMyTurn(false);
-            LOGGER.info("Sending mate notification");
             sender.send(Protocol.MATE);
             chat.addChatLine("* You lose! Check and mate.", Protocol.SYSTEM);
         }
@@ -182,27 +160,13 @@ public abstract class Board implements BoardState {
     public void globalSetFigure(int x, int y, int color, int type, boolean isEmpty, boolean firstStep) {
         main.setMyTurn(false);
         localSetFigure(x, y, color, type, isEmpty, firstStep);
-        int iIsEmpty, iFirstStep;
-        if (isEmpty) {
-            iIsEmpty = 1;
-        } else {
-            iIsEmpty = 0;
-        }
-        if (firstStep) {
-            iFirstStep = 1;
-        } else {
-            iFirstStep = 0;
-        }
-        int invertedX, invertedY;
-        invertedX = Math.abs(7 - x);
-        invertedY = Math.abs(7 - y);
         sender.send(Protocol.SET);
-        sender.send(invertedX);
-        sender.send(invertedY);
+        sender.send(Math.abs(7 - x));
+        sender.send(Math.abs(7 - y));
         sender.send(color);
         sender.send(type);
-        sender.send(iIsEmpty);
-        sender.send(iFirstStep);
+        sender.send(isEmpty ? 1 : 0);
+        sender.send(firstStep ? 1 : 0);
     }
 
     @Override
@@ -231,17 +195,10 @@ public abstract class Board implements BoardState {
     @Override
     public void castleKingSide() {
         main.setMyTurn(false);
-        LOGGER.info("Waiting to send coordinates");
         if (main.getMyColor() == Protocol.WHITE) {
-            globalSetFigure(7, 7, Protocol.NULL, Protocol.NULL, true, false);
-            globalSetFigure(4, 7, Protocol.NULL, Protocol.NULL, true, false);
-            globalSetFigure(5, 7, main.getMyColor(), Protocol.ROOK, false, false);
-            globalSetFigure(6, 7, main.getMyColor(), Protocol.KING, false, false);
+            castle(7, 4, 5, 6);
         } else {
-            globalSetFigure(0, 7, Protocol.NULL, Protocol.NULL, true, false);
-            globalSetFigure(3, 7, Protocol.NULL, Protocol.NULL, true, false);
-            globalSetFigure(2, 7, main.getMyColor(), Protocol.ROOK, false, false);
-            globalSetFigure(1, 7, main.getMyColor(), Protocol.KING, false, false);
+            castle(0, 3, 2, 1);
         }
         giveTurn();
         main.refresh();
@@ -250,20 +207,20 @@ public abstract class Board implements BoardState {
     @Override
     public void castleQueenSide() {
         main.setMyTurn(false);
-        LOGGER.info("Waiting to send coordinates");
         if (main.getMyColor() == Protocol.WHITE) {
-            globalSetFigure(0, 7, Protocol.NULL, Protocol.NULL, true, false);
-            globalSetFigure(4, 7, Protocol.NULL, Protocol.NULL, true, false);
-            globalSetFigure(3, 7, main.getMyColor(), Protocol.ROOK, false, false);
-            globalSetFigure(2, 7, main.getMyColor(), Protocol.KING, false, false);
+            castle(0, 4, 3, 2);
         } else {
-            globalSetFigure(7, 7, Protocol.NULL, Protocol.NULL, true, false);
-            globalSetFigure(3, 7, Protocol.NULL, Protocol.NULL, true, false);
-            globalSetFigure(4, 7, main.getMyColor(), Protocol.ROOK, false, false);
-            globalSetFigure(5, 7, main.getMyColor(), Protocol.KING, false, false);
+            castle(7, 3, 4, 5);
         }
         giveTurn();
         main.refresh();
+    }
+
+    private void castle(int rookCol, int kingCol, int rookNewCol, int kingNewCol) {
+        globalSetFigure(rookCol, 7, Protocol.NULL, Protocol.NULL, true, false);
+        globalSetFigure(kingCol, 7, Protocol.NULL, Protocol.NULL, true, false);
+        globalSetFigure(rookNewCol, 7, main.getMyColor(), Protocol.ROOK, false, false);
+        globalSetFigure(kingNewCol, 7, main.getMyColor(), Protocol.KING, false, false);
     }
 
     @Override
@@ -288,19 +245,32 @@ public abstract class Board implements BoardState {
 
     @Override
     public Figure draggedFigure() {
-        return figures[x][y];
+        return figures[selectedCol][selectedRow];
     }
 
     @Override
     public void updateDraggedPosition() {
-        figures[x][y].oX = dragX * CELL_SIZE;
-        figures[x][y].oY = dragY * CELL_SIZE;
+        draggedFigure().oX = draggedCol * CELL_SIZE;
+        draggedFigure().oY = draggedRow * CELL_SIZE;
+    }
+
+    @Override
+    public void moveAndClear(Figure figure, int col, int row) {
+        figureAt(col, row).oX = col * CELL_SIZE;
+        figureAt(col, row).oY = row * CELL_SIZE;
+        figureAt(col, row).empty = false;
+        figureAt(col, row).firstStep = false;
+        figureAt(col, row).type = figure.type;
+        figureAt(col, row).color = figure.color;
+
+        figure.empty = true;
+        figure.firstStep = false;
+        figure.type = Protocol.NULL;
+        figure.color = Protocol.NULL;
     }
 
     @Override
     public void moveKing(int color, int col, int row) {
-        bckKing[0] = king[color][0];
-        bckKing[1] = king[color][1];
         king[color][0] = col;
         king[color][1] = row;
     }

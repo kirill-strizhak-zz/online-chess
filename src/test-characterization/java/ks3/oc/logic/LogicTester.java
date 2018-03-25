@@ -1,10 +1,10 @@
 package ks3.oc.logic;
 
 import ks3.oc.Figure;
-import ks3.oc.main.MainWindow;
 import ks3.oc.Protocol;
-import ks3.oc.board.BoardState;
+import ks3.oc.board.Board;
 import ks3.oc.dialogs.FigurePickerWindow;
+import ks3.oc.main.MainWindow;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -13,17 +13,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 
 public abstract class LogicTester {
 
     @Mock
-    protected BoardState board;
+    Board board;
     @Mock
     private MainWindow mainWindow;
     @Mock
-    protected FigurePickerWindow figurePickerWindow;
+    FigurePickerWindow figurePickerWindow;
 
     protected Logic logic;
 
@@ -33,7 +35,7 @@ public abstract class LogicTester {
     private int kingCol;
     private int kingRow;
 
-    protected Figure[][] fig = {
+    Figure[][] fig = {
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() },
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() },
             { new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure(), new Figure() },
@@ -48,22 +50,24 @@ public abstract class LogicTester {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         initFigure(col(), row());
-        when(board.isCheck()).thenAnswer((in) -> isCheck());
-        when(board.draggedFigure()).thenAnswer((in) -> getDraggedFigure());
-        when(board.getKingCol(anyInt())).thenAnswer((in) -> getKingCol());
-        when(board.getKingRow(anyInt())).thenAnswer((in) -> getKingRow());
+        when(board.isCheck()).thenAnswer((in) -> check);
+        when(board.draggedFigure()).thenAnswer((in) -> draggedFigure);
+        doCallRealMethod().when(board).moveAndClear(any(), anyInt(), anyInt());
+        when(board.getKingCol(anyInt())).thenAnswer((in) -> kingCol);
+        when(board.getKingRow(anyInt())).thenAnswer((in) -> kingRow);
         when(board.figureAt(anyInt(), anyInt())).thenAnswer((in) -> {
             int col = (Integer) in.getArguments()[0];
             int row = (Integer) in.getArguments()[1];
             return fig[col][row];
         });
+
         when(mainWindow.getMyColor()).thenAnswer((in) -> getMyColor());
         when(mainWindow.getOppColor()).thenAnswer((in) -> getOppColor());
-        when(mainWindow.isMyTurn()).thenAnswer((in) -> isMyTurn());
+        when(mainWindow.isMyTurn()).thenAnswer((in) -> myTurn);
         logic = new Logic(board, mainWindow, figurePickerWindow);
     }
 
-    public void initFigure(int col, int row) {
+    void initFigure(int col, int row) {
         fig[col][row].empty = false;
         fig[col][row].firstStep = true;
         fig[col][row].type = type();
@@ -86,23 +90,23 @@ public abstract class LogicTester {
         initSimple(col, row, getMyColor(), type);
     }
 
-    public void initSimple(int col, int row, int color, int type) {
+    private void initSimple(int col, int row, int color, int type) {
         fig[col][row].empty = false;
         fig[col][row].type = type;
         fig[col][row].color = color;
     }
 
-    public void clearFigure(int col, int row) {
+    void clearFigure(int col, int row) {
         fig[col][row].empty = true;
         fig[col][row].type = Protocol.NULL;
         fig[col][row].color = Protocol.NULL;
     }
 
-    public void validate(Set<String> expected) {
+    void validate(Set<String> expected) {
         validate(col(), row(), expected);
     }
 
-    public void validate(int col, int row, Set<String> expected) {
+    void validate(int col, int row, Set<String> expected) {
         logic.calculateAllowedMoves(col, row);
         Set<String> result = convertResult();
         assertTrue("Result does not contain all expected values: " + result, result.containsAll(expected));
@@ -117,39 +121,19 @@ public abstract class LogicTester {
         return result;
     }
 
-    public boolean isCheck() {
-        return check;
-    }
-
-    public void setCheck(boolean check) {
+    void setCheck(boolean check) {
         this.check = check;
     }
 
-    public boolean isMyTurn() {
-        return myTurn;
-    }
-
-    public void setMyTurn(boolean myTurn) {
+    void setMyTurn(boolean myTurn) {
         this.myTurn = myTurn;
     }
 
-    public Figure getDraggedFigure() {
-        return draggedFigure;
-    }
-
-    public void setDraggedFigure(int col, int row) {
+    void setDraggedFigure(int col, int row) {
         this.draggedFigure = fig[col][row];
     }
 
-    public int getKingCol() {
-        return kingCol;
-    }
-
-    public int getKingRow() {
-        return kingRow;
-    }
-
-    public void setKingPosition(int col, int row) {
+    void setKingPosition(int col, int row) {
         kingCol = col;
         kingRow = row;
     }

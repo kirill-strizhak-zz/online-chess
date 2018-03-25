@@ -1,6 +1,7 @@
 package ks3.oc.board;
 
 import ks3.oc.Figure;
+import ks3.oc.Protocol;
 import ks3.oc.board.start.StartingBoardInitializer;
 import ks3.oc.conn.Sender;
 import ks3.oc.logic.Logic;
@@ -40,6 +41,8 @@ public interface BoardState {
     Figure draggedFigure();
 
     void updateDraggedPosition();
+
+    void moveAndClear(Figure figure, int col, int row);
 
     void moveKing(int color, int col, int row);
 
